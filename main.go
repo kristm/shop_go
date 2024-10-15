@@ -1,13 +1,29 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"shop_go/models"
 
 	"github.com/gin-gonic/gin"
 )
 
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func getCategories(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Categories"})
+	categories, err := models.GetCategories()
+	checkErr(err)
+
+	if categories == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No records found"})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"data": categories})
+	}
 }
 func getProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Products"})
@@ -21,11 +37,19 @@ func getProductById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Product" + id})
 }
 
+func getRoot(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "OK"})
+}
+
 func main() {
+	err := models.ConnectDatabase()
+	checkErr(err)
+
 	r := gin.Default()
 
 	v1 := r.Group("/api/v1")
 	{
+		v1.GET("", getRoot)
 		v1.GET("categories", getCategories)
 		v1.GET("products", getProducts)
 		v1.GET("categories/:id", getCategoryById)
