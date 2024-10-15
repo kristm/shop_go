@@ -1,0 +1,11 @@
+#migrate up
+
+migrate -path=internal/database/migrations -database "sqlite3://test.db" -verbose up
+
+#migrate down
+
+migrate -path=internal/database/migrations -database "sqlite3://test.db" -verbose down
+
+#fix dirty/force migration
+
+migrate -path=internal/database/migrations -database "sqlite3://test.db" -verbose force 1
