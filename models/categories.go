@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -54,6 +53,19 @@ func GetCategories() ([]Category, error) {
 	return categories, err
 }
 
-func main() {
-	fmt.Println("vim-go")
+func GetCategoryById(id int) (Category, error) {
+	stmt, err := DB.Prepare("SELECT id, name FROM categories WHERE ID = ?")
+	if err != nil {
+		return Category{}, err
+	}
+
+	category := Category{}
+	sqlErr := stmt.QueryRow(id).Scan(&category.Id, &category.Name)
+	if sqlErr != nil {
+		if sqlErr == sql.ErrNoRows {
+			return Category{}, nil
+		}
+		return Category{}, sqlErr
+	}
+	return category, nil
 }

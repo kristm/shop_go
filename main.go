@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"shop_go/models"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,8 +30,16 @@ func getProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Products"})
 }
 func getCategoryById(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Category" + id})
+	id, err := strconv.Atoi(c.Param("id"))
+	checkErr(err)
+	category, err := models.GetCategoryById(id)
+	checkErr(err)
+
+	if category.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No records found"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"data": category})
+	}
 }
 func getProductById(c *gin.Context) {
 	id := c.Param("id")
