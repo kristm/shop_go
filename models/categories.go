@@ -16,7 +16,7 @@ type Category struct {
 }
 
 func ConnectDatabase() error {
-	db, err := sql.Open("sqlite3", "./testsql.DB")
+	db, err := sql.Open("sqlite3", "/Users/krist/code/shop_go/shop_test.db")
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func ConnectDatabase() error {
 }
 
 func GetCategories() ([]Category, error) {
-	rows, err := DB.Query("SELECT id, name")
+	rows, err := DB.Query("SELECT id, name FROM categories")
 	if err != nil {
 		return nil, err
 	}
