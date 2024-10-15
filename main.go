@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"shop_go/models"
 	"strconv"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,6 +57,15 @@ func main() {
 	checkErr(err)
 
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	r.GET("/api/categories", getCategories)
 
 	v1 := r.Group("/api/v1")
 	{
