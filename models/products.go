@@ -5,12 +5,22 @@ import (
 )
 
 type Product struct {
-	Id           int    `json:"id"`
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	CategoryId   int    `json:"category_id"`
-	PriceInCents int    `json:"price_in_cents"`
+	Id          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	CategoryId  int     `json:"category_id"`
+	Price       float64 `json:"price"`
 }
+
+// wonky
+//func (prod *Product) MarshalJSON() ([]byte, error) {
+//
+//	log.Printf("%+v", prod)
+//	prod.Price = prod.Price / 100
+//	var out string
+//	out = fmt.Sprintf("%v", prod)
+//	return []byte(out[1:len(out)]), nil
+//}
 
 func GetProducts(category_id int) ([]Product, error) {
 	stmt, err := DB.Prepare("SELECT id, name, description, category_id, price_in_cents FROM products WHERE category_id = ?")
@@ -28,11 +38,14 @@ func GetProducts(category_id int) ([]Product, error) {
 
 	for rows.Next() {
 		product := Product{}
-		err = rows.Scan(&product.Id, &product.Name, &product.Description, &product.CategoryId, &product.PriceInCents)
+		err = rows.Scan(&product.Id, &product.Name, &product.Description, &product.CategoryId, &product.Price)
 
 		if err != nil {
 			return nil, err
 		}
+
+		//need to convert to precision float
+		product.Price = float64(int(product.Price)) / 100.00
 
 		products = append(products, product)
 	}
