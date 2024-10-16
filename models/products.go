@@ -6,6 +6,7 @@ import (
 
 type Product struct {
 	Id          int     `json:"id"`
+	Sku         string  `json:"sku"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	CategoryId  int     `json:"category_id"`
@@ -23,7 +24,7 @@ type Product struct {
 //}
 
 func GetProducts(category_id int) ([]Product, error) {
-	stmt, err := DB.Prepare("SELECT id, name, description, category_id, price_in_cents FROM products WHERE category_id = ?")
+	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents FROM products WHERE category_id = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func GetProducts(category_id int) ([]Product, error) {
 
 	for rows.Next() {
 		product := Product{}
-		err = rows.Scan(&product.Id, &product.Name, &product.Description, &product.CategoryId, &product.Price)
+		err = rows.Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
 
 		if err != nil {
 			return nil, err

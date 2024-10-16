@@ -8,6 +8,7 @@ CREATE TABLE categories (
 CREATE TABLE products (
   id INTEGER NOT NULL PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
+  sku VARCHAR(100) NOT NULL UNIQUE,
   description VARCHAR(255) NOT NULL,
   category_id INTEGER,
   price_in_cents INTEGER,
