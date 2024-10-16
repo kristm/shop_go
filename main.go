@@ -28,9 +28,21 @@ func getCategories(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"data": categories})
 	}
 }
+
 func getProducts(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Products"})
+	category_id, err := strconv.Atoi(c.Param("category_id"))
+	checkErr(err)
+	products, err := models.GetProducts(category_id)
+	checkErr(err)
+
+	if products == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No records found"})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"data": products})
+	}
 }
+
 func getCategoryById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	checkErr(err)
@@ -71,8 +83,8 @@ func main() {
 	{
 		v1.GET("", getRoot)
 		v1.GET("categories", getCategories)
-		v1.GET("products", getProducts)
 		v1.GET("categories/:id", getCategoryById)
+		v1.GET("products/category/:category_id", getProducts)
 		v1.GET("products/:id", getProductById)
 	}
 

@@ -2,27 +2,13 @@ package models
 
 import (
 	"database/sql"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DB *sql.DB
-
 type Category struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
-}
-
-func ConnectDatabase() error {
-	db, err := sql.Open("sqlite3", "/Users/krist/code/shop_go/shop_test.db")
-	if err != nil {
-		return err
-	}
-	DB = db
-	log.Printf("Connecting to DB")
-	log.Printf("DB %+v", db)
-	return nil
 }
 
 func GetCategories() ([]Category, error) {
