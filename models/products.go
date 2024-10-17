@@ -1,6 +1,8 @@
 package models
 
 import (
+	"database/sql"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -53,4 +55,38 @@ func GetProducts(category_id int) ([]Product, error) {
 	err = rows.Err()
 
 	return products, nil
+}
+
+func GetProductById(id int) (Product, error) {
+	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents FROM products WHERE id = ?")
+	if err != nil {
+		return Product{}, err
+	}
+
+	product := Product{}
+	sqlErr := stmt.QueryRow(id).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
+	if sqlErr != nil {
+		if sqlErr == sql.ErrNoRows {
+			return Product{}, nil
+		}
+		return Product{}, sqlErr
+	}
+	return product, nil
+}
+
+func GetProductBySku(sku string) (Product, error) {
+	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents FROM products WHERE sku = ?")
+	if err != nil {
+		return Product{}, err
+	}
+
+	product := Product{}
+	sqlErr := stmt.QueryRow(sku).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
+	if sqlErr != nil {
+		if sqlErr == sql.ErrNoRows {
+			return Product{}, nil
+		}
+		return Product{}, sqlErr
+	}
+	return product, nil
 }

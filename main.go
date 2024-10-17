@@ -55,9 +55,30 @@ func getCategoryById(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"data": category})
 	}
 }
+
 func getProductById(c *gin.Context) {
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{"message": "Product" + id})
+	id, err := strconv.Atoi(c.Param("id"))
+	checkErr(err)
+	product, err := models.GetProductById(id)
+	checkErr(err)
+
+	if product.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No records found"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"data": product})
+	}
+}
+
+func getProductBySku(c *gin.Context) {
+	sku := c.Param("sku")
+	product, err := models.GetProductBySku(sku)
+	checkErr(err)
+
+	if product.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No records found"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"data": product})
+	}
 }
 
 func getRoot(c *gin.Context) {
@@ -86,6 +107,7 @@ func main() {
 		v1.GET("categories/:id", getCategoryById)
 		v1.GET("products/category/:category_id", getProducts)
 		v1.GET("products/:id", getProductById)
+		v1.GET("products/sku/:sku", getProductBySku)
 	}
 
 	r.Run()
