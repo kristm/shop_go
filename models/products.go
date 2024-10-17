@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"encoding/json"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -15,15 +16,17 @@ type Product struct {
 	Price       float64 `json:"price"`
 }
 
-// wonky
-//func (prod *Product) MarshalJSON() ([]byte, error) {
-//
-//	log.Printf("%+v", prod)
-//	prod.Price = prod.Price / 100
-//	var out string
-//	out = fmt.Sprintf("%v", prod)
-//	return []byte(out[1:len(out)]), nil
-//}
+func (prod *Product) MarshalJSON() ([]byte, error) {
+	computedPrice := float64(int(prod.Price)) / 100.00
+	return json.Marshal(Product{
+		Id:          prod.Id,
+		Sku:         prod.Sku,
+		Name:        prod.Name,
+		Description: prod.Description,
+		CategoryId:  prod.CategoryId,
+		Price:       computedPrice,
+	})
+}
 
 func GetProducts(category_id int) ([]Product, error) {
 	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents FROM products WHERE category_id = ?")
@@ -46,9 +49,6 @@ func GetProducts(category_id int) ([]Product, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		//need to convert to precision float
-		product.Price = float64(int(product.Price)) / 100.00
 
 		products = append(products, product)
 	}
