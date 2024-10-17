@@ -16,15 +16,15 @@ type Product struct {
 	Price       float64 `json:"price"`
 }
 
-func (prod *Product) MarshalJSON() ([]byte, error) {
+func (prod Product) MarshalJSON() ([]byte, error) {
+	type Alias Product
 	computedPrice := float64(int(prod.Price)) / 100.00
-	return json.Marshal(Product{
-		Id:          prod.Id,
-		Sku:         prod.Sku,
-		Name:        prod.Name,
-		Description: prod.Description,
-		CategoryId:  prod.CategoryId,
-		Price:       computedPrice,
+	return json.Marshal(&struct {
+		*Alias
+		Price float64 `json:"price"`
+	}{
+		Alias: (*Alias)(&prod),
+		Price: computedPrice,
 	})
 }
 
