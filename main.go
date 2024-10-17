@@ -13,7 +13,7 @@ import (
 
 func checkErr(err error) {
 	if err != nil {
-		log.Panic(err)
+		log.Printf("ERROR: %s", err)
 	}
 }
 
@@ -90,7 +90,6 @@ func main() {
 	checkErr(err)
 
 	r := gin.Default()
-	r.Use(gin.Recovery())
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "OPTIONS"},
