@@ -7,6 +7,9 @@ migrate_down:
 migrate_reset: 
 	migrate -path=internal/database/migrations -database "sqlite3://shop_test.DB" -verbose force 1
 
+migrate_version: 
+	migrate -version -path=internal/database/migrations -database=sqlite3://shop_test.DB
+
 migrate_drop:
 	migrate drop -f -ext=sql -database "sqlite3://shop_test.DB"
 
