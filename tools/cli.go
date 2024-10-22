@@ -38,7 +38,10 @@ func trim(sliced []string) string {
 }
 
 func processCSV(reader *csv.Reader) {
-	for {
+	for i := 0; true; i++ {
+		if i == 0 {
+			continue
+		}
 		record, err := reader.Read()
 		if err == io.EOF {
 			break
@@ -46,10 +49,7 @@ func processCSV(reader *csv.Reader) {
 			fmt.Println("Error reading CSV data:", err)
 			break
 		}
-		str := strings.Join(record, ", ")
-		rec := strings.Split(str, ", ")
-		fmt.Println(rec)
-		fmt.Printf("sku: %s name: %s\n", trim(record[0:1]), trim(record[2:3]))
+
 		categoryId, err := strconv.Atoi(trim(record[4:5]))
 		if err != nil {
 			log.Println("error ", err)
@@ -68,7 +68,11 @@ func processCSV(reader *csv.Reader) {
 			Price:       price,
 		}
 
-		fmt.Printf("product: %+v\n", product)
+		_, err = models.AddProduct(product)
+		if err != nil {
+			fmt.Println("ERROR: ", err)
+		}
+		fmt.Printf("%d product: %+v\n", i, product)
 	}
 }
 
@@ -78,7 +82,7 @@ func main() {
 		log.Printf("%s\n", err)
 	}
 
-	data, err := readCSVFile("inventory.csv")
+	data, err := readCSVFile("mini_inventory.csv")
 	if err != nil {
 		fmt.Println("Error reading file:", err)
 		return
