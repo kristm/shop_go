@@ -23,7 +23,7 @@ func TestAddCustomer(t *testing.T) {
 	assert.Equal(t, true, success)
 }
 
-/*func TestAddCustomerMissingData(t *testing.T) {
+func TestAddCustomerMissingData(t *testing.T) {
 	success, err := AddCustomer(Customer{
 		FirstName: "Bob",
 		LastName:  "Wood",
@@ -33,4 +33,3 @@ func TestAddCustomer(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, false, success)
 }
-*/

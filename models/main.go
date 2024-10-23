@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"log"
 )
 
 var DB *sql.DB
@@ -13,7 +12,7 @@ func ConnectDatabase() error {
 		return err
 	}
 	DB = db
-	log.Printf("Connecting to DB")
-	log.Printf("DB %+v", db)
+	//log.Printf("Connecting to DB")
+	//log.Printf("DB %+v", db)
 	return nil
 }

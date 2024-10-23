@@ -68,18 +68,45 @@ func processCSV(reader *csv.Reader) {
 			Price:       price,
 		}
 
-		_, err = models.AddProduct(product)
-		if err != nil {
-			fmt.Println("ERROR: ", err)
+		if !readonly {
+			_, err = models.AddProduct(product)
+			if err != nil {
+				fmt.Println("ERROR: ", err)
+			}
 		}
+
 		fmt.Printf("%d product: %+v\n", i, product)
 	}
 }
+
+func showProducts() {
+	products, err := models.GetAllProducts()
+	log.Printf("products %v", products)
+
+	if err != nil {
+		log.Printf("error getting products", err)
+	}
+	for _, product := range products {
+		fmt.Printf("%v\n", product)
+	}
+}
+
+var readonly = false
 
 func main() {
 	err := models.ConnectDatabase()
 	if err != nil {
 		log.Printf("%s\n", err)
+	}
+
+	if len(os.Args) == 2 && os.Args[1] == "--read" {
+		readonly = true
+		fmt.Println("READONLY MODE")
+	} else if len(os.Args) == 3 {
+		readonly = true
+		fmt.Println("SHOW PRODUCTS")
+		showProducts()
+		os.Exit(1)
 	}
 
 	data, err := readCSVFile("mini_inventory.csv")

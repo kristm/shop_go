@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -26,6 +27,34 @@ func (prod Product) MarshalJSON() ([]byte, error) {
 		Alias: (*Alias)(&prod),
 		Price: computedPrice,
 	})
+}
+
+func GetAllProducts() ([]Product, error) {
+	rows, err := DB.Query("SELECT id, name, sku, description, category_id, price_in_cents FROM products")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	products := make([]Product, 0)
+
+	for rows.Next() {
+		product := Product{}
+		err = rows.Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
+
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, product)
+	}
+	err = rows.Err()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return products, err
 }
 
 func GetProducts(category_id int) ([]Product, error) {
@@ -91,7 +120,21 @@ func GetProductBySku(sku string) (Product, error) {
 	return product, nil
 }
 
+func Validate(product *Product, fieldname string) bool {
+	value := strings.ToLower(product.Sku)
+	if strings.ToLower(value) == fieldname {
+		return false
+	}
+
+	return true
+}
+
 func AddProduct(newProduct Product) (bool, error) {
+	isValid := Validate(&newProduct, "sku")
+	if !isValid {
+		return false, nil
+	}
+
 	tx, err := DB.Begin()
 	if err != nil {
 		return false, err

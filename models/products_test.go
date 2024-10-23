@@ -17,10 +17,10 @@ func TestAddProduct(t *testing.T) {
 
 	got, err := AddProduct(newProduct)
 	if err != nil {
-		t.Errorf("Failed to add Product")
+		t.Errorf("Error when adding Product %v", err)
 	}
 	if !got {
-		t.Errorf("Failed to add Product")
+		t.Errorf("Failed to add Product %v", err)
 	}
 
 }
