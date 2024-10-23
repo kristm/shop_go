@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	"os"
-	"shop_go/models"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
@@ -26,6 +25,14 @@ func setupTest(tb testing.TB) func(tb testing.TB) {
 	return func(tb testing.TB) {
 		log.Println("teardown test")
 	}
+}
+
+func ConnectTestDatabase() {
+	db, err := sql.Open("sqlite3", "/Users/krist/code/shop_go/test.db")
+	if err != nil {
+		log.Println(err)
+	}
+	DB = db
 }
 
 func ClearProducts() (bool, error) {
@@ -51,7 +58,7 @@ func ClearProducts() (bool, error) {
 
 func TestMain(m *testing.M) {
 	log.Println("Test Main")
-	models.ConnectDatabase()
+	ConnectTestDatabase()
 	code := m.Run()
 	_, err := ClearProducts()
 	if err != nil {
