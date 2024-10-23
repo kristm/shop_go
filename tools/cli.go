@@ -84,7 +84,7 @@ func showProducts() {
 	log.Printf("products %v", products)
 
 	if err != nil {
-		log.Printf("error getting products", err)
+		log.Printf("error getting products %v", err)
 	}
 	for _, product := range products {
 		fmt.Printf("%v\n", product)
