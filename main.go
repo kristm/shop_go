@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"shop_go/models"
 	"strconv"
 	"time"
@@ -81,6 +82,18 @@ func getProductBySku(c *gin.Context) {
 	}
 }
 
+func createOrder(c *gin.Context) {
+	// create customer record
+	// create shipping record
+	// create order record
+	// create order products join table entries
+	dump, err := httputil.DumpRequest(c.Request, true)
+	log.Printf("err %v\n", err)
+	log.Printf("dump %q\n", dump)
+
+	c.JSON(http.StatusOK, gin.H{"message": "TODO"})
+}
+
 func getRoot(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "OK"})
 }
@@ -108,6 +121,7 @@ func main() {
 		v1.GET("products/category/:category_id", getProducts)
 		v1.GET("products/:id", getProductById)
 		v1.GET("products/sku/:sku", getProductBySku)
+		v1.POST("orders", createOrder)
 	}
 
 	r.Run()
