@@ -1,14 +1,19 @@
 package models
 
 import (
+	"log"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
 	"github.com/stretchr/testify/require"
 )
 
-func init() {
-	ConnectDatabase()
+func setupTest(tb testing.TB) func(tb testing.TB) {
+	log.Println("setup test")
+
+	return func(tb testing.TB) {
+		log.Println("teardown test")
+	}
 }
 
 func TestAddCustomer(t *testing.T) {
