@@ -18,16 +18,16 @@ type Order struct {
 }
 
 type OrderItem struct {
-	ProductId  int `json:"product_id"`
-	CategoryId int `json:"category_id"`
-	Qty        int `json:"qty"`
-	Price      int `json:"price"`
+	ProductId  int     `json:"product_id"`
+	CategoryId int     `json:"category_id"`
+	Qty        int     `json:"qty"`
+	Price      float64 `json:"price"`
 }
 
 func (prod *OrderItem) UnmarshalJSON(p []byte) error {
 	type Alias OrderItem
 	aux := &struct {
-		Price int `json:"price"`
+		Price float64 `json:"price"`
 		*Alias
 	}{
 		Alias: (*Alias)(prod),
@@ -37,8 +37,7 @@ func (prod *OrderItem) UnmarshalJSON(p []byte) error {
 		return err
 	}
 
-	//TODO: convert Price from float to int
-	prod.Price = aux.Price * 100
+	prod.Price = aux.Price * 100.00
 	return nil
 }
 
