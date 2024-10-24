@@ -1,5 +1,7 @@
 package models
 
+import "encoding/json"
+
 type Status int
 
 const (
@@ -20,6 +22,24 @@ type OrderItem struct {
 	CategoryId int `json:"category_id"`
 	Qty        int `json:"qty"`
 	Price      int `json:"price"`
+}
+
+func (prod *OrderItem) UnmarshalJSON(p []byte) error {
+	type Alias OrderItem
+	aux := &struct {
+		Price int `json:"price"`
+		*Alias
+	}{
+		Alias: (*Alias)(prod),
+	}
+
+	if err := json.Unmarshal(p, &aux); err != nil {
+		return err
+	}
+
+	//TODO: convert Price from float to int
+	prod.Price = aux.Price * 100
+	return nil
 }
 
 func GetOrders(customerId int) ([]Order, error) {
