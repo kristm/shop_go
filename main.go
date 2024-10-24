@@ -103,9 +103,9 @@ func createOrder(c *gin.Context) {
 
 	log.Printf("json payload %v\n  %v", requestBody)
 	log.Printf("order %g\n", requestBody.Orders[0].Price)
-	//log.Printf("order: %v\n", requestBody.Orders)
-	//log.Printf("customer: %v\n", requestBody.Customer)
-	//log.Printf("shipping: %v\n", requestBody.Shipping)
+	log.Printf("order: %v\n", requestBody.Orders)
+	log.Printf("customer: %v\n", requestBody.Customer)
+	log.Printf("shipping: %v\n", requestBody.Shipping)
 
 	c.JSON(http.StatusOK, gin.H{"message": "TODO"})
 }

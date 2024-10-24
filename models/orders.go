@@ -18,10 +18,10 @@ type Order struct {
 }
 
 type OrderItem struct {
-	ProductId  int     `json:"product_id"`
-	CategoryId int     `json:"category_id"`
-	Qty        int     `json:"qty"`
-	Price      float64 `json:"price"`
+	OrderId   int     `json:"id"`
+	ProductId int     `json:"product_id"`
+	Qty       int     `json:"qty"`
+	Price     float64 `json:"price"`
 }
 
 func (prod *OrderItem) UnmarshalJSON(p []byte) error {
@@ -85,6 +85,31 @@ func AddOrder(newOrder Order) (bool, error) {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(newOrder.CustomerId, newOrder.Amount, newOrder.Status)
+
+	if err != nil {
+		return false, err
+	}
+
+	tx.Commit()
+
+	return true, nil
+}
+
+func AddOrderItem(newOrderItem OrderItem) (bool, error) {
+	tx, err := DB.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO orders_product (order_id, product_id, qty) VALUES (?, ?)")
+
+	if err != nil {
+		return false, err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(newOrderItem.OrderId, newOrderItem.ProductId, newOrderItem.Qty)
 
 	if err != nil {
 		return false, err
