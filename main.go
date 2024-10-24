@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"shop_go/models"
 	"strconv"
 	"time"
@@ -87,9 +86,9 @@ func createOrder(c *gin.Context) {
 	// create shipping record
 	// create order record
 	// create order products join table entries
-	dump, err := httputil.DumpRequest(c.Request, true)
+	jsonData, err := c.GetRawData()
 	log.Printf("err %v\n", err)
-	log.Printf("dump %q\n", dump)
+	log.Printf("dump %q\n", jsonData)
 
 	c.JSON(http.StatusOK, gin.H{"message": "TODO"})
 }
