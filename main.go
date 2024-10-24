@@ -99,6 +99,12 @@ func createOrder(c *gin.Context) {
 	// create customer record
 	//customerId, err := models.AddCustomer(requestBody.Customer)
 
+	// create shipping record
+	//shippingId, err := models.AddShipping(requestBody.Shipping)
+
+	// create order record
+	//order:Order := Order{customerId, shippingId, Amount:, Status: Items:requestBody.Orders}
+
 	log.Printf("json payload %v\n", requestBody)
 	log.Printf("order: %v\n", requestBody.Orders)
 	log.Printf("customer: %v\n", requestBody.Customer)

@@ -11,10 +11,11 @@ const (
 )
 
 type Order struct {
-	Id         int    `json:"id"`
-	CustomerId int    `json:"customer_id"`
-	Amount     int    `json:"amount_in_cents"`
-	Status     Status `json:"status"`
+	Id         int         `json:"id"`
+	CustomerId int         `json:"customer_id"`
+	Amount     int         `json:"amount_in_cents"`
+	Status     Status      `json:"status"`
+	Items      []OrderItem `json:"orders"`
 }
 
 type OrderItem struct {
@@ -23,6 +24,24 @@ type OrderItem struct {
 	Qty       int     `json:"qty"`
 	Price     float64 `json:"price"`
 }
+
+//TODO
+/*func (order Order) MarshalJSON() ([]byte, error) {
+	type Alias Order
+	computedAmount := mapreduce Items
+	var amount int = 0
+	for item, i := range Items {
+		total := item.Qty * item.Price
+		amount += total
+	}
+	return json.Marshal(&struct {
+		*Alias
+		Amount int `json:"amount"`
+	}{
+		Alias: (*Alias)(&order),
+		Amount: computedAmount,
+	})
+}*/
 
 func (prod *OrderItem) UnmarshalJSON(p []byte) error {
 	type Alias OrderItem
