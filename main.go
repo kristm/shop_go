@@ -88,7 +88,6 @@ func getProductBySku(c *gin.Context) {
 }
 
 func createOrder(c *gin.Context) {
-	// create customer record
 	// create shipping record
 	// create order record
 	// create order products join table entries
@@ -96,6 +95,9 @@ func createOrder(c *gin.Context) {
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Error parsing POST payload %v", err)
 	}
+
+	// create customer record
+	//customerId, err := models.AddCustomer(requestBody.Customer)
 
 	log.Printf("json payload %v\n", requestBody)
 	log.Printf("order: %v\n", requestBody.Orders)

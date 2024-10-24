@@ -28,31 +28,32 @@ func ValidateNotEmpty(customer Customer) bool {
 	return true
 }
 
-func AddCustomer(newCustomer Customer) (bool, error) {
+func AddCustomer(newCustomer Customer) (int, error) {
 	tx, err := DB.Begin()
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	if !ValidateNotEmpty(newCustomer) {
-		return false, nil
+		return -1, nil
 	}
 
 	stmt, err := tx.Prepare("INSERT INTO customers (first_name, last_name, email, phone) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newCustomer.FirstName, newCustomer.LastName, newCustomer.Email, newCustomer.Phone)
+	res, err := stmt.Exec(newCustomer.FirstName, newCustomer.LastName, newCustomer.Email, newCustomer.Phone)
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	tx.Commit()
+	id, _ := res.LastInsertId()
 
-	return true, nil
+	return int(id), nil
 }
