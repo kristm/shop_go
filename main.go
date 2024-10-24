@@ -92,14 +92,19 @@ func createOrder(c *gin.Context) {
 	// create shipping record
 	// create order record
 	// create order products join table entries
-	var requestBody OrderPayload
-
+	//var requestBody OrderPayload
+	jsonData, err := c.GetRawData()
+	log.Printf("Raw JSON %q\n", jsonData)
+	log.Printf("err %v\n", err)
 	// ERROR: Error parsing POST payload json: cannot unmarshal number 349.99 into Go struct field OrderItem.Orders.price of type int
-	if err := c.BindJSON(&requestBody); err != nil {
-		log.Printf("Error parsing POST payload %v", err)
-	}
+	//if err := c.BindJSON(&requestBody); err != nil {
+	//	log.Printf("Error parsing POST payload %v", err)
+	//}
 
-	log.Printf("json payload %v\n  %v", requestBody, requestBody.Orders)
+	//log.Printf("json payload %v\n  %v", requestBody)
+	//log.Printf("order: %v\n", requestBody.Orders)
+	//log.Printf("customer: %v\n", requestBody.Customer)
+	//log.Printf("shipping: %v\n", requestBody.Shipping)
 
 	c.JSON(http.StatusOK, gin.H{"message": "TODO"})
 }
