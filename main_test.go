@@ -88,6 +88,13 @@ func TestPostOrders(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	orders := make([]models.OrderItem, 0)
+	order := models.OrderItem{
+		ProductId: 1,
+		Qty:       2,
+		Price:     250,
+	}
+
+	orders = append(orders, order)
 
 	payload := OrderPayload{
 		Orders: orders,
