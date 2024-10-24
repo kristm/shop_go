@@ -15,6 +15,13 @@ type Order struct {
 	Status     Status `json:"status"`
 }
 
+type OrderItem struct {
+	ProductId  int `json:"product_id"`
+	CategoryId int `json:"category_id"`
+	Qty        int `json:"qty"`
+	Price      int `json:"price"`
+}
+
 func GetOrders(customerId int) ([]Order, error) {
 	stmt, err := DB.Prepare("SELECT id, customer_id, amount_in_cents FROM orders WHERE customer_id = ?")
 	if err != nil {

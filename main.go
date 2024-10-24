@@ -11,6 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type OrderPayload struct {
+	Orders   []models.OrderItem
+	Customer models.Customer
+	Shipping models.Shipping
+}
+
 func checkErr(err error) {
 	if err != nil {
 		log.Printf("ERROR: %s", err)
@@ -86,9 +92,14 @@ func createOrder(c *gin.Context) {
 	// create shipping record
 	// create order record
 	// create order products join table entries
-	jsonData, err := c.GetRawData()
-	log.Printf("err %v\n", err)
-	log.Printf("dump %q\n", jsonData)
+	var requestBody OrderPayload
+
+	// ERROR: Error parsing POST payload json: cannot unmarshal number 349.99 into Go struct field OrderItem.Orders.price of type int
+	if err := c.BindJSON(&requestBody); err != nil {
+		log.Printf("Error parsing POST payload %v", err)
+	}
+
+	log.Printf("json payload %v\n  %v", requestBody, requestBody.Orders)
 
 	c.JSON(http.StatusOK, gin.H{"message": "TODO"})
 }
