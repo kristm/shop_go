@@ -93,16 +93,11 @@ func createOrder(c *gin.Context) {
 	// create order record
 	// create order products join table entries
 	var requestBody OrderPayload
-	//jsonData, err := c.GetRawData()
-	//log.Printf("Raw JSON %q\n", jsonData)
-	//log.Printf("err %v\n", err)
-	// ERROR: Error parsing POST payload json: cannot unmarshal number 349.99 into Go struct field OrderItem.Orders.price of type int
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Error parsing POST payload %v", err)
 	}
 
-	log.Printf("json payload %v\n  %v", requestBody)
-	log.Printf("order %g\n", requestBody.Orders[0].Price)
+	log.Printf("json payload %v\n", requestBody)
 	log.Printf("order: %v\n", requestBody.Orders)
 	log.Printf("customer: %v\n", requestBody.Customer)
 	log.Printf("shipping: %v\n", requestBody.Shipping)
@@ -110,16 +105,9 @@ func createOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "TODO"})
 }
 
-func getRoot(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "OK"})
-}
-
-func main() {
-	err := models.ConnectDatabase()
-	checkErr(err)
-
-	r := gin.Default()
-	r.Use(cors.New(cors.Config{
+func setupRouter() *gin.Engine {
+	router := gin.Default()
+	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
@@ -127,11 +115,12 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-	r.GET("/api/categories", getCategories)
+	router.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
 
-	v1 := r.Group("/api/v1")
+	v1 := router.Group("/api/v1")
 	{
-		v1.GET("", getRoot)
 		v1.GET("categories", getCategories)
 		v1.GET("categories/:id", getCategoryById)
 		v1.GET("products/category/:category_id", getProducts)
@@ -139,6 +128,14 @@ func main() {
 		v1.GET("products/sku/:sku", getProductBySku)
 		v1.POST("orders", createOrder)
 	}
+	return router
+}
+
+func main() {
+	err := models.ConnectDatabase()
+	checkErr(err)
+
+	r := setupRouter()
 
 	r.Run()
 }

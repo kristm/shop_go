@@ -2,8 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"shop_go/models"
+	"strings"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
@@ -67,6 +72,36 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestNothing(t *testing.T) {
-	assert.Equal(t, true, true)
+func TestPing(t *testing.T) {
+	router := setupRouter()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/ping", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "pong", w.Body.String())
+}
+
+func TestPostOrders(t *testing.T) {
+	router := setupRouter()
+
+	w := httptest.NewRecorder()
+	orders := make([]models.OrderItem, 0)
+
+	payload := OrderPayload{
+		Orders: orders,
+		Customer: models.Customer{
+			FirstName: "joe",
+		},
+		Shipping: models.Shipping{
+			Address: "malugay st",
+		},
+	}
+
+	orderJson, _ := json.Marshal(payload)
+	req, _ := http.NewRequest("POST", "/api/v1/orders", strings.NewReader(string(orderJson)))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
 }
