@@ -88,34 +88,42 @@ func getProductBySku(c *gin.Context) {
 }
 
 func createOrder(c *gin.Context) {
-	// create shipping record
-	// create order record
-	// create order products join table entries
 	var requestBody OrderPayload
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Error parsing POST payload %v\n", err)
 	}
 
 	// create customer record
-	//customerId, err := models.AddCustomer(requestBody.Customer)
-	//if err != nil {
-	//	log.Printf("Error Adding Customer %v\n", err)
-	//}
+	customerId, err := models.AddCustomer(requestBody.Customer)
+	if err != nil {
+		log.Printf("Error Adding Customer %v\n", err)
+	}
 
 	// create shipping record
-	//shippingId, err := models.AddShipping(requestBody.Shipping)
-	//if err != nil {
-	//	log.Printf("Error Adding Shipping %v\n", err)
-	//}
+	shippingId, err := models.AddShipping(requestBody.Shipping)
+	if err != nil {
+		log.Printf("Error Adding Shipping %v\n", err)
+	}
 
 	// create order record
+	success, err := models.AddOrder(models.Order{
+		ShippingId: shippingId,
+		CustomerId: customerId,
+		Status:     0,
+		Items:      requestBody.Orders,
+	})
 
-	log.Printf("json payload %v\n", requestBody)
-	log.Printf("order: %v\n", requestBody.Orders)
-	log.Printf("customer: %v\n", requestBody.Customer)
-	log.Printf("shipping: %v\n", requestBody.Shipping)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	} else {
 
-	c.JSON(http.StatusOK, gin.H{"message": "TODO"})
+		log.Printf("json payload %v\n", requestBody)
+		log.Printf("order: %v\n", requestBody.Orders)
+		log.Printf("customer: %v\n", requestBody.Customer)
+		log.Printf("shipping: %v\n", requestBody.Shipping)
+
+		c.JSON(http.StatusOK, gin.H{"message": "ok", "success": success})
+	}
 }
 
 func setupRouter() *gin.Engine {
