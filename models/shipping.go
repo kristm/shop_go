@@ -18,7 +18,7 @@ func AddShipping(newAddress Shipping) (int, error) {
 	}
 
 	//if !ValidateNotEmpty(newAddress) {
-	//	return false, nil
+	//	return -1, nil
 	//}
 
 	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone) VALUES (?, ?, ?, ?, ?, ?, ?)")
