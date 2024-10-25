@@ -16,7 +16,7 @@ type Customer struct {
 }
 
 func PrintCustomer(customer Customer) Customer {
-	log.Printf("------>> %v\n", customer)
+	log.Printf("------>> %v\n", DB)
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Printf("error %v", err)

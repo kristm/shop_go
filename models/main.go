@@ -2,13 +2,18 @@ package models
 
 import (
 	"database/sql"
+	"testing"
 )
 
 var DB *sql.DB
 
 func ConnectDatabase() error {
 	var dbPath string
-	dbPath = "/Users/krist/code/shop_go/shop_test.db"
+	if testing.Testing() {
+		dbPath = "/Users/krist/code/shop_go/test.db"
+	} else {
+		dbPath = "/Users/krist/code/shop_go/shop_test.db"
+	}
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {

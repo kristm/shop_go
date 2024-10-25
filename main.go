@@ -93,43 +93,44 @@ func createOrder(c *gin.Context) {
 		log.Printf("Error parsing POST payload %v\n", err)
 	}
 
-	log.Printf(">> %v", models.PrintCustomer(requestBody.Customer))
+	//log.Printf(">> %v", models.PrintCustomer(requestBody.Customer))
 	// create customer record
-	//customerId, err := models.AddCustomer(requestBody.Customer)
-	//if err != nil {
-	//	log.Printf("Error Adding Customer %v\n", err)
-	//}
+	customerId, err := models.AddCustomer(requestBody.Customer)
+	if err != nil {
+		log.Printf("Error Adding Customer %v\n", err)
+	}
 
-	//// create shipping record
-	//shippingId, err := models.AddShipping(requestBody.Shipping)
-	//if err != nil {
-	//	log.Printf("Error Adding Shipping %v\n", err)
-	//}
+	// create shipping record
+	shippingId, err := models.AddShipping(requestBody.Shipping)
+	if err != nil {
+		log.Printf("Error Adding Shipping %v\n", err)
+	}
 
-	//// create order record
-	//success, err := models.AddOrder(models.Order{
-	//	ShippingId: shippingId,
-	//	CustomerId: customerId,
-	//	Status:     0,
-	//	Items:      requestBody.Orders,
-	//})
+	// create order record
+	success, err := models.AddOrder(models.Order{
+		ShippingId: shippingId,
+		CustomerId: customerId,
+		Status:     0,
+		Items:      requestBody.Orders,
+	})
 
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": err})
-	//} else {
-	//requestBody.Customer.Id = customerId
-	//log.Println(customerId)
-	log.Printf("json payload %v\n", requestBody)
-	log.Printf("order: %v\n", requestBody.Orders)
-	log.Printf("customer: %v\n", requestBody.Customer)
-	log.Printf("shipping: %v\n", requestBody.Shipping)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	} else {
+		requestBody.Customer.Id = customerId
+		log.Println(customerId)
+		log.Printf("json payload %v\n", requestBody)
+		//log.Printf("order: %v\n", requestBody.Orders)
+		log.Printf("customer: %v\n", requestBody.Customer)
+		log.Printf("shipping: %v\n", requestBody.Shipping)
 
-	success := true
-	c.JSON(http.StatusOK, gin.H{"message": "ok", "success": success})
-	//}
+		c.JSON(http.StatusOK, gin.H{"message": "ok", "success": success})
+	}
 }
 
 func setupRouter() *gin.Engine {
+	err := models.ConnectDatabase()
+	checkErr(err)
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
@@ -156,8 +157,6 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
-	err := models.ConnectDatabase()
-	checkErr(err)
 
 	r := setupRouter()
 
