@@ -10,9 +10,9 @@ var DB *sql.DB
 func ConnectDatabase() error {
 	var dbPath string
 	if testing.Testing() {
-		dbPath = "/Users/krist/code/shop_go/test.db"
+		dbPath = "/Users/krist/code/shop_go/test.db?_foreign_keys=true"
 	} else {
-		dbPath = "/Users/krist/code/shop_go/shop_test.db"
+		dbPath = "/Users/krist/code/shop_go/shop_test.db?_foreign_keys=true"
 	}
 
 	db, err := sql.Open("sqlite3", dbPath)

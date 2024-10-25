@@ -34,7 +34,7 @@ CREATE TABLE order_products (
 
 CREATE TABLE shipping (
   id INTEGER NOT NULL PRIMARY KEY,
-  customer_id INTEGER,
+  customer_id INTEGER NOT NULL,
   status INTEGER NOT NULL DEFAULT 0, -- pending | in transit | failed | completed
   address VARCHAR(100) NOT NULL,
   city VARCHAR(100) NOT NULL,

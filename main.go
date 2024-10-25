@@ -100,6 +100,7 @@ func createOrder(c *gin.Context) {
 	}
 
 	// create shipping record
+	requestBody.Shipping.CustomerId = customerId
 	shippingId, err := models.AddShipping(requestBody.Shipping)
 	if err != nil {
 		log.Printf("Error Adding Shipping %v\n", err)
