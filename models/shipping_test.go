@@ -3,12 +3,12 @@ package models
 import (
 	"testing"
 
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAddShipping(t *testing.T) {
-	success, err := AddShipping(Shipping{
+	shippingId, err := AddShipping(Shipping{
 		CustomerId: 1,
 		Status:     0,
 		Address:    "Malugay St.",
@@ -19,5 +19,5 @@ func TestAddShipping(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	assert.Equal(t, true, success)
+	assert.Greater(t, shippingId, 0)
 }

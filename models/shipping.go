@@ -11,10 +11,10 @@ type Shipping struct {
 	Phone      string `json:"phone"`
 }
 
-func AddShipping(newAddress Shipping) (bool, error) {
+func AddShipping(newAddress Shipping) (int, error) {
 	tx, err := DB.Begin()
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	//if !ValidateNotEmpty(newAddress) {
@@ -24,18 +24,19 @@ func AddShipping(newAddress Shipping) (bool, error) {
 	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone) VALUES (?, ?, ?, ?, ?, ?, ?)")
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone)
+	res, err := stmt.Exec(newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone)
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	tx.Commit()
+	id, _ := res.LastInsertId()
 
-	return true, nil
+	return int(id), nil
 }
