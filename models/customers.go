@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"reflect"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -12,6 +13,16 @@ type Customer struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
+}
+
+func PrintCustomer(customer Customer) Customer {
+	log.Printf("------>> %v\n", customer)
+	tx, err := DB.Begin()
+	if err != nil {
+		log.Printf("error %v", err)
+	}
+	tx.Commit()
+	return customer
 }
 
 func ValidateNotEmpty(customer Customer) bool {

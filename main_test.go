@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
+	"shop_go/models"
+	"strings"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
@@ -58,16 +60,16 @@ func ClearProducts() (bool, error) {
 	return true, nil
 }
 
-func TestMain(m *testing.M) {
-	log.Println("Test Main")
-	ConnectTestDatabase()
-	code := m.Run()
-	_, err := ClearProducts()
-	if err != nil {
-		log.Printf("Teardown error %v\n", err)
-	}
-	os.Exit(code)
-}
+//func TestMain(m *testing.M) {
+//	log.Println("Test Main")
+//	ConnectTestDatabase()
+//	code := m.Run()
+//	_, err := ClearProducts()
+//	if err != nil {
+//		log.Printf("Teardown error %v\n", err)
+//	}
+//	os.Exit(code)
+//}
 
 func TestPing(t *testing.T) {
 	router := setupRouter()
@@ -81,31 +83,38 @@ func TestPing(t *testing.T) {
 }
 
 func TestPostOrders(t *testing.T) {
-	//router := setupRouter()
+	router := setupRouter()
 
-	//w := httptest.NewRecorder()
-	//orders := make([]models.OrderItem, 0)
-	//order := models.OrderItem{
-	//	ProductId: 1,
-	//	Qty:       2,
-	//	Price:     250,
-	//}
+	w := httptest.NewRecorder()
+	orders := make([]models.OrderItem, 0)
+	order := models.OrderItem{
+		ProductId: 1,
+		Qty:       2,
+		Price:     250.00,
+	}
 
-	//orders = append(orders, order)
+	orders = append(orders, order)
 
-	//payload := OrderPayload{
-	//	Orders: orders,
-	//	Customer: models.Customer{
-	//		FirstName: "joe",
-	//	},
-	//	Shipping: models.Shipping{
-	//		Address: "malugay st",
-	//	},
-	//}
+	payload := OrderPayload{
+		Orders: orders,
+		Customer: models.Customer{
+			FirstName: "joe",
+			LastName:  "book",
+			Email:     "joe@bo.ok",
+			Phone:     "123-123",
+		},
+		Shipping: models.Shipping{
+			Address: "malugay st",
+		},
+	}
 
-	//orderJson, _ := json.Marshal(payload)
-	//req, _ := http.NewRequest("POST", "/api/v1/orders", strings.NewReader(string(orderJson)))
-	//router.ServeHTTP(w, req)
+	orderJson, _ := json.Marshal(payload)
+	req, err := http.NewRequest("POST", "/api/v1/orders", strings.NewReader(string(orderJson)))
+	if err != nil {
+		t.Logf("err %v", err)
+	}
+	router.ServeHTTP(w, req)
 
-	//assert.Equal(t, 200, w.Code)
+	t.Logf("w body %v", w.Body)
+	assert.Equal(t, 200, w.Code)
 }
