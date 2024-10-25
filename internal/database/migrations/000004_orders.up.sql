@@ -10,8 +10,8 @@ CREATE TABLE customers (
 
 CREATE TABLE orders (
   id INTEGER NOT NULL PRIMARY KEY,
-  shipping_id INTEGER,
-  customer_id INTEGER,
+  shipping_id INTEGER NOT NULL,
+  customer_id INTEGER NOT NULL,
   amount_in_cents INTEGER,
   status INTEGER NOT NULL DEFAULT 0, -- pending | canceled | paid
   created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -22,7 +22,7 @@ CREATE TABLE orders (
 
 CREATE TABLE order_products (
   id INTEGER NOT NULL PRIMARY KEY,
-  order_id INTEGER,
+  order_id INTEGER NOT NULL,
   product_id INTEGER,
   qty INTEGER DEFAULT 1,
   created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
