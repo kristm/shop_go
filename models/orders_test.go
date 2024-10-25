@@ -33,7 +33,7 @@ func TestMarshalOrder(t *testing.T) {
 	}
 
 	assert.Equal(t, newOrder.Items[0].Price, 20000.00) // price in cents
-	assert.Equal(t, newOrder.Amount, 700.00)
+	assert.Equal(t, newOrder.Amount, 70000.00)
 }
 
 func TestUnmarshalOrderItem(t *testing.T) {

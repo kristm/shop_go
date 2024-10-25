@@ -65,7 +65,7 @@ func (order *Order) UnmarshalJSON(p []byte) error {
 		computedAmount += float64(total)
 	}
 
-	order.Amount = computedAmount / 100.00
+	order.Amount = computedAmount
 	return nil
 }
 
