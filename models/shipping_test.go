@@ -9,7 +9,6 @@ import (
 
 func TestAddShipping(t *testing.T) {
 	success, err := AddShipping(Shipping{
-		OrderId:    1,
 		CustomerId: 1,
 		Status:     0,
 		Address:    "Malugay St.",

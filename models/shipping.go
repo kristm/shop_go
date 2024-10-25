@@ -2,7 +2,6 @@ package models
 
 type Shipping struct {
 	Id         int    `json:"id"`
-	OrderId    int    `json:"order_id"`
 	CustomerId int    `json:"customer_id"`
 	Status     int    `json:"status"`
 	Address    string `json:"address"`
@@ -22,7 +21,7 @@ func AddShipping(newAddress Shipping) (bool, error) {
 	//	return false, nil
 	//}
 
-	stmt, err := tx.Prepare("INSERT INTO shipping (order_id, customer_id, status, address, city, country, zip, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone) VALUES (?, ?, ?, ?, ?, ?, ?)")
 
 	if err != nil {
 		return false, err
@@ -30,7 +29,7 @@ func AddShipping(newAddress Shipping) (bool, error) {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newAddress.OrderId, newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone)
+	_, err = stmt.Exec(newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone)
 
 	if err != nil {
 		return false, err
