@@ -109,12 +109,36 @@ func TestPostOrders(t *testing.T) {
 	}
 
 	orderJson, _ := json.Marshal(payload)
-	req, err := http.NewRequest("POST", "/api/v1/orders", strings.NewReader(string(orderJson)))
-	if err != nil {
-		t.Logf("err %v", err)
-	}
+	req, _ := http.NewRequest("POST", "/api/v1/orders", strings.NewReader(string(orderJson)))
 	router.ServeHTTP(w, req)
 
-	t.Logf("w body %v", w.Body)
 	assert.Equal(t, 200, w.Code)
+}
+
+func TestPostIncompleteOrders(t *testing.T) {
+	router := setupRouter()
+
+	w := httptest.NewRecorder()
+	orders := make([]models.OrderItem, 0)
+	order := models.OrderItem{
+		ProductId: 1,
+		Qty:       2,
+		Price:     250.00,
+	}
+
+	orders = append(orders, order)
+
+	payload := OrderPayload{
+		Orders:   orders,
+		Customer: models.Customer{},
+		Shipping: models.Shipping{
+			Address: "malugay st",
+		},
+	}
+
+	orderJson, _ := json.Marshal(payload)
+	req, _ := http.NewRequest("POST", "/api/v1/orders", strings.NewReader(string(orderJson)))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
 }
