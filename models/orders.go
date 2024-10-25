@@ -14,6 +14,7 @@ const (
 
 type Order struct {
 	Id         int         `json:"id"`
+	ShippingId int         `json:"shipping_id"`
 	CustomerId int         `json:"customer_id"`
 	Amount     int         `json:"amount_in_cents"`
 	Status     Status      `json:"status"`
