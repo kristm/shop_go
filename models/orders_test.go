@@ -4,32 +4,34 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAddOrder(t *testing.T) {
-	//items := []OrderItem{
-	//	OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
-	//	OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
-	//}
+	items := []OrderItem{
+		OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
+		OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
+	}
 
-	//order := Order{
-	//	CustomerId: 1,
-	//	ShippingId: 1,
-	//	Status:     0,
-	//	Amount:     0,
-	//	Items:      items,
-	//}
+	order := Order{
+		CustomerId: 1,
+		ShippingId: 1,
+		Status:     0,
+		Amount:     0,
+		Items:      items,
+	}
 
-	//orderId, err := AddOrder(order)
-	//for _, item := range order.Items {
-	//	orderItem := OrderItem{OrderId: orderId,
-	//														ProductId: item.ProductId,
-	//														Qty: item.Qty,
-	//														Price: item.Price}
-	//	item.OrderId = orderId
-	//	ok, err := AddOrderItem(item)
-	//}
+	orderId, err := AddOrderRecord(order)
+	require.NoError(t, err)
+	assert.Greater(t, orderId, 0)
+
+	for _, item := range order.Items {
+		item.OrderId = orderId
+		ok, err := AddOrderItem(item)
+		require.NoError(t, err)
+		assert.Equal(t, ok, true)
+	}
 
 }
 

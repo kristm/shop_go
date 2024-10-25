@@ -115,7 +115,33 @@ func GetOrders(customerId int) ([]Order, error) {
 	return orders, nil
 }
 
-func AddOrder(newOrder Order) (int, error) {
+func computeTotalAmount(orderItems []OrderItem) float64 {
+	computedAmount := 0.0
+	for _, item := range orderItems {
+		total := item.Qty * int(item.Price)
+		computedAmount += float64(total)
+	}
+
+	return computedAmount
+}
+
+func AddOrder(order Order) (bool, error) {
+	orderId, err := AddOrderRecord(order)
+	if err != nil {
+		return false, err
+	}
+	for _, item := range order.Items {
+		item.OrderId = orderId
+		_, err := AddOrderItem(item)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	return true, nil
+}
+
+func AddOrderRecord(newOrder Order) (int, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		return -1, err
@@ -128,6 +154,8 @@ func AddOrder(newOrder Order) (int, error) {
 	}
 
 	defer stmt.Close()
+
+	newOrder.Amount = computeTotalAmount(newOrder.Items)
 
 	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.Amount, newOrder.Status)
 
@@ -147,7 +175,8 @@ func AddOrderItem(newOrderItem OrderItem) (bool, error) {
 		return false, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO orders_product (order_id, product_id, qty, price) VALUES (?, ?, ?, ?)")
+	//TODO: fetch price from product table
+	stmt, err := tx.Prepare("INSERT INTO order_products (order_id, product_id, qty, price_in_cents) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
 		return false, err
@@ -155,7 +184,7 @@ func AddOrderItem(newOrderItem OrderItem) (bool, error) {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newOrderItem.OrderId, newOrderItem.ProductId, newOrderItem.Qty)
+	_, err = stmt.Exec(newOrderItem.OrderId, newOrderItem.ProductId, newOrderItem.Qty, newOrderItem.Price)
 
 	if err != nil {
 		return false, err

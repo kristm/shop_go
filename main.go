@@ -93,17 +93,22 @@ func createOrder(c *gin.Context) {
 	// create order products join table entries
 	var requestBody OrderPayload
 	if err := c.BindJSON(&requestBody); err != nil {
-		log.Printf("Error parsing POST payload %v", err)
+		log.Printf("Error parsing POST payload %v\n", err)
 	}
 
 	// create customer record
 	//customerId, err := models.AddCustomer(requestBody.Customer)
+	//if err != nil {
+	//	log.Printf("Error Adding Customer %v\n", err)
+	//}
 
 	// create shipping record
 	//shippingId, err := models.AddShipping(requestBody.Shipping)
+	//if err != nil {
+	//	log.Printf("Error Adding Shipping %v\n", err)
+	//}
 
 	// create order record
-	//order:Order := Order{customerId, shippingId, Amount:, Status: Items:requestBody.Orders}
 
 	log.Printf("json payload %v\n", requestBody)
 	log.Printf("order: %v\n", requestBody.Orders)
