@@ -16,7 +16,7 @@ type Order struct {
 	Id         int         `json:"id"`
 	ShippingId int         `json:"shipping_id"`
 	CustomerId int         `json:"customer_id"`
-	Amount     int         `json:"amount_in_cents"`
+	Amount     float64     `json:"amount_in_cents"`
 	Status     Status      `json:"status"`
 	Items      []OrderItem `json:"orders"`
 }
@@ -31,14 +31,14 @@ type OrderItem struct {
 // TODO
 func (order Order) MarshalJSON() ([]byte, error) {
 	type Alias Order
-	computedAmount := 0
+	computedAmount := 0.0
 	for _, item := range order.Items {
 		total := item.Qty * int(item.Price)
-		computedAmount += total
+		computedAmount += float64(total)
 	}
 	return json.Marshal(&struct {
 		*Alias
-		Amount int `json:"amount"`
+		Amount float64 `json:"amount"`
 	}{
 		Alias:  (*Alias)(&order),
 		Amount: computedAmount,
@@ -48,7 +48,7 @@ func (order Order) MarshalJSON() ([]byte, error) {
 func (order *Order) UnmarshalJSON(p []byte) error {
 	type Alias Order
 	aux := &struct {
-		Amount int `json:"amount_in_cents"`
+		Amount float64 `json:"amount_in_cents"`
 		*Alias
 	}{
 		Alias: (*Alias)(order),
@@ -58,13 +58,14 @@ func (order *Order) UnmarshalJSON(p []byte) error {
 		return err
 	}
 
-	computedAmount := 0
+	//calculation of amount is not necessary if we're storing amount in db
+	computedAmount := 0.0
 	for _, item := range order.Items {
 		total := item.Qty * int(item.Price)
-		computedAmount += total
+		computedAmount += float64(total)
 	}
 
-	order.Amount = computedAmount
+	order.Amount = computedAmount / 100.00
 	return nil
 }
 
