@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"log"
 )
 
 type Status int
@@ -117,8 +118,10 @@ func GetOrders(customerId int) ([]Order, error) {
 
 func computeTotalAmount(orderItems []OrderItem) float64 {
 	computedAmount := 0.0
+	log.Printf("items %v", orderItems)
 	for _, item := range orderItems {
 		total := item.Qty * int(item.Price)
+		log.Printf("running total %v %v", total, item.Price)
 		computedAmount += float64(total)
 	}
 
@@ -156,6 +159,7 @@ func AddOrderRecord(newOrder Order) (int, error) {
 	defer stmt.Close()
 
 	newOrder.Amount = computeTotalAmount(newOrder.Items)
+	log.Printf("TOTAL AMOUNT %v", newOrder.Amount)
 
 	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.Amount, newOrder.Status)
 

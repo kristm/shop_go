@@ -96,6 +96,7 @@ func TestPostOrders(t *testing.T) {
 	orders = append(orders, order)
 
 	payload := OrderPayload{
+		Orders: orders,
 		Customer: models.Customer{
 			FirstName: "joe",
 			LastName:  "book",
