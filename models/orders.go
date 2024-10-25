@@ -115,29 +115,30 @@ func GetOrders(customerId int) ([]Order, error) {
 	return orders, nil
 }
 
-func AddOrder(newOrder Order) (bool, error) {
+func AddOrder(newOrder Order) (int, error) {
 	tx, err := DB.Begin()
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, amount_in_cents, status) VALUES (?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, shipping_id, amount_in_cents, status) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newOrder.CustomerId, newOrder.Amount, newOrder.Status)
+	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.Amount, newOrder.Status)
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	tx.Commit()
+	orderId, _ := res.LastInsertId()
 
-	return true, nil
+	return int(orderId), nil
 }
 
 func AddOrderItem(newOrderItem OrderItem) (bool, error) {
@@ -146,7 +147,7 @@ func AddOrderItem(newOrderItem OrderItem) (bool, error) {
 		return false, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO orders_product (order_id, product_id, qty) VALUES (?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO orders_product (order_id, product_id, qty, price) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
 		return false, err

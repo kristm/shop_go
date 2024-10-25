@@ -8,6 +8,28 @@ import (
 )
 
 func TestAddOrder(t *testing.T) {
+	//items := []OrderItem{
+	//	OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
+	//	OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
+	//}
+
+	//order := Order{
+	//	CustomerId: 1,
+	//	ShippingId: 1,
+	//	Status:     0,
+	//	Amount:     0,
+	//	Items:      items,
+	//}
+
+	//orderId, err := AddOrder(order)
+	//for _, item := range order.Items {
+	//	orderItem := OrderItem{OrderId: orderId,
+	//														ProductId: item.ProductId,
+	//														Qty: item.Qty,
+	//														Price: item.Price}
+	//	item.OrderId = orderId
+	//	ok, err := AddOrderItem(item)
+	//}
 
 }
 
