@@ -8,6 +8,31 @@ import (
 )
 
 func TestAddOrder(t *testing.T) {
+
+}
+
+func TestMarshalOrder(t *testing.T) {
+	items := []OrderItem{
+		OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
+		OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
+	}
+
+	order := Order{
+		CustomerId: 1,
+		Status:     0,
+		Amount:     0,
+		Items:      items,
+	}
+
+	res, _ := json.Marshal(order)
+
+	var newOrder Order
+	err := json.Unmarshal(res, &newOrder)
+	if err != nil {
+		t.Logf("ERR %v\n", err)
+	}
+
+	assert.Equal(t, newOrder.Amount, 70000)
 }
 
 func TestUnmarshalOrderItem(t *testing.T) {

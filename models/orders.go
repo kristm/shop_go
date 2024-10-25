@@ -1,6 +1,8 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Status int
 
@@ -25,23 +27,45 @@ type OrderItem struct {
 	Price     float64 `json:"price"`
 }
 
-//TODO
-/*func (order Order) MarshalJSON() ([]byte, error) {
+// TODO
+func (order Order) MarshalJSON() ([]byte, error) {
 	type Alias Order
-	computedAmount := mapreduce Items
-	var amount int = 0
-	for item, i := range Items {
-		total := item.Qty * item.Price
-		amount += total
+	computedAmount := 0
+	for _, item := range order.Items {
+		total := item.Qty * int(item.Price)
+		computedAmount += total
 	}
 	return json.Marshal(&struct {
 		*Alias
 		Amount int `json:"amount"`
 	}{
-		Alias: (*Alias)(&order),
+		Alias:  (*Alias)(&order),
 		Amount: computedAmount,
 	})
-}*/
+}
+
+func (order *Order) UnmarshalJSON(p []byte) error {
+	type Alias Order
+	aux := &struct {
+		Amount int `json:"amount_in_cents"`
+		*Alias
+	}{
+		Alias: (*Alias)(order),
+	}
+
+	if err := json.Unmarshal(p, &aux); err != nil {
+		return err
+	}
+
+	computedAmount := 0
+	for _, item := range order.Items {
+		total := item.Qty * int(item.Price)
+		computedAmount += total
+	}
+
+	order.Amount = computedAmount
+	return nil
+}
 
 func (prod *OrderItem) UnmarshalJSON(p []byte) error {
 	type Alias OrderItem
