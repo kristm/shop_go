@@ -138,32 +138,33 @@ func Validate(product *Product, fieldname string) bool {
 	return true
 }
 
-func AddProduct(newProduct Product) (bool, error) {
+func AddProduct(newProduct Product) (int, error) {
 	isValid := Validate(&newProduct, "sku")
 	if !isValid {
-		return false, nil
+		return -1, nil
 	}
 
 	tx, err := DB.Begin()
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	stmt, err := tx.Prepare("INSERT INTO products (name, sku, description, category_id, price_in_cents) VALUES (?, ?, ?, ?, ?)")
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newProduct.Name, newProduct.Sku, newProduct.Description, newProduct.CategoryId, newProduct.Price)
+	res, err := stmt.Exec(newProduct.Name, newProduct.Sku, newProduct.Description, newProduct.CategoryId, newProduct.Price)
 
 	if err != nil {
-		return false, err
+		return -1, err
 	}
 
 	tx.Commit()
+	id, _ := res.LastInsertId()
 
-	return true, nil
+	return int(id), nil
 }

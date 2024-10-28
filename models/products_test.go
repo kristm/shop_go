@@ -20,11 +20,11 @@ func TestAddProduct(t *testing.T) {
 		Status:      InStock,
 	}
 
-	got, err := AddProduct(newProduct)
+	productId, err := AddProduct(newProduct)
 	if err != nil {
 		t.Errorf("Error when adding Product %v", err)
 	}
-	if !got {
+	if productId < 0 {
 		t.Errorf("Failed to add Product %v", err)
 	}
 
