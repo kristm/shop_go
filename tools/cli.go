@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -50,11 +51,11 @@ func processCSV(reader *csv.Reader) {
 			break
 		}
 
-		categoryId, err := strconv.Atoi(trim(record[4:5]))
+		categoryId, err := strconv.Atoi(trim(record[3:4]))
 		if err != nil {
 			log.Println("error ", err)
 		}
-		price, err := strconv.ParseFloat(trim(record[5:6]), 64)
+		price, err := strconv.ParseFloat(trim(record[4:5]), 64)
 		if err != nil {
 			log.Println("error ", err)
 		}
@@ -62,20 +63,23 @@ func processCSV(reader *csv.Reader) {
 		product := models.Product{
 			Id:          0,
 			Sku:         trim(record[0:1]),
-			Name:        trim(record[2:3]),
-			Description: trim(record[3:4]),
+			Name:        trim(record[1:2]),
+			Description: trim(record[2:3]),
 			CategoryId:  categoryId,
 			Price:       price,
 		}
 
-		if !readonly {
-			_, err = models.AddProduct(product)
-			if err != nil {
-				fmt.Println("ERROR: ", err)
-			}
-		}
+		//if !readonly {
+		//	_, err = models.AddProduct(product)
+		//	if err != nil {
+		//		fmt.Println("ERROR: ", err)
+		//	}
+		//}
 
-		fmt.Printf("%d product: %+v\n", i, product)
+		qty := strings.Join(record[5:6], "")
+		//qty, _ = strconv.Atoi(qty)
+		fmt.Printf("%d product: %+v %s\n", i, product, qty)
+		//fmt.Printf("%s %s %s %s %s %s\n", record[0:1], record[1:2], record[2:3], record[3:4], record[4:5], record[5:6])
 	}
 }
 
@@ -94,15 +98,16 @@ func showProducts() {
 var readonly = false
 
 func main() {
+	showcsv := flag.Bool("showcsv", false, "a bool")
+	flag.Parse()
 	err := models.ConnectDatabase()
 	if err != nil {
 		log.Printf("%s\n", err)
 	}
 
-	if len(os.Args) == 2 && os.Args[1] == "--read" {
-		readonly = true
-		fmt.Println("READONLY MODE")
-	} else if len(os.Args) == 3 {
+	log.Printf("ARGC %d %t", len(os.Args), *showcsv)
+
+	if *showcsv {
 		readonly = true
 		fmt.Println("SHOW PRODUCTS")
 		showProducts()
