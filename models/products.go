@@ -8,13 +8,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type ProductStatus int
+
+const (
+	InStock ProductStatus = iota
+	LowStock
+	OutofStock
+)
+
 type Product struct {
-	Id          int     `json:"id"`
-	Sku         string  `json:"sku"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	CategoryId  int     `json:"category_id"`
-	Price       float64 `json:"price"`
+	Id          int           `json:"id"`
+	Sku         string        `json:"sku"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	CategoryId  int           `json:"category_id"`
+	Price       float64       `json:"price"`
+	Status      ProductStatus `json:"status"`
 }
 
 func (prod Product) MarshalJSON() ([]byte, error) {
@@ -30,7 +39,7 @@ func (prod Product) MarshalJSON() ([]byte, error) {
 }
 
 func GetAllProducts() ([]Product, error) {
-	rows, err := DB.Query("SELECT id, name, sku, description, category_id, price_in_cents FROM products")
+	rows, err := DB.Query("SELECT id, name, sku, description, category_id, price_in_cents, status FROM products")
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +49,7 @@ func GetAllProducts() ([]Product, error) {
 
 	for rows.Next() {
 		product := Product{}
-		err = rows.Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
+		err = rows.Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price, &product.Status)
 
 		if err != nil {
 			return nil, err

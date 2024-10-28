@@ -45,3 +45,23 @@ CREATE TABLE shipping (
   updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
+
+CREATE TABLE socials (
+  id INTEGER NOT NULL PRIMARY KEY,
+  customer_id INTEGER NOT NULL,
+  subscribed_to_newsletter BOOL NOT NULL DEFAULT FALSE,
+  account_url VARCHAR(100),
+  created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+CREATE TABLE product_inventory (
+  id INTEGER NOT NULL PRIMARY KEY,
+  product_id INTEGER,
+  qty INTEGER NOT NULL,
+  created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);
+

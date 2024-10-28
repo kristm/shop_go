@@ -17,6 +17,7 @@ func TestAddProduct(t *testing.T) {
 		Description: "",
 		CategoryId:  4,
 		Price:       10000,
+		Status:      InStock,
 	}
 
 	got, err := AddProduct(newProduct)

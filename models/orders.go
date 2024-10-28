@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 )
 
-type Status int
+type OrderStatus int
 
 const (
-	Pending Status = iota
+	Pending OrderStatus = iota
 	Cancelled
 	Paid
 )
@@ -17,7 +17,7 @@ type Order struct {
 	ShippingId int         `json:"shipping_id"`
 	CustomerId int         `json:"customer_id"`
 	Amount     float64     `json:"amount_in_cents"`
-	Status     Status      `json:"status"`
+	Status     OrderStatus `json:"status"`
 	Items      []OrderItem `json:"orders"`
 }
 
