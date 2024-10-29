@@ -13,6 +13,7 @@ func setupTest(tb testing.TB) func(tb testing.TB) {
 	log.Println("setup test")
 
 	return func(tb testing.TB) {
+		ClearTestTable("customers")
 		log.Println("teardown test")
 	}
 }
