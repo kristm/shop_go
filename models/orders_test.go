@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,16 +72,13 @@ func TestMarshalOrder(t *testing.T) {
 		Items:      items,
 	}
 
-	res, _ := json.Marshal(order)
+	res, err := json.Marshal(order)
 
-	var newOrder Order
-	err := json.Unmarshal(res, &newOrder)
-	if err != nil {
-		t.Logf("ERR %v\n", err)
-	}
+	json := fmt.Sprintf("%s", res)
+	expect := "{\"id\":0,\"shipping_id\":0,\"customer_id\":1,\"amount_in_cents\":0,\"status\":0,\"orders\":[{\"id\":0,\"order_id\":0,\"product_id\":2,\"qty\":1,\"price\":200},{\"id\":0,\"order_id\":0,\"product_id\":3,\"qty\":2,\"price\":250}],\"amount\":700}"
 
-	assert.Equal(t, newOrder.Items[0].Price, 20000.00) // price in cents
-	assert.Equal(t, newOrder.Amount, 70000.00)
+	require.NoError(t, err)
+	assert.Equal(t, json, expect)
 }
 
 func TestUnmarshalOrderItem(t *testing.T) {
