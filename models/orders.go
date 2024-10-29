@@ -22,7 +22,8 @@ type Order struct {
 }
 
 type OrderItem struct {
-	OrderId   int     `json:"id"`
+	Id        int     `json:"id"`
+	OrderId   int     `json:"order_id"`
 	ProductId int     `json:"product_id"`
 	Qty       int     `json:"qty"`
 	Price     float64 `json:"price"`
@@ -115,6 +116,35 @@ func GetOrders(customerId int) ([]Order, error) {
 	return orders, nil
 }
 
+func GetOrderItems(orderId int) ([]OrderItem, error) {
+	stmt, err := DB.Prepare("SELECT id, order_id, product_id, qty, price_in_cents FROM order_products WHERE order_id = ?")
+	if err != nil {
+		return nil, err
+	}
+
+	rows, sqlErr := stmt.Query(orderId)
+	if sqlErr != nil {
+		return nil, sqlErr
+	}
+
+	defer rows.Close()
+	orderItems := make([]OrderItem, 0)
+
+	for rows.Next() {
+		item := OrderItem{}
+		err = rows.Scan(&item.Id, &item.OrderId, &item.ProductId, &item.Qty, &item.Price)
+
+		if err != nil {
+			return nil, err
+		}
+
+		orderItems = append(orderItems, item)
+	}
+	err = rows.Err()
+
+	return orderItems, nil
+}
+
 func computeTotalAmount(orderItems []OrderItem) float64 {
 	computedAmount := 0.0
 	for _, item := range orderItems {
@@ -125,20 +155,20 @@ func computeTotalAmount(orderItems []OrderItem) float64 {
 	return computedAmount
 }
 
-func AddOrder(order Order) (bool, error) {
+func AddOrder(order Order) (bool, int, error) {
 	orderId, err := AddOrderRecord(order)
 	if err != nil {
-		return false, err
+		return false, -1, err
 	}
 	for _, item := range order.Items {
 		item.OrderId = orderId
 		_, err := AddOrderItem(item)
 		if err != nil {
-			return false, err
+			return false, -1, err
 		}
 	}
 
-	return true, nil
+	return true, orderId, nil
 }
 
 func AddOrderRecord(newOrder Order) (int, error) {

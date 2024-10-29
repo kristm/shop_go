@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddOrder(t *testing.T) {
+func TestAddOrderRecord(t *testing.T) {
 	items := []OrderItem{
 		OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
 		OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
@@ -33,6 +33,29 @@ func TestAddOrder(t *testing.T) {
 		assert.Equal(t, ok, true)
 	}
 
+}
+
+func TestAddOrder(t *testing.T) {
+	items := []OrderItem{
+		OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
+		OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
+	}
+
+	order := Order{
+		CustomerId: 1,
+		ShippingId: 1,
+		Status:     0,
+		Amount:     0,
+		Items:      items,
+	}
+
+	_, orderId, err := AddOrder(order)
+	require.NoError(t, err)
+	assert.Greater(t, orderId, 0)
+
+	orderItems, err := GetOrderItems(orderId)
+	require.NoError(t, err)
+	assert.Equal(t, 2, len(orderItems))
 }
 
 func TestMarshalOrder(t *testing.T) {

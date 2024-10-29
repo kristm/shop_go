@@ -109,7 +109,7 @@ func createOrder(c *gin.Context) {
 
 	// create order record
 	log.Printf("Order Items Req %v", requestBody.Orders)
-	success, err := models.AddOrder(models.Order{
+	success, _, err := models.AddOrder(models.Order{
 		ShippingId: shippingId,
 		CustomerId: customerId,
 		Status:     0,
