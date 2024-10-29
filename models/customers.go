@@ -30,7 +30,7 @@ func ValidateNotEmpty(customer Customer) bool {
 	return true
 }
 
-func checkCustomerDuplicate(customer Customer) (int, error) {
+func getCustomer(customer Customer) (int, error) {
 	sql := fmt.Sprintf("SELECT id, first_name, last_name, email, phone FROM customers WHERE first_name = ? AND last_name = ? AND email = ? AND phone = ? ORDER BY created_at LIMIT 1")
 	stmt, err := DB.Prepare(sql)
 	if err != nil {
@@ -48,7 +48,7 @@ func checkCustomerDuplicate(customer Customer) (int, error) {
 }
 
 func AddOrGetCustomer(customer Customer) (int, error) {
-	customerId, _ := checkCustomerDuplicate(customer)
+	customerId, _ := getCustomer(customer)
 	if customerId > 0 {
 		return customerId, nil
 	}

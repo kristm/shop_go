@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -24,6 +25,12 @@ type Product struct {
 	CategoryId  int           `json:"category_id"`
 	Price       float64       `json:"price"`
 	Status      ProductStatus `json:"status"`
+}
+
+type Inventory struct {
+	Id        int `json:"id"`
+	ProductId int `json:"product_id"`
+	Qty       int `json:"qty"`
 }
 
 func (prod Product) MarshalJSON() ([]byte, error) {
@@ -158,6 +165,81 @@ func AddProduct(newProduct Product) (int, error) {
 	defer stmt.Close()
 
 	res, err := stmt.Exec(newProduct.Name, newProduct.Sku, newProduct.Description, newProduct.CategoryId, newProduct.Price)
+
+	if err != nil {
+		return -1, err
+	}
+
+	tx.Commit()
+	id, _ := res.LastInsertId()
+
+	return int(id), nil
+}
+
+func GetProductInventory(productId int) (*Inventory, error) {
+	sql := fmt.Sprintf("SELECT id, sku FROM product_inventory WHERE id = ? ORDER BY created_at LIMIT 1")
+	stmt, err := DB.Prepare(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	inventory := &Inventory{}
+	sqlErr := stmt.QueryRow().Scan(&inventory.Id, &inventory.ProductId, &inventory.Qty)
+	if sqlErr != nil {
+		return nil, sqlErr
+	}
+
+	return inventory, nil
+}
+
+func UpdateProductInventory(productId int, qty int) (bool, error) {
+	tx, err := DB.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	stmt, err := tx.Prepare("UPDATE product_inventory SET qty = ? WHERE product_id = ?")
+	if err != nil {
+		return false, err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(qty, productId)
+	if err != nil {
+		return false, err
+	}
+
+	tx.Commit()
+	return true, nil
+}
+
+func AddProductInventory(productId int, qty int) (int, error) {
+	inventory, err := GetProductInventory(productId)
+	if err != nil {
+		return -1, err
+	}
+
+	if inventory != nil {
+		UpdateProductInventory(productId, qty)
+	}
+
+	//add inventory
+	tx, err := DB.Begin()
+	if err != nil {
+		return -1, err
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO product_inventory (product_id, qty) VALUES (?, ?)")
+
+	if err != nil {
+		return -1, err
+	}
+
+	defer stmt.Close()
+	inventory = &Inventory{ProductId: productId, Qty: qty}
+
+	res, err := stmt.Exec(inventory.ProductId, inventory.Qty)
 
 	if err != nil {
 		return -1, err
