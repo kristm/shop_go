@@ -68,18 +68,17 @@ func processCSV(reader *csv.Reader) {
 			CategoryId:  categoryId,
 			Price:       price,
 		}
+		qtyVal := strings.Join(record[5:6], "")
+		qty, _ := strconv.Atoi(qtyVal)
 
 		if !readonly {
-			productId, err := models.AddProduct(product)
+			productId, err := models.AddProductWithQty(product, qty)
 			if err != nil {
 				fmt.Printf("ERROR Adding Product: %d %s\n", productId, err)
 			}
 		}
 
-		qty := strings.Join(record[5:6], "")
-		//qty, _ = strconv.Atoi(qty)
-		fmt.Printf("%d product: %+v %s\n", i, product, qty)
-		//fmt.Printf("%s %s %s %s %s %s\n", record[0:1], record[1:2], record[2:3], record[3:4], record[4:5], record[5:6])
+		fmt.Printf("%d product: %+v %d\n", i, product, qty)
 	}
 }
 
