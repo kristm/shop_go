@@ -34,8 +34,8 @@ func (order Order) MarshalJSON() ([]byte, error) {
 	type Alias Order
 	computedAmount := 0.0
 	for _, item := range order.Items {
-		total := item.Qty * int(item.Price)
-		computedAmount += float64(total)
+		total := float64(item.Qty) * float64(item.Price)
+		computedAmount += total
 	}
 	return json.Marshal(&struct {
 		*Alias
