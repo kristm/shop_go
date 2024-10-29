@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 	ConnectTestDatabase()
 	code := m.Run()
 
-	testTables := []string{"customers", "products", "product_inventory", "orders", "order_products", "shipping"}
+	testTables := []string{"customers", "orders", "order_products", "shipping"}
 	log.Println("Models Teardown")
 	for _, table := range testTables {
 		_, err := ClearTestTable(table)

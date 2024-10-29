@@ -3,9 +3,11 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"shop_go/models"
 	"strings"
 	"testing"
@@ -20,6 +22,14 @@ func setupSuite(tb testing.TB) func(tb testing.TB) {
 
 	return func(tb testing.TB) {
 		log.Println("teardown suite")
+		testTables := []string{"customers", "orders", "order_products", "shipping"}
+		log.Println("Models Teardown")
+		for _, table := range testTables {
+			_, err := ClearTestTable(table)
+			if err != nil {
+				log.Printf("Teardown error %v", err)
+			}
+		}
 	}
 }
 
@@ -39,13 +49,14 @@ func ConnectTestDatabase() {
 	DB = db
 }
 
-func ClearProducts() (bool, error) {
+func ClearTestTable(tableName string) (bool, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		return false, err
 	}
 
-	stmt, err := DB.Prepare("DELETE FROM products WHERE id >= ?")
+	sql := fmt.Sprintf("DELETE FROM %s WHERE id >= ?", tableName)
+	stmt, err := DB.Prepare(sql)
 	if err != nil {
 		return false, err
 	}
@@ -56,20 +67,20 @@ func ClearProducts() (bool, error) {
 		return false, err
 	}
 	tx.Commit()
-	log.Println("Products table cleared")
+	log.Printf("%s table cleared", tableName)
 	return true, nil
 }
 
-//func TestMain(m *testing.M) {
-//	log.Println("Test Main")
-//	ConnectTestDatabase()
-//	code := m.Run()
-//	_, err := ClearProducts()
-//	if err != nil {
-//		log.Printf("Teardown error %v\n", err)
-//	}
-//	os.Exit(code)
-//}
+func TestMain(m *testing.M) {
+	log.Println("Test Main")
+	ConnectTestDatabase()
+	code := m.Run()
+	//_, err := ClearProducts()
+	//if err != nil {
+	//	log.Printf("Teardown error %v\n", err)
+	//}
+	os.Exit(code)
+}
 
 func TestPing(t *testing.T) {
 	router := setupRouter()

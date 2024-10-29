@@ -136,6 +136,7 @@ func GetProductBySku(sku string) (Product, error) {
 	return product, nil
 }
 
+// move this to cli tool
 func Validate(product *Product, fieldname string) bool {
 	value := strings.ToLower(product.Sku)
 	if strings.ToLower(value) == fieldname {

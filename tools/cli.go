@@ -72,7 +72,7 @@ func processCSV(reader *csv.Reader) {
 		if !readonly {
 			productId, err := models.AddProduct(product)
 			if err != nil {
-				fmt.Printf("ERROR Adding Product: %d %s", productId, err)
+				fmt.Printf("ERROR Adding Product: %d %s\n", productId, err)
 			}
 		}
 
@@ -99,6 +99,7 @@ var readonly = false
 
 func main() {
 	showcsv := flag.Bool("showcsv", false, "a bool")
+	getproducts := flag.Bool("getproducts", false, "a bool")
 	flag.Parse()
 	err := models.ConnectDatabase()
 	if err != nil {
@@ -109,6 +110,9 @@ func main() {
 
 	if *showcsv {
 		readonly = true
+	}
+
+	if *getproducts {
 		fmt.Println("SHOW PRODUCTS")
 		showProducts()
 		os.Exit(1)

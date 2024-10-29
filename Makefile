@@ -19,3 +19,6 @@ migrate_create:
 # does not work
 migrate_goto:
 	migrate goto $(version) -path=internal/database/migrations -database "sqlite3://shop_test.DB"
+
+clean_test:
+	go clean -testcache
