@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	// "github.com/stretchr/testify/assert"
 	// "github.com/stretchr/testify/require"
 )
@@ -28,4 +31,11 @@ func TestAddProduct(t *testing.T) {
 		t.Errorf("Failed to add Product %v", err)
 	}
 
+	ok, err := AddProductInventory(productId, 10)
+	require.NoError(t, err)
+	assert.Equal(t, ok, true)
+
+	inventory, err := GetProductInventory(productId)
+	require.NoError(t, err)
+	assert.Equal(t, 10, inventory.Qty)
 }

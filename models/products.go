@@ -176,17 +176,17 @@ func AddProduct(newProduct Product) (int, error) {
 	return int(id), nil
 }
 
-func GetProductInventory(productId int) (*Inventory, error) {
-	sql := fmt.Sprintf("SELECT id, sku FROM product_inventory WHERE id = ? ORDER BY created_at LIMIT 1")
-	stmt, err := DB.Prepare(sql)
+func GetProductInventory(productId int) (Inventory, error) {
+	query := fmt.Sprintf("SELECT id, product_id, qty FROM product_inventory WHERE product_id = ? ORDER BY created_at LIMIT 1")
+	stmt, err := DB.Prepare(query)
 	if err != nil {
-		return nil, err
+		return Inventory{}, err
 	}
 
-	inventory := &Inventory{}
-	sqlErr := stmt.QueryRow().Scan(&inventory.Id, &inventory.ProductId, &inventory.Qty)
-	if sqlErr != nil {
-		return nil, sqlErr
+	inventory := Inventory{}
+	sqlErr := stmt.QueryRow(productId).Scan(&inventory.Id, &inventory.ProductId, &inventory.Qty)
+	if sqlErr != nil && sqlErr != sql.ErrNoRows {
+		return Inventory{}, nil
 	}
 
 	return inventory, nil
@@ -214,39 +214,38 @@ func UpdateProductInventory(productId int, qty int) (bool, error) {
 	return true, nil
 }
 
-func AddProductInventory(productId int, qty int) (int, error) {
+func AddProductInventory(productId int, qty int) (bool, error) {
 	inventory, err := GetProductInventory(productId)
 	if err != nil {
-		return -1, err
+		return false, err
 	}
 
-	if inventory != nil {
+	if inventory.Id > 0 {
 		UpdateProductInventory(productId, qty)
 	}
 
 	//add inventory
 	tx, err := DB.Begin()
 	if err != nil {
-		return -1, err
+		return false, err
 	}
 
 	stmt, err := tx.Prepare("INSERT INTO product_inventory (product_id, qty) VALUES (?, ?)")
 
 	if err != nil {
-		return -1, err
+		return false, err
 	}
 
 	defer stmt.Close()
-	inventory = &Inventory{ProductId: productId, Qty: qty}
+	inventory = Inventory{ProductId: productId, Qty: qty}
 
-	res, err := stmt.Exec(inventory.ProductId, inventory.Qty)
+	_, err = stmt.Exec(inventory.ProductId, inventory.Qty)
 
 	if err != nil {
-		return -1, err
+		return false, err
 	}
 
 	tx.Commit()
-	id, _ := res.LastInsertId()
 
-	return int(id), nil
+	return true, nil
 }
