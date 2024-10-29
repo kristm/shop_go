@@ -43,10 +43,13 @@ func TestMain(m *testing.M) {
 	ConnectTestDatabase()
 	code := m.Run()
 
+	testTables := []string{"customers", "products", "product_inventory", "orders", "order_products", "shipping"}
 	log.Println("Models Teardown")
-	_, err := ClearTestTable("customers")
-	if err != nil {
-		log.Printf("Teardown error %v", err)
+	for _, table := range testTables {
+		_, err := ClearTestTable(table)
+		if err != nil {
+			log.Printf("Teardown error %v", err)
+		}
 	}
 	os.Exit(code)
 }

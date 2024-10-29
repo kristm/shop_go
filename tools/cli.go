@@ -69,12 +69,12 @@ func processCSV(reader *csv.Reader) {
 			Price:       price,
 		}
 
-		//if !readonly {
-		//	_, err = models.AddProduct(product)
-		//	if err != nil {
-		//		fmt.Println("ERROR: ", err)
-		//	}
-		//}
+		if !readonly {
+			productId, err := models.AddProduct(product)
+			if err != nil {
+				fmt.Printf("ERROR Adding Product: %d %s", productId, err)
+			}
+		}
 
 		qty := strings.Join(record[5:6], "")
 		//qty, _ = strconv.Atoi(qty)
