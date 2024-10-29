@@ -146,6 +146,20 @@ func Validate(product *Product, fieldname string) bool {
 	return true
 }
 
+func AddProductWithQty(newProduct Product, qty int) (int, error) {
+	productId, err := AddProduct(newProduct)
+	if err != nil {
+		return -1, err
+	}
+
+	_, err = AddProductInventory(productId, qty)
+	if err != nil {
+		return -1, err
+	}
+
+	return productId, nil
+}
+
 func AddProduct(newProduct Product) (int, error) {
 	isValid := Validate(&newProduct, "sku")
 	if !isValid {

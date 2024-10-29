@@ -38,6 +38,28 @@ func ClearTestTable(tableName string) (bool, error) {
 	return true, nil
 }
 
+func ClearProductTestData() (bool, error) {
+	tx, err := DB.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	query := "DELETE FROM products WHERE sku LIKE ?"
+	stmt, err := DB.Prepare(query)
+	if err != nil {
+		return false, err
+	}
+
+	defer stmt.Close()
+	_, err = stmt.Exec("WKW%")
+	if err != nil {
+		return false, err
+	}
+	tx.Commit()
+	log.Printf("product test data cleared")
+	return true, nil
+}
+
 func TestMain(m *testing.M) {
 	log.Println("Test Models Main")
 	ConnectTestDatabase()
@@ -50,6 +72,11 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			log.Printf("Teardown error %v", err)
 		}
+	}
+
+	_, err := ClearProductTestData()
+	if err != nil {
+		log.Printf("product test teardown error %v", err)
 	}
 	os.Exit(code)
 }

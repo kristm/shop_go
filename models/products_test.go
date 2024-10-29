@@ -91,3 +91,26 @@ func TestUpdateProductInventory(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 20, inventory.Qty)
 }
+
+func TestAddProductWithQty(t *testing.T) {
+	timestamp := time.Now().Unix()
+	sku := fmt.Sprintf("WKW1 %d", timestamp)
+	newProduct := Product{
+		Sku:         sku,
+		Name:        "Something Rice",
+		Description: "",
+		CategoryId:  4,
+		Price:       10000,
+		Status:      InStock,
+	}
+	productId, err := AddProductWithQty(newProduct, 100)
+	if err != nil {
+		t.Errorf("Error when adding Product %v", err)
+	}
+	if productId < 0 {
+		t.Errorf("Failed to add Product %v", err)
+	}
+	inventory, err := GetProductInventory(productId)
+	require.NoError(t, err)
+	assert.Equal(t, 100, inventory.Qty)
+}
