@@ -65,3 +65,13 @@ CREATE TABLE product_inventory (
   FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+CREATE TABLE product_gallery (
+  id INTEGER NOT NULL PRIMARY KEY,
+  product_id INTEGER,
+  image VARCHAR(100),
+  image2 VARCHAR(100),
+  image3 VARCHAR(100),
+  created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);
