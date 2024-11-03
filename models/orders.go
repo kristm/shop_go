@@ -1,7 +1,10 @@
 package models
 
 import (
+	"crypto/rand"
 	"encoding/json"
+	"fmt"
+	"log"
 )
 
 type OrderStatus int
@@ -13,12 +16,13 @@ const (
 )
 
 type Order struct {
-	Id         int         `json:"id"`
-	ShippingId int         `json:"shipping_id"`
-	CustomerId int         `json:"customer_id"`
-	Amount     float64     `json:"amount_in_cents"`
-	Status     OrderStatus `json:"status"`
-	Items      []OrderItem `json:"orders"`
+	Id            int         `json:"id"`
+	ShippingId    int         `json:"shipping_id"`
+	CustomerId    int         `json:"customer_id"`
+	ReferenceCode string      `json:"reference_code"`
+	Amount        float64     `json:"amount_in_cents"`
+	Status        OrderStatus `json:"status"`
+	Items         []OrderItem `json:"orders"`
 }
 
 type OrderItem struct {
@@ -87,8 +91,18 @@ func (prod *OrderItem) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
+func generateReferenceCode() string {
+	n := 5
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		log.Printf("Error generating reference code %v\n", err)
+	}
+
+	return fmt.Sprintf("%X", b)
+}
+
 func GetOrders(customerId int) ([]Order, error) {
-	stmt, err := DB.Prepare("SELECT id, customer_id, amount_in_cents FROM orders WHERE customer_id = ?")
+	stmt, err := DB.Prepare("SELECT id, customer_id, reference_code, amount_in_cents FROM orders WHERE customer_id = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +191,7 @@ func AddOrderRecord(newOrder Order) (int, error) {
 		return -1, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, shipping_id, amount_in_cents, status) VALUES (?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, shipping_id, reference_code, amount_in_cents, status) VALUES (?, ?, ?, ?, ?)")
 
 	if err != nil {
 		return -1, err
@@ -186,8 +200,9 @@ func AddOrderRecord(newOrder Order) (int, error) {
 	defer stmt.Close()
 
 	newOrder.Amount = computeTotalAmount(newOrder.Items)
+	newOrder.ReferenceCode = generateReferenceCode()
 
-	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.Amount, newOrder.Status)
+	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.ReferenceCode, newOrder.Amount, newOrder.Status)
 
 	if err != nil {
 		return -1, err
