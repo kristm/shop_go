@@ -25,6 +25,7 @@ type Product struct {
 	CategoryId  int           `json:"category_id"`
 	Price       float64       `json:"price"`
 	Status      ProductStatus `json:"status"`
+	Photos      []Photo       `json:"images"`
 }
 
 type Inventory struct {
