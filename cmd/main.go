@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
-	"shop_go/models"
+	"shop_go/internal/models"
 	"strconv"
 	"time"
 

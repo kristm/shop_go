@@ -8,7 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
-	"shop_go/models"
+	"shop_go/internal/models"
 	"strconv"
 	"strings"
 )

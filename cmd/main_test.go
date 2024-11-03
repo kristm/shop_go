@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"shop_go/models"
+	"shop_go/internal/models"
 	"strings"
 	"testing"
 
