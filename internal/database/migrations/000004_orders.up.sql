@@ -10,6 +10,7 @@ CREATE TABLE customers (
 
 CREATE TABLE orders (
   id INTEGER NOT NULL PRIMARY KEY,
+  reference_code VARCHAR(50) NOT NULL,
   shipping_id INTEGER NOT NULL,
   customer_id INTEGER NOT NULL,
   amount_in_cents INTEGER,
