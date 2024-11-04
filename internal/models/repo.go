@@ -12,17 +12,23 @@ var DB *sql.DB
 
 func ConnectDatabase() error {
 	var dbPath string
+	var cfg config.Config
+	var err error
 	dbParams := "_foreign_keys=true"
 
-	config, err := config.LoadConfig("../.env")
-	if err != nil {
-		log.Fatal("cannot load config ", err)
-	}
-
 	if testing.Testing() {
-		dbPath = fmt.Sprintf("%s?%s", config.TEST_DB, dbParams)
+		cfg, err = config.LoadConfig("../.env")
+		if err != nil {
+			log.Fatal("cannot load config ", err)
+		}
+
+		dbPath = fmt.Sprintf("%s?%s", cfg.TEST_DB, dbParams)
 	} else {
-		dbPath = fmt.Sprintf("%s?%s", config.DB, dbParams)
+		cfg, err = config.LoadConfig(".env")
+		if err != nil {
+			log.Fatal("cannot load config ", err)
+		}
+		dbPath = fmt.Sprintf("%s?%s", cfg.DB, dbParams)
 	}
 
 	log.Printf("DB path %s\n", dbPath)

@@ -10,11 +10,11 @@ import (
 )
 
 func ConnectTestDatabase() {
-	config, err := config.LoadConfig("../../.env")
+	cfg, err := config.LoadConfig("../../.env")
 	if err != nil {
 		log.Fatal("cannot load config ", err)
 	}
-	db, err := sql.Open("sqlite3", config.TEST_DB)
+	db, err := sql.Open("sqlite3", cfg.TEST_DB)
 	if err != nil {
 		log.Println(err)
 	}

@@ -8,15 +8,15 @@ type Config struct {
 }
 
 func LoadConfig(path string) (Config, error) {
-	var config Config
+	var cfg Config
 	viper.SetConfigFile(path)
 	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		return config, err
+		return cfg, err
 	}
 
-	err = viper.Unmarshal(&config)
-	return config, nil
+	err = viper.Unmarshal(&cfg)
+	return cfg, nil
 }
