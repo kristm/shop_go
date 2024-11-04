@@ -94,7 +94,7 @@ func createOrder(c *gin.Context) {
 	}
 
 	// create customer record
-	customerId, err := models.AddOrGetCustomer(requestBody.Customer)
+	customerId, err := models.AddOrGetCustomer(&requestBody.Customer)
 	if err != nil {
 		log.Printf("Error Adding Customer %v\n", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})

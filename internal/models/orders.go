@@ -211,6 +211,7 @@ func AddOrderRecord(newOrder Order) (int, error) {
 	tx.Commit()
 	orderId, _ := res.LastInsertId()
 
+	//return int(orderId), newOrder.ReferenceCode, nil
 	return int(orderId), nil
 }
 

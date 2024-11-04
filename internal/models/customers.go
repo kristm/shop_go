@@ -16,8 +16,8 @@ type Customer struct {
 	Phone     string `json:"phone"`
 }
 
-func ValidateNotEmpty(customer Customer) bool {
-	values := reflect.ValueOf(customer)
+func ValidateNotEmpty(customer *Customer) bool {
+	values := reflect.ValueOf(*customer)
 	for i := 0; i < values.NumField(); i++ {
 		f := values.Field(i)
 		value := values.Field(i).Interface()
@@ -30,7 +30,7 @@ func ValidateNotEmpty(customer Customer) bool {
 	return true
 }
 
-func getCustomer(customer Customer) (int, error) {
+func getCustomer(customer *Customer) (int, error) {
 	sql := fmt.Sprintf("SELECT id, first_name, last_name, email, phone FROM customers WHERE first_name = ? AND last_name = ? AND email = ? AND phone = ? ORDER BY created_at LIMIT 1")
 	stmt, err := DB.Prepare(sql)
 	if err != nil {
@@ -47,7 +47,7 @@ func getCustomer(customer Customer) (int, error) {
 	return existingCustomer.Id, nil
 }
 
-func AddOrGetCustomer(customer Customer) (int, error) {
+func AddOrGetCustomer(customer *Customer) (int, error) {
 	customerId, _ := getCustomer(customer)
 	if customerId > 0 {
 		return customerId, nil
@@ -56,7 +56,7 @@ func AddOrGetCustomer(customer Customer) (int, error) {
 	return AddCustomer(customer)
 }
 
-func AddCustomer(newCustomer Customer) (int, error) {
+func AddCustomer(newCustomer *Customer) (int, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		return -1, err

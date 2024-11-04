@@ -19,19 +19,20 @@ func setupTest(tb testing.TB) func(tb testing.TB) {
 }
 
 func TestAddCustomer(t *testing.T) {
-	customerId, err := AddCustomer(Customer{
+	newCustomer := Customer{
 		FirstName: "Bob",
 		LastName:  "Wood",
 		Email:     "bob@wo.od",
 		Phone:     "123-456-789",
-	})
+	}
+	customerId, err := AddCustomer(&newCustomer)
 
 	require.NoError(t, err)
 	assert.Greater(t, customerId, 0)
 }
 
 func TestAddCustomerMissingData(t *testing.T) {
-	success, err := AddCustomer(Customer{
+	success, err := AddCustomer(&Customer{
 		FirstName: "Bob",
 		LastName:  "Wood",
 		Email:     "bob@wo.od",
@@ -42,14 +43,14 @@ func TestAddCustomerMissingData(t *testing.T) {
 }
 
 func TestDuplicateCustomer(t *testing.T) {
-	customer1, err := AddCustomer(Customer{
+	customer1, err := AddCustomer(&Customer{
 		FirstName: "Bob",
 		LastName:  "West",
 		Email:     "bob@we.st",
 		Phone:     "12345",
 	})
 
-	duplicateId, err := AddOrGetCustomer(Customer{
+	duplicateId, err := AddOrGetCustomer(&Customer{
 		FirstName: "Bob",
 		LastName:  "West",
 		Email:     "bob@we.st",
