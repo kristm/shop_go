@@ -2,6 +2,9 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
+	"shop_go/internal/config"
 	"testing"
 )
 
@@ -9,18 +12,27 @@ var DB *sql.DB
 
 func ConnectDatabase() error {
 	var dbPath string
-	if testing.Testing() {
-		dbPath = "/Users/krist/code/shop_go/test.db?_foreign_keys=true"
-	} else {
-		dbPath = "/Users/krist/code/shop_go/shop_test.db?_foreign_keys=true"
+	dbParams := "_foreign_keys=true"
+
+	config, err := config.LoadConfig("../.env")
+	if err != nil {
+		log.Fatal("cannot load config ", err)
 	}
+
+	if testing.Testing() {
+		dbPath = fmt.Sprintf("%s?%s", config.TEST_DB, dbParams)
+	} else {
+		dbPath = fmt.Sprintf("%s?%s", config.DB, dbParams)
+	}
+
+	log.Printf("DB path %s\n", dbPath)
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
+		log.Fatal("cannot load DB ", dbPath)
 		return err
 	}
 	DB = db
-	//log.Printf("Connecting to DB")
-	//log.Printf("DB %+v", db)
+
 	return nil
 }

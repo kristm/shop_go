@@ -7,3 +7,5 @@
 *.DB
 *.csv
 **/*.csv
+.env
+*.env

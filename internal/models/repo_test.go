@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"shop_go/internal/config"
 	"testing"
 )
 
 func ConnectTestDatabase() {
-	db, err := sql.Open("sqlite3", "/Users/krist/code/shop_go/test.db")
+	config, err := config.LoadConfig("../../.env")
+	if err != nil {
+		log.Fatal("cannot load config ", err)
+	}
+	db, err := sql.Open("sqlite3", config.TEST_DB)
 	if err != nil {
 		log.Println(err)
 	}
