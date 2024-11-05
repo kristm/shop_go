@@ -61,6 +61,28 @@ func TestAddOrder(t *testing.T) {
 	assert.Equal(t, 2, len(orderItems))
 }
 
+func TestGetOrderByReference(t *testing.T) {
+	items := []OrderItem{
+		OrderItem{ProductId: 2, Qty: 1, Price: 200.99},
+		OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
+	}
+
+	order := Order{
+		CustomerId: 1,
+		ShippingId: 1,
+		Status:     0,
+		Amount:     0,
+		Items:      items,
+	}
+
+	_, orderReference, err := AddOrder(order)
+
+	fetchedOrder, err := GetOrderByReference(orderReference)
+	require.NoError(t, err)
+	assert.Equal(t, fetchedOrder.ReferenceCode, orderReference)
+	//assert.Equal(t, fetchedOrder.Amount, 700.99)
+}
+
 func TestMarshalOrder(t *testing.T) {
 	items := []OrderItem{
 		OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
@@ -77,7 +99,7 @@ func TestMarshalOrder(t *testing.T) {
 	res, err := json.Marshal(order)
 
 	jsonStr := fmt.Sprintf("%s", res)
-	expect := "{\"id\":0,\"shipping_id\":0,\"customer_id\":1,\"reference_code\":\"\",\"payment_reference\":\"\",\"amount_in_cents\":0,\"status\":0,\"orders\":[{\"id\":0,\"order_id\":0,\"product_id\":2,\"qty\":1,\"price\":200},{\"id\":0,\"order_id\":0,\"product_id\":3,\"qty\":2,\"price\":250.5}],\"amount\":701}"
+	expect := "{\"id\":0,\"shipping_id\":0,\"customer_id\":1,\"reference_code\":\"\",\"payment_reference\":\"\",\"amount_in_cents\":0,\"status\":0,\"orders\":[{\"id\":0,\"order_id\":0,\"product_id\":2,\"product_name\":\"\",\"qty\":1,\"price\":200},{\"id\":0,\"order_id\":0,\"product_id\":3,\"product_name\":\"\",\"qty\":2,\"price\":250.5}],\"amount\":701}"
 
 	require.NoError(t, err)
 	assert.Equal(t, expect, jsonStr)

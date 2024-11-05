@@ -89,6 +89,18 @@ func getProductBySku(c *gin.Context) {
 	}
 }
 
+func getOrderByReference(c *gin.Context) {
+	reference := c.Param("reference_code")
+	order, err := models.GetOrderByReference(reference)
+	checkErr(err)
+
+	if order != nil {
+		c.JSON(http.StatusOK, gin.H{"data": order})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	}
+}
+
 func createOrder(c *gin.Context) {
 	var requestBody OrderPayload
 	if err := c.BindJSON(&requestBody); err != nil {
@@ -166,6 +178,7 @@ func setupRouter() *gin.Engine {
 		v1.GET("products/category/:category_id", getProducts)
 		v1.GET("products/:id", getProductById)
 		v1.GET("products/sku/:sku", getProductBySku)
+		v1.GET("order/:reference_code", getOrderByReference)
 		v1.POST("orders", createOrder)
 	}
 	return router

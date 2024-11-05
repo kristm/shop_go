@@ -28,11 +28,12 @@ type Order struct {
 }
 
 type OrderItem struct {
-	Id        int     `json:"id"`
-	OrderId   int     `json:"order_id"`
-	ProductId int     `json:"product_id"`
-	Qty       int     `json:"qty"`
-	Price     float64 `json:"price"`
+	Id          int     `json:"id"`
+	OrderId     int     `json:"order_id"`
+	ProductId   int     `json:"product_id"`
+	ProductName string  `json:"product_name"`
+	Qty         int     `json:"qty"`
+	Price       float64 `json:"price"`
 }
 
 // TODO
@@ -40,7 +41,7 @@ func (order Order) MarshalJSON() ([]byte, error) {
 	type Alias Order
 	computedAmount := 0.0
 	for _, item := range order.Items {
-		total := float64(item.Qty) * float64(item.Price)
+		total := float64(item.Qty) * item.Price
 		computedAmount += total
 	}
 	return json.Marshal(&struct {
@@ -68,10 +69,11 @@ func (order *Order) UnmarshalJSON(p []byte) error {
 	//calculation of amount is not necessary if we're storing amount in db
 	computedAmount := 0.0
 	for _, item := range order.Items {
-		total := item.Qty * int(item.Price)
+		total := float64(item.Qty) * item.Price
 		computedAmount += float64(total)
 	}
 
+	log.Printf("marshal %v", computedAmount)
 	order.Amount = computedAmount
 	return nil
 }
@@ -103,29 +105,29 @@ func generateReferenceCode() string {
 	return fmt.Sprintf("%X", b)
 }
 
-func GetOrderByReference(ref string) (Order, error) {
-	stmt, err := DB.Prepare("SELECT id, reference_code, payment_reference, amount_in_cents, status FROM orders WHERE reference_code = ?")
+func GetOrderByReference(ref string) (*Order, error) {
+	stmt, err := DB.Prepare("SELECT id, shipping_id, customer_id, reference_code, payment_reference, amount_in_cents, status FROM orders WHERE reference_code = ?")
 	if err != nil {
-		return Order{}, err
+		return nil, err
 	}
 
 	order := Order{}
 	sqlErr := stmt.QueryRow(ref).Scan(&order.Id, &order.ShippingId, &order.CustomerId, &order.ReferenceCode, &order.PaymentReference, &order.Amount, &order.Status)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
-			return Order{}, nil
+			return nil, nil
 		}
-		return Order{}, sqlErr
+		return nil, sqlErr
 	}
 
-	stmt, err = DB.Prepare("SELECT p.name, op.qty, op.price_in_cents FROM order_products as op LEFT JOIN products as p ON p.id = op.product_id WHERE o.order_id = ?")
+	stmt, err = DB.Prepare("SELECT op.id, op.order_id, p.name, op.qty, op.price_in_cents FROM order_products as op LEFT JOIN products as p ON p.id = op.product_id WHERE op.order_id = ?")
 	if err != nil {
-		return Order{}, err
+		return nil, err
 	}
 
 	rows, sqlErr := stmt.Query(order.Id)
 	if sqlErr != nil {
-		return Order{}, sqlErr
+		return nil, sqlErr
 	}
 
 	defer rows.Close()
@@ -133,10 +135,10 @@ func GetOrderByReference(ref string) (Order, error) {
 
 	for rows.Next() {
 		orderItem := OrderItem{}
-		err = rows.Scan(&orderItem.Id, &orderItem.OrderId, &orderItem.ProductId, &orderItem.Qty, &orderItem.Price)
+		err = rows.Scan(&orderItem.Id, &orderItem.OrderId, &orderItem.ProductName, &orderItem.Qty, &orderItem.Price)
 
 		if err != nil {
-			return Order{}, err
+			return nil, err
 		}
 
 		orderItems = append(orderItems, orderItem)
@@ -146,7 +148,7 @@ func GetOrderByReference(ref string) (Order, error) {
 
 	order.Items = orderItems
 
-	return order, nil
+	return &order, nil
 }
 
 func GetOrders(customerId int) ([]Order, error) {
