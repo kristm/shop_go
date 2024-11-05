@@ -2,6 +2,7 @@ package models
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -100,6 +101,23 @@ func generateReferenceCode() string {
 	}
 
 	return fmt.Sprintf("%X", b)
+}
+
+func GetOrderByReference(ref string) (Order, error) {
+	stmt, err := DB.Prepare("SELECT id, reference_code, payment_reference, amount_in_cents, status FROM orders WHERE reference_code = ?")
+	if err != nil {
+		return Order{}, err
+	}
+
+	order := Order{}
+	sqlErr := stmt.QueryRow(ref).Scan(&order.Id, &order.ShippingId, &order.CustomerId, &order.ReferenceCode, &order.PaymentReference, &order.Amount, &order.Status)
+	if sqlErr != nil {
+		if sqlErr == sql.ErrNoRows {
+			return Order{}, nil
+		}
+		return Order{}, sqlErr
+	}
+	return order, nil
 }
 
 func GetOrders(customerId int) ([]Order, error) {
