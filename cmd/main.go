@@ -14,6 +14,7 @@ import (
 type OrderPayload struct {
 	Orders   []models.OrderItem
 	Customer models.Customer
+	Socials  models.Socials
 	Shipping models.Shipping
 }
 
@@ -100,6 +101,9 @@ func createOrder(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
+	// create social media record
+	//models.AddSocials(&requestBody.Socials)
+
 	// create shipping record
 	requestBody.Shipping.CustomerId = customerId
 	shippingId, err := models.AddShipping(requestBody.Shipping)
@@ -124,6 +128,7 @@ func createOrder(c *gin.Context) {
 		log.Printf("json payload %v\n", requestBody)
 		log.Printf("order: %v\n", requestBody.Orders)
 		log.Printf("customer: %v\n", requestBody.Customer)
+		log.Printf("socials: %v\n", requestBody.Socials)
 		log.Printf("shipping: %v\n", requestBody.Shipping)
 
 		c.JSON(http.StatusOK, gin.H{"message": "ok", "success": success})
