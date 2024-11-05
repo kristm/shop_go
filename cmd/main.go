@@ -16,7 +16,7 @@ type OrderPayload struct {
 	Customer         models.Customer
 	Socials          models.Socials
 	Shipping         models.Shipping
-	PaymentReference string
+	PaymentReference string `json:"reference"`
 }
 
 func checkErr(err error) {
@@ -115,10 +115,11 @@ func createOrder(c *gin.Context) {
 	// create order record
 	log.Printf("Order Items Req %+v", requestBody.Orders)
 	success, _, err := models.AddOrder(models.Order{
-		ShippingId: shippingId,
-		CustomerId: customerId,
-		Status:     0,
-		Items:      requestBody.Orders,
+		ShippingId:       shippingId,
+		CustomerId:       customerId,
+		Status:           0,
+		PaymentReference: requestBody.PaymentReference,
+		Items:            requestBody.Orders,
 	})
 
 	if err != nil {
@@ -128,6 +129,7 @@ func createOrder(c *gin.Context) {
 		log.Println(customerId)
 		log.Printf("json payload %v\n", requestBody)
 		log.Printf("order: %v\n", requestBody.Orders)
+		log.Printf("payment reference: %s\n", requestBody.PaymentReference)
 		log.Printf("customer: %v\n", requestBody.Customer)
 		log.Printf("socials: %v\n", requestBody.Socials)
 		log.Printf("shipping: %v\n", requestBody.Shipping)

@@ -16,13 +16,14 @@ const (
 )
 
 type Order struct {
-	Id            int         `json:"id"`
-	ShippingId    int         `json:"shipping_id"`
-	CustomerId    int         `json:"customer_id"`
-	ReferenceCode string      `json:"reference_code"`
-	Amount        float64     `json:"amount_in_cents"`
-	Status        OrderStatus `json:"status"`
-	Items         []OrderItem `json:"orders"`
+	Id               int         `json:"id"`
+	ShippingId       int         `json:"shipping_id"`
+	CustomerId       int         `json:"customer_id"`
+	ReferenceCode    string      `json:"reference_code"`
+	PaymentReference string      `json:"payment_reference"`
+	Amount           float64     `json:"amount_in_cents"`
+	Status           OrderStatus `json:"status"`
+	Items            []OrderItem `json:"orders"`
 }
 
 type OrderItem struct {
@@ -191,7 +192,7 @@ func AddOrderRecord(newOrder Order) (int, error) {
 		return -1, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, shipping_id, reference_code, amount_in_cents, status) VALUES (?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, shipping_id, reference_code, amount_in_cents, status, payment_reference) VALUES (?, ?, ?, ?, ?, ?)")
 
 	if err != nil {
 		return -1, err
@@ -202,7 +203,7 @@ func AddOrderRecord(newOrder Order) (int, error) {
 	newOrder.Amount = computeTotalAmount(newOrder.Items)
 	newOrder.ReferenceCode = generateReferenceCode()
 
-	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.ReferenceCode, newOrder.Amount, newOrder.Status)
+	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.ReferenceCode, newOrder.Amount, newOrder.Status, newOrder.PaymentReference)
 
 	if err != nil {
 		return -1, err
