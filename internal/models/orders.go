@@ -170,32 +170,32 @@ func computeTotalAmount(orderItems []OrderItem) float64 {
 	return computedAmount
 }
 
-func AddOrder(order Order) (bool, int, error) {
-	orderId, err := AddOrderRecord(order)
+func AddOrder(order Order) (int, string, error) {
+	orderId, refCode, err := AddOrderRecord(order)
 	if err != nil {
-		return false, -1, err
+		return -1, "", err
 	}
 	for _, item := range order.Items {
 		item.OrderId = orderId
 		_, err := AddOrderItem(item)
 		if err != nil {
-			return false, -1, err
+			return -1, "", err
 		}
 	}
 
-	return true, orderId, nil
+	return orderId, refCode, nil
 }
 
-func AddOrderRecord(newOrder Order) (int, error) {
+func AddOrderRecord(newOrder Order) (int, string, error) {
 	tx, err := DB.Begin()
 	if err != nil {
-		return -1, err
+		return -1, "", err
 	}
 
 	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, shipping_id, reference_code, amount_in_cents, status, payment_reference) VALUES (?, ?, ?, ?, ?, ?)")
 
 	if err != nil {
-		return -1, err
+		return -1, "", err
 	}
 
 	defer stmt.Close()
@@ -206,14 +206,14 @@ func AddOrderRecord(newOrder Order) (int, error) {
 	res, err := stmt.Exec(newOrder.CustomerId, newOrder.ShippingId, newOrder.ReferenceCode, newOrder.Amount, newOrder.Status, newOrder.PaymentReference)
 
 	if err != nil {
-		return -1, err
+		return -1, "", err
 	}
 
 	tx.Commit()
 	orderId, _ := res.LastInsertId()
 
 	//return int(orderId), newOrder.ReferenceCode, nil
-	return int(orderId), nil
+	return int(orderId), newOrder.ReferenceCode, nil
 }
 
 func AddOrderItem(newOrderItem OrderItem) (bool, error) {

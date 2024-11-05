@@ -23,9 +23,11 @@ func TestAddOrderRecord(t *testing.T) {
 		Items:      items,
 	}
 
-	orderId, err := AddOrderRecord(order)
+	orderId, reference, err := AddOrderRecord(order)
 	require.NoError(t, err)
 	assert.Greater(t, orderId, 0)
+	assert.NotEqual(t, reference, "")
+	assert.Equal(t, 10, len(reference)) // 10 character reference code
 
 	for _, item := range order.Items {
 		item.OrderId = orderId
@@ -50,7 +52,7 @@ func TestAddOrder(t *testing.T) {
 		Items:      items,
 	}
 
-	_, orderId, err := AddOrder(order)
+	orderId, _, err := AddOrder(order)
 	require.NoError(t, err)
 	assert.Greater(t, orderId, 0)
 

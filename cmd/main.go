@@ -114,7 +114,7 @@ func createOrder(c *gin.Context) {
 
 	// create order record
 	log.Printf("Order Items Req %+v", requestBody.Orders)
-	success, _, err := models.AddOrder(models.Order{
+	success, referenceCode, err := models.AddOrder(models.Order{
 		ShippingId:       shippingId,
 		CustomerId:       customerId,
 		Status:           0,
@@ -134,7 +134,7 @@ func createOrder(c *gin.Context) {
 		log.Printf("socials: %v\n", requestBody.Socials)
 		log.Printf("shipping: %v\n", requestBody.Shipping)
 
-		c.JSON(http.StatusOK, gin.H{"message": "ok", "success": success})
+		c.JSON(http.StatusOK, gin.H{"message": "ok", "reference_code": referenceCode, "success": success})
 	}
 }
 
