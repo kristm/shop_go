@@ -117,6 +117,35 @@ func GetOrderByReference(ref string) (Order, error) {
 		}
 		return Order{}, sqlErr
 	}
+
+	stmt, err = DB.Prepare("SELECT p.name, op.qty, op.price_in_cents FROM order_products as op LEFT JOIN products as p ON p.id = op.product_id WHERE o.order_id = ?")
+	if err != nil {
+		return Order{}, err
+	}
+
+	rows, sqlErr := stmt.Query(order.Id)
+	if sqlErr != nil {
+		return Order{}, sqlErr
+	}
+
+	defer rows.Close()
+	orderItems := make([]OrderItem, 0)
+
+	for rows.Next() {
+		orderItem := OrderItem{}
+		err = rows.Scan(&orderItem.Id, &orderItem.OrderId, &orderItem.ProductId, &orderItem.Qty, &orderItem.Price)
+
+		if err != nil {
+			return Order{}, err
+		}
+
+		orderItems = append(orderItems, orderItem)
+	}
+	//handle error
+	err = rows.Err()
+
+	order.Items = orderItems
+
 	return order, nil
 }
 

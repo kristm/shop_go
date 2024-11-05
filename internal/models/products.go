@@ -98,6 +98,7 @@ func GetProducts(category_id int) ([]Product, error) {
 
 		products = append(products, product)
 	}
+	//TODO handle error
 	err = rows.Err()
 
 	return products, nil
