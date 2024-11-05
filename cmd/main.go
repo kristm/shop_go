@@ -178,7 +178,7 @@ func setupRouter() *gin.Engine {
 		v1.GET("products/category/:category_id", getProducts)
 		v1.GET("products/:id", getProductById)
 		v1.GET("products/sku/:sku", getProductBySku)
-		v1.GET("order/:reference_code", getOrderByReference)
+		v1.GET("orders/:reference_code", getOrderByReference)
 		v1.POST("orders", createOrder)
 	}
 	return router

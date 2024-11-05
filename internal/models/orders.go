@@ -49,7 +49,7 @@ func (order Order) MarshalJSON() ([]byte, error) {
 		Amount float64 `json:"amount"`
 	}{
 		Alias:  (*Alias)(&order),
-		Amount: computedAmount,
+		Amount: computedAmount / 100.00,
 	})
 }
 
@@ -73,7 +73,6 @@ func (order *Order) UnmarshalJSON(p []byte) error {
 		computedAmount += float64(total)
 	}
 
-	log.Printf("marshal %v", computedAmount)
 	order.Amount = computedAmount
 	return nil
 }
@@ -212,8 +211,8 @@ func GetOrderItems(orderId int) ([]OrderItem, error) {
 func computeTotalAmount(orderItems []OrderItem) float64 {
 	computedAmount := 0.0
 	for _, item := range orderItems {
-		total := item.Qty * int(item.Price)
-		computedAmount += float64(total)
+		total := float64(item.Qty) * item.Price
+		computedAmount += total
 	}
 
 	return computedAmount

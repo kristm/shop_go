@@ -80,7 +80,7 @@ func TestGetOrderByReference(t *testing.T) {
 	fetchedOrder, err := GetOrderByReference(orderReference)
 	require.NoError(t, err)
 	assert.Equal(t, fetchedOrder.ReferenceCode, orderReference)
-	//assert.Equal(t, fetchedOrder.Amount, 700.99)
+	assert.Equal(t, fetchedOrder.Amount, 700.99)
 }
 
 func TestMarshalOrder(t *testing.T) {
