@@ -12,10 +12,11 @@ import (
 )
 
 type OrderPayload struct {
-	Orders   []models.OrderItem
-	Customer models.Customer
-	Socials  models.Socials
-	Shipping models.Shipping
+	Orders           []models.OrderItem
+	Customer         models.Customer
+	Socials          models.Socials
+	Shipping         models.Shipping
+	PaymentReference string
 }
 
 func checkErr(err error) {

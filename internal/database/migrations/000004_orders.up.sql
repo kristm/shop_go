@@ -15,6 +15,7 @@ CREATE TABLE orders (
   customer_id INTEGER NOT NULL,
   amount_in_cents INTEGER,
   status INTEGER NOT NULL DEFAULT 0, -- pending | canceled | paid
+  payment_reference VARCHAR(50),
   created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_id) REFERENCES customers(id)
