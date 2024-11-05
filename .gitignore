@@ -4,6 +4,7 @@
 *.swo
 *.swn
 *.db
+*.db*
 *.DB
 *.csv
 **/*.csv
