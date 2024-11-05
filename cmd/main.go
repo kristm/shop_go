@@ -103,7 +103,11 @@ func createOrder(c *gin.Context) {
 	}
 
 	// create social media record
-	//models.AddSocials(&requestBody.Socials)
+	requestBody.Socials.CustomerId = customerId
+	models.AddCustomerSocials(&requestBody.Socials)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	}
 
 	// create shipping record
 	requestBody.Shipping.CustomerId = customerId
