@@ -13,10 +13,10 @@ import (
 
 func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Config) (bool, error) {
 
-	t := template.New("template.html")
+	//t := template.New("template.html")
 
 	var err error
-	t, err = t.ParseFiles("template.html")
+	t, err := template.ParseFiles("internal/mail/template.html")
 	if err != nil {
 		log.Println(err)
 	}
@@ -36,6 +36,7 @@ func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Con
 	m.SetBody("text/html", emailBody)
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, cfg.EMAIL_FROM, cfg.EMAIL_PASSWORD)
+	d.StartTLSPolicy = gomail.MandatoryStartTLS
 
 	if err = d.DialAndSend(m); err != nil {
 		return false, err
