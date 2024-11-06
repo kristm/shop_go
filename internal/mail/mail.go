@@ -8,10 +8,10 @@ import (
 	"shop_go/internal/config"
 	"shop_go/internal/models"
 
-	gomail "github.com/wneessen/go-mail"
+	gomail "github.com/Shopify/gomail"
 )
 
-func NotifyOrder(order *models.Order, customer *models.Customer, shipping *models.Shipping, cfg *config.Config) (bool, error) {
+func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Config) (bool, error) {
 
 	t := template.New("template.html")
 
@@ -27,6 +27,7 @@ func NotifyOrder(order *models.Order, customer *models.Customer, shipping *model
 	}
 
 	emailBody := tpl.String()
+
 	m := gomail.NewMessage()
 	m.SetHeader("From", cfg.EMAIL_FROM)
 	m.SetHeader("To", cfg.EMAIL_REPORTS)
