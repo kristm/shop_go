@@ -3,8 +3,11 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	DB      string `mapstructure:"DB"`
-	TEST_DB string `mapstructure:"TEST_DB"`
+	DB             string `mapstructure:"DB"`
+	TEST_DB        string `mapstructure:"TEST_DB"`
+	EMAIL_FROM     string `mapstructure:"EMAIL_FROM"`
+	EMAIL_PASSWORD string `mapstructure:"EMAIL_PASSWORD"`
+	EMAIL_REPORTS  string `mapstructure:"EMAIL_REPORTS"`
 }
 
 func LoadConfig(path string) (Config, error) {
