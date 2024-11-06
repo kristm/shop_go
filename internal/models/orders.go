@@ -31,7 +31,7 @@ type OrderItem struct {
 	Id          int     `json:"id"`
 	OrderId     int     `json:"order_id"`
 	ProductId   int     `json:"product_id"`
-	ProductName string  `json:"product_name"`
+	ProductName string  `json:"name"`
 	Qty         int     `json:"qty"`
 	Price       float64 `json:"price"`
 }
@@ -75,6 +75,17 @@ func (order *Order) UnmarshalJSON(p []byte) error {
 
 	order.Amount = computedAmount
 	return nil
+}
+
+func (prod OrderItem) MarshalJSON() ([]byte, error) {
+	type Alias OrderItem
+	return json.Marshal(&struct {
+		*Alias
+		Price float64 `json:"price"`
+	}{
+		Alias: (*Alias)(&prod),
+		Price: prod.Price / 100.00,
+	})
 }
 
 func (prod *OrderItem) UnmarshalJSON(p []byte) error {

@@ -85,8 +85,8 @@ func TestGetOrderByReference(t *testing.T) {
 
 func TestMarshalOrder(t *testing.T) {
 	items := []OrderItem{
-		OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
-		OrderItem{ProductId: 3, Qty: 2, Price: 250.50},
+		OrderItem{ProductId: 2, Qty: 1, Price: 20000.00},
+		OrderItem{ProductId: 3, Qty: 2, Price: 25050.00},
 	}
 
 	order := Order{
@@ -99,7 +99,7 @@ func TestMarshalOrder(t *testing.T) {
 	res, err := json.Marshal(order)
 
 	jsonStr := fmt.Sprintf("%s", res)
-	expect := "{\"id\":0,\"shipping_id\":0,\"customer_id\":1,\"reference_code\":\"\",\"payment_reference\":\"\",\"amount_in_cents\":0,\"status\":0,\"orders\":[{\"id\":0,\"order_id\":0,\"product_id\":2,\"product_name\":\"\",\"qty\":1,\"price\":200},{\"id\":0,\"order_id\":0,\"product_id\":3,\"product_name\":\"\",\"qty\":2,\"price\":250.5}],\"amount\":7.01}"
+	expect := "{\"id\":0,\"shipping_id\":0,\"customer_id\":1,\"reference_code\":\"\",\"payment_reference\":\"\",\"amount_in_cents\":0,\"status\":0,\"orders\":[{\"id\":0,\"order_id\":0,\"product_id\":2,\"name\":\"\",\"qty\":1,\"price\":200},{\"id\":0,\"order_id\":0,\"product_id\":3,\"name\":\"\",\"qty\":2,\"price\":250.5}],\"amount\":701}"
 
 	require.NoError(t, err)
 	assert.Equal(t, expect, jsonStr)

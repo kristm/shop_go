@@ -147,6 +147,7 @@ func createOrder(c *gin.Context) {
 	} else {
 		if !testing.Testing() {
 			cfg, err := config.LoadConfig(".env")
+			order.ReferenceCode = referenceCode
 			if err != nil {
 				log.Fatal("cannot load config ", err)
 			}
