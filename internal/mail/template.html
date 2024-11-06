@@ -2,7 +2,6 @@
 <html>
   <body>
     Order
-    {{ with .Order }}
       <dl>
         <dt>Reference</dt>
         <dd>{{.ReferenceCode}}</dd>
@@ -20,6 +19,5 @@
           {{.ProductName}} x {{.Qty}} ({{.Price}})
         </div>
       {{end}}
-    {{ end }}
   </body>
 </html>
