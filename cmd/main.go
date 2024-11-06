@@ -145,16 +145,11 @@ func createOrder(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	} else {
-		if !testing.Testing() {
-			cfg, err := config.LoadConfig(".env")
-			order.ReferenceCode = referenceCode
-			if err != nil {
-				log.Fatal("cannot load config ", err)
-			}
-			_, err = mail.NotifyOrder(&order, &requestBody.Customer, &cfg)
-			if err != nil {
-				log.Printf("EMAIL ERROR %v\n", err)
-			}
+		order.ReferenceCode = referenceCode
+		cfg, _ := loadConfig()
+		_, err = mail.NotifyOrder(&order, &requestBody.Customer, cfg)
+		if err != nil {
+			log.Printf("EMAIL ERROR %v\n", err)
 		}
 		requestBody.Customer.Id = customerId
 		log.Println(customerId)
@@ -169,8 +164,25 @@ func createOrder(c *gin.Context) {
 	}
 }
 
+func loadConfig() (*config.Config, error) {
+	var configPath string
+	if testing.Testing() {
+		configPath = "../.env"
+	} else {
+		configPath = ".env"
+	}
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		log.Fatal("cannot load config ", err)
+		return nil, err
+	}
+
+	return &cfg, err
+}
+
 func setupRouter() *gin.Engine {
-	err := models.ConnectDatabase()
+	cfg, _ := loadConfig()
+	err := models.ConnectDatabase(cfg)
 	checkErr(err)
 
 	router := gin.Default()
