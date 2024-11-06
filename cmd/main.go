@@ -3,8 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"shop_go/internal/config"
+	"shop_go/internal/mail"
 	"shop_go/internal/models"
 	"strconv"
+	"testing"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -130,17 +133,28 @@ func createOrder(c *gin.Context) {
 
 	// create order record
 	log.Printf("Order Items Req %+v", requestBody.Orders)
-	success, referenceCode, err := models.AddOrder(models.Order{
+	order := models.Order{
 		ShippingId:       shippingId,
 		CustomerId:       customerId,
 		Status:           0,
 		PaymentReference: requestBody.PaymentReference,
 		Items:            requestBody.Orders,
-	})
+	}
+	success, referenceCode, err := models.AddOrder(order)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	} else {
+		if !testing.Testing() {
+			cfg, err := config.LoadConfig(".env")
+			if err != nil {
+				log.Fatal("cannot load config ", err)
+			}
+			_, err = mail.NotifyOrder(&order, &requestBody.Customer, &cfg)
+			if err != nil {
+				log.Printf("EMAIL ERROR %v\n", err)
+			}
+		}
 		requestBody.Customer.Id = customerId
 		log.Println(customerId)
 		log.Printf("json payload %v\n", requestBody)
