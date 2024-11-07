@@ -22,6 +22,18 @@ func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Con
 	}
 
 	var tpl bytes.Buffer
+
+	//convert from cents
+	//TODO how to use existing json marshalling
+	computedAmount := 0.0
+	for i := 0; i < len(order.Items); i++ {
+		p := order.Items[i].Price
+		order.Items[i].Price = p / 100.00
+		computedAmount += order.Items[i].Price * float64(order.Items[i].Qty)
+	}
+
+	order.Amount = computedAmount
+
 	if err = t.Execute(&tpl, order); err != nil {
 		log.Println(err)
 	}
