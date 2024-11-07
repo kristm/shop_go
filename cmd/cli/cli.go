@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"shop_go/internal/config"
 	"shop_go/internal/models"
 	"strconv"
 	"strings"
@@ -100,7 +101,11 @@ func main() {
 	showcsv := flag.Bool("showcsv", false, "a bool")
 	getproducts := flag.Bool("getproducts", false, "a bool")
 	flag.Parse()
-	err := models.ConnectDatabase()
+	cfg, err := config.LoadConfig(".env")
+	if err != nil {
+		log.Fatal("cannot load config ", err)
+	}
+	err = models.ConnectDatabase(&cfg)
 	if err != nil {
 		log.Printf("%s\n", err)
 	}
