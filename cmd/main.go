@@ -131,6 +131,12 @@ func createOrder(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
+	// create analytics
+	_, err = models.AddAnalytics(&models.Analytics{
+		CustomerId: customerId,
+		IpAddress:  c.ClientIP(),
+	})
+
 	// create order record
 	log.Printf("Order Items Req %+v", requestBody.Orders)
 	order := models.Order{

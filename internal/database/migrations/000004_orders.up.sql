@@ -77,3 +77,14 @@ CREATE TABLE product_gallery (
   updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (product_id) REFERENCES products(id)
 );
+
+CREATE TABLE analytics (
+  id INTEGER NOT NULL PRIMARY KEY,
+  customer_id INTEGER NOT NULL,
+  ip_address VARCHAR(50),
+  device VARCHAR(50),
+  others VARCHAR(255),
+  created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES customers(id)
+);

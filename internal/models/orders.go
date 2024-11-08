@@ -44,6 +44,7 @@ func (order Order) MarshalJSON() ([]byte, error) {
 		total := float64(item.Qty) * item.Price
 		computedAmount += total
 	}
+	log.Printf("MARSHAL JSONNNNNN ORDER %v", computedAmount)
 	return json.Marshal(&struct {
 		*Alias
 		Amount float64 `json:"amount"`
@@ -55,6 +56,7 @@ func (order Order) MarshalJSON() ([]byte, error) {
 
 func (order *Order) UnmarshalJSON(p []byte) error {
 	type Alias Order
+	log.Printf("UNMARSHALL ORDER %v", order)
 	aux := &struct {
 		Amount float64 `json:"amount_in_cents"`
 		*Alias
@@ -79,6 +81,7 @@ func (order *Order) UnmarshalJSON(p []byte) error {
 
 func (prod OrderItem) MarshalJSON() ([]byte, error) {
 	type Alias OrderItem
+	log.Printf("MARSHAL JSON ORDER ITEM %v", prod.Price)
 	return json.Marshal(&struct {
 		*Alias
 		Price float64 `json:"price"`
@@ -90,6 +93,8 @@ func (prod OrderItem) MarshalJSON() ([]byte, error) {
 
 func (prod *OrderItem) UnmarshalJSON(p []byte) error {
 	type Alias OrderItem
+
+	log.Printf("<< UNMARSHAL JSON ORDER ITEM %v", prod.Price)
 	aux := &struct {
 		Price float64 `json:"price"`
 		*Alias
