@@ -20,6 +20,7 @@ type OrderPayload struct {
 	Socials          models.Socials
 	Shipping         models.Shipping
 	PaymentReference string `json:"reference"`
+	DeviceProfile    string `json:"device_profile"`
 }
 
 func checkErr(err error) {
@@ -135,7 +136,11 @@ func createOrder(c *gin.Context) {
 	_, err = models.AddAnalytics(&models.Analytics{
 		CustomerId: customerId,
 		IpAddress:  c.ClientIP(),
+		Device:     requestBody.DeviceProfile,
 	})
+	if err != nil {
+		log.Printf("ERROR creating analytics record %v\n", err)
+	}
 
 	// create order record
 	log.Printf("Order Items Req %+v", requestBody.Orders)
