@@ -105,6 +105,16 @@ func getOrderByReference(c *gin.Context) {
 	}
 }
 
+func sendOrderNotification(order *models.Order, customer *models.Customer, cfg *config.Config) error {
+	_, err := mail.NotifyOrder(order, customer, cfg)
+	if err != nil {
+		log.Printf("EMAIL ERROR %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
 func createOrder(c *gin.Context) {
 	var requestBody OrderPayload
 	if err := c.BindJSON(&requestBody); err != nil {
@@ -158,10 +168,7 @@ func createOrder(c *gin.Context) {
 	} else {
 		order.ReferenceCode = referenceCode
 		cfg, _ := loadConfig()
-		_, err = mail.NotifyOrder(&order, &requestBody.Customer, cfg)
-		if err != nil {
-			log.Printf("EMAIL ERROR %v\n", err)
-		}
+		go sendOrderNotification(&order, &requestBody.Customer, cfg)
 		requestBody.Customer.Id = customerId
 		log.Println(customerId)
 		log.Printf("json payload %v\n", requestBody)
