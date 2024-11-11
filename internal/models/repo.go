@@ -5,22 +5,15 @@ import (
 	"fmt"
 	"log"
 	"shop_go/internal/config"
-	"testing"
 )
 
 var DB *sql.DB
+var dbPath string
+var dbParams string
 
 func ConnectDatabase(cfg *config.Config) error {
-	var dbPath string
-	var err error
-	dbParams := "_foreign_keys=true"
-
-	if testing.Testing() {
-		dbPath = fmt.Sprintf("%s?%s", cfg.TEST_DB, dbParams)
-	} else {
-		dbPath = fmt.Sprintf("%s?%s", cfg.DB, dbParams)
-	}
-
+	dbParams = "_foreign_keys=true"
+	dbPath = fmt.Sprintf("%s?%s", cfg.DB, dbParams)
 	log.Printf("DB path %s\n", dbPath)
 
 	db, err := sql.Open("sqlite3", dbPath)
@@ -34,12 +27,8 @@ func ConnectDatabase(cfg *config.Config) error {
 }
 
 func ConnectTestDatabase(cfg *config.Config) error {
-	var dbPath string
-	var err error
-	dbParams := "_foreign_keys=true"
-
+	dbParams = "" // we don't care about foreign contraints on teardown
 	dbPath = fmt.Sprintf("%s?%s", cfg.TEST_DB, dbParams)
-
 	log.Printf("TEST DB path %s\n", dbPath)
 
 	db, err := sql.Open("sqlite3", dbPath)
