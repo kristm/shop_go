@@ -8,7 +8,7 @@ import (
 )
 
 func TestAddShipping(t *testing.T) {
-	shippingId, err := AddShipping(Shipping{
+	shippingId, err := AddShipping(&Shipping{
 		CustomerId: 1,
 		Status:     0,
 		Address:    "Malugay St.",

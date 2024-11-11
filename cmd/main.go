@@ -137,7 +137,7 @@ func createOrder(c *gin.Context) {
 
 	// create shipping record
 	requestBody.Shipping.CustomerId = customerId
-	shippingId, err := models.AddShipping(requestBody.Shipping)
+	shippingId, err := models.AddShipping(&requestBody.Shipping)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}

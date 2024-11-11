@@ -11,7 +11,7 @@ type Shipping struct {
 	Phone      string `json:"phone"`
 }
 
-func AddShipping(newAddress Shipping) (int, error) {
+func AddShipping(newAddress *Shipping) (int, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		return -1, err
