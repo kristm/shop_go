@@ -61,9 +61,17 @@ func TestMain(m *testing.M) {
 	}
 	log.Printf("OK CFG TEST MAIN %v", &cfg)
 	ConnectTestDatabase(&cfg)
+	testTables := []string{"customers", "orders", "order_products", "shipping"}
+	log.Println("Prepare Test tables")
+	for _, table := range testTables {
+		_, err := ClearTestTable(table)
+		if err != nil {
+			log.Printf("Teardown error %v", err)
+		}
+	}
 	code := m.Run()
 
-	testTables := []string{"customers", "orders", "order_products", "shipping"}
+	testTables = []string{"customers", "orders", "order_products", "shipping"}
 	log.Println("Models Teardown")
 	for _, table := range testTables {
 		_, err := ClearTestTable(table)
