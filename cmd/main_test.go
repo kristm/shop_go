@@ -88,7 +88,10 @@ func TestMain(m *testing.M) {
 }
 
 func TestPing(t *testing.T) {
-	router := setupRouter()
+	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
+		return true, nil
+	}
+	router := setupRouter(mailerMock)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)
@@ -99,7 +102,10 @@ func TestPing(t *testing.T) {
 }
 
 func TestPostOrders(t *testing.T) {
-	router := setupRouter()
+	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
+		return true, nil
+	}
+	router := setupRouter(mailerMock)
 
 	w := httptest.NewRecorder()
 	orders := make([]models.OrderItem, 0)
@@ -132,7 +138,10 @@ func TestPostOrders(t *testing.T) {
 }
 
 func TestPostIncompleteOrders(t *testing.T) {
-	router := setupRouter()
+	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
+		return true, nil
+	}
+	router := setupRouter(mailerMock)
 
 	w := httptest.NewRecorder()
 	orders := make([]models.OrderItem, 0)

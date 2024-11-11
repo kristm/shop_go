@@ -7,17 +7,11 @@ import (
 	"log"
 	"shop_go/internal/config"
 	"shop_go/internal/models"
-	"testing"
 
 	gomail "github.com/Shopify/gomail"
 )
 
 func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Config) (bool, error) {
-
-	//t := template.New("template.html")
-	if testing.Testing() {
-		return true, nil
-	}
 
 	var err error
 	t, err := template.ParseFiles("internal/mail/template.html")
@@ -56,6 +50,7 @@ func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Con
 	d.StartTLSPolicy = gomail.MandatoryStartTLS
 
 	if err = d.DialAndSend(m); err != nil {
+		log.Printf("MAIL ERROR %v", err)
 		return false, err
 	}
 
