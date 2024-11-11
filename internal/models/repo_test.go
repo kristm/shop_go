@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -9,17 +8,18 @@ import (
 	"testing"
 )
 
-func ConnectTestDatabase() {
-	cfg, err := config.LoadConfig("../../.env")
-	if err != nil {
-		log.Fatal("cannot load config ", err)
-	}
-	db, err := sql.Open("sqlite3", cfg.TEST_DB)
-	if err != nil {
-		log.Println(err)
-	}
-	DB = db
-}
+//func ConnectTestDatabase() {
+//	cfg, err := config.LoadConfig("../../.env")
+//	if err != nil {
+//		log.Fatal("cannot load config ", err)
+//	}
+//	db, err := sql.Open("sqlite3", cfg.TEST_DB)
+//	if err != nil {
+//		log.Println(err)
+//	}
+//	DB = db
+//	log.Printf("REPO DB %v", DB)
+//}
 
 func ClearTestTable(tableName string) (bool, error) {
 	tx, err := DB.Begin()
@@ -67,7 +67,13 @@ func ClearProductTestData() (bool, error) {
 
 func TestMain(m *testing.M) {
 	log.Println("Test Models Main")
-	ConnectTestDatabase()
+	cfg, err := config.LoadConfig("../../.env")
+	if err != nil {
+		log.Printf("CFG TEST MAIN %v", &cfg)
+		//panic(err)
+	}
+	log.Printf("OK CFG TEST MAIN %v", &cfg)
+	ConnectTestDatabase(&cfg)
 	code := m.Run()
 
 	testTables := []string{"customers", "orders", "order_products", "shipping"}
@@ -79,7 +85,7 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	_, err := ClearProductTestData()
+	_, err = ClearProductTestData()
 	if err != nil {
 		log.Printf("product test teardown error %v", err)
 	}

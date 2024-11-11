@@ -157,7 +157,6 @@ func createOrder(m mailer, cfg *config.Config) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		} else {
 			order.ReferenceCode = referenceCode
-			//cfg, _ := loadConfig()
 			go m(&order, &requestBody.Customer, cfg)
 			requestBody.Customer.Id = customerId
 			log.Println(customerId)
@@ -187,10 +186,11 @@ func loadConfig() (*config.Config, error) {
 
 type mailer func(*models.Order, *models.Customer, *config.Config) (bool, error)
 type configLoader func() (*config.Config, error)
+type connectDB func(*config.Config) error
 
-func setupRouter(m mailer, cl configLoader) *gin.Engine {
+func setupRouter(m mailer, cl configLoader, cdb connectDB) *gin.Engine {
 	cfg, _ := cl()
-	err := models.ConnectDatabase(cfg)
+	err := cdb(cfg)
 	checkErr(err)
 
 	router := gin.Default()
@@ -221,7 +221,7 @@ func setupRouter(m mailer, cl configLoader) *gin.Engine {
 
 func main() {
 
-	r := setupRouter(mail.NotifyOrder, loadConfig)
+	r := setupRouter(mail.NotifyOrder, loadConfig, models.ConnectDatabase)
 
 	r.Run()
 }

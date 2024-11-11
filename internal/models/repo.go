@@ -32,3 +32,22 @@ func ConnectDatabase(cfg *config.Config) error {
 
 	return nil
 }
+
+func ConnectTestDatabase(cfg *config.Config) error {
+	var dbPath string
+	var err error
+	dbParams := "_foreign_keys=true"
+
+	dbPath = fmt.Sprintf("%s?%s", cfg.TEST_DB, dbParams)
+
+	log.Printf("TEST DB path %s\n", dbPath)
+
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal("cannot load DB ", dbPath)
+		return err
+	}
+	DB = db
+
+	return nil
+}
