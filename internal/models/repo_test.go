@@ -8,19 +8,6 @@ import (
 	"testing"
 )
 
-//func ConnectTestDatabase() {
-//	cfg, err := config.LoadConfig("../../.env")
-//	if err != nil {
-//		log.Fatal("cannot load config ", err)
-//	}
-//	db, err := sql.Open("sqlite3", cfg.TEST_DB)
-//	if err != nil {
-//		log.Println(err)
-//	}
-//	DB = db
-//	log.Printf("REPO DB %v", DB)
-//}
-
 func ClearTestTable(tableName string) (bool, error) {
 	tx, err := DB.Begin()
 	if err != nil {
