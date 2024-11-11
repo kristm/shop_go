@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -63,7 +64,8 @@ func AddCustomer(newCustomer *Customer) (int, error) {
 	}
 
 	if !ValidateNotEmpty(newCustomer) {
-		return -1, nil
+		err = errors.New("Invalid Customer Data")
+		return -1, err
 	}
 
 	stmt, err := tx.Prepare("INSERT INTO customers (first_name, last_name, email, phone) VALUES (?, ?, ?, ?)")

@@ -38,7 +38,7 @@ func TestAddCustomerMissingData(t *testing.T) {
 		Email:     "bob@wo.od",
 	})
 
-	require.NoError(t, err)
+	assert.EqualError(t, err, "Invalid Customer Data")
 	assert.Equal(t, -1, success)
 }
 
