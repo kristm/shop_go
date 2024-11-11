@@ -91,7 +91,7 @@ func TestPing(t *testing.T) {
 	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
 		return true, nil
 	}
-	router := setupRouter(mailerMock)
+	router := setupRouter(mailerMock, loadConfigMock)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)
@@ -101,11 +101,20 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, "pong", w.Body.String())
 }
 
+func loadConfigMock() (*config.Config, error) {
+	cfg, err := config.LoadConfig("../.env")
+	if err != nil {
+		log.Fatal("cannot load config ", err)
+		return nil, err
+	}
+	return &cfg, err
+}
+
 func TestPostOrders(t *testing.T) {
 	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
 		return true, nil
 	}
-	router := setupRouter(mailerMock)
+	router := setupRouter(mailerMock, loadConfigMock)
 
 	w := httptest.NewRecorder()
 	orders := make([]models.OrderItem, 0)
@@ -141,7 +150,7 @@ func TestPostIncompleteOrders(t *testing.T) {
 	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
 		return true, nil
 	}
-	router := setupRouter(mailerMock)
+	router := setupRouter(mailerMock, loadConfigMock)
 
 	w := httptest.NewRecorder()
 	orders := make([]models.OrderItem, 0)

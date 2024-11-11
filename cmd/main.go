@@ -7,7 +7,6 @@ import (
 	"shop_go/internal/mail"
 	"shop_go/internal/models"
 	"strconv"
-	"testing"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -105,7 +104,7 @@ func getOrderByReference(c *gin.Context) {
 	}
 }
 
-func createOrder(m mailer) gin.HandlerFunc {
+func createOrder(m mailer, cfg *config.Config) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		var requestBody OrderPayload
 		if err := c.BindJSON(&requestBody); err != nil {
@@ -158,7 +157,7 @@ func createOrder(m mailer) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		} else {
 			order.ReferenceCode = referenceCode
-			cfg, _ := loadConfig()
+			//cfg, _ := loadConfig()
 			go m(&order, &requestBody.Customer, cfg)
 			requestBody.Customer.Id = customerId
 			log.Println(customerId)
@@ -177,13 +176,7 @@ func createOrder(m mailer) gin.HandlerFunc {
 }
 
 func loadConfig() (*config.Config, error) {
-	var configPath string
-	if testing.Testing() {
-		configPath = "../.env"
-	} else {
-		configPath = ".env"
-	}
-	cfg, err := config.LoadConfig(configPath)
+	cfg, err := config.LoadConfig(".env")
 	if err != nil {
 		log.Fatal("cannot load config ", err)
 		return nil, err
@@ -193,9 +186,10 @@ func loadConfig() (*config.Config, error) {
 }
 
 type mailer func(*models.Order, *models.Customer, *config.Config) (bool, error)
+type configLoader func() (*config.Config, error)
 
-func setupRouter(m mailer) *gin.Engine {
-	cfg, _ := loadConfig()
+func setupRouter(m mailer, cl configLoader) *gin.Engine {
+	cfg, _ := cl()
 	err := models.ConnectDatabase(cfg)
 	checkErr(err)
 
@@ -220,14 +214,14 @@ func setupRouter(m mailer) *gin.Engine {
 		v1.GET("products/:id", getProductById)
 		v1.GET("products/sku/:sku", getProductBySku)
 		v1.GET("orders/:reference_code", getOrderByReference)
-		v1.POST("orders", createOrder(m))
+		v1.POST("orders", createOrder(m, cfg))
 	}
 	return router
 }
 
 func main() {
 
-	r := setupRouter(mail.NotifyOrder)
+	r := setupRouter(mail.NotifyOrder, loadConfig)
 
 	r.Run()
 }
