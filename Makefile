@@ -22,3 +22,6 @@ migrate_goto:
 
 clean_test:
 	go clean -testcache
+
+build_docker:
+	docker build --progress=plain -t shop_go .
