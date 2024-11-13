@@ -25,3 +25,6 @@ clean_test:
 
 build_docker:
 	docker build --progress=plain -t shop_go .
+
+shell:
+	docker run --entrypoint /bin/sh -it shop_go
