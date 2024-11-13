@@ -28,3 +28,6 @@ build_docker:
 
 shell:
 	docker run --entrypoint /bin/sh -it shop_go
+
+run_shop:
+	docker run --rm -p 8080:8080 shop_go
