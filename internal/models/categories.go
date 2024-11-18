@@ -7,8 +7,34 @@ import (
 )
 
 type Category struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id      int    `json:"id"`
+	Name    string `json:"name"`
+	Enabled bool   `json:"enabled"`
+}
+
+func AddCategory(category *Category) error {
+	tx, err := DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare("INSERT into categories (name, enabled) VALUES (?, ?)")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(category.Name, category.Enabled)
+
+	if err != nil {
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
 }
 
 func GetCategories() ([]Category, error) {
