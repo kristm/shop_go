@@ -1,22 +1,12 @@
 package models
 
 import (
-	"log"
 	"testing"
 
 	//"github.com/go-playground/assert/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func setupTest(tb testing.TB) func(tb testing.TB) {
-	log.Println("setup test")
-
-	return func(tb testing.TB) {
-		ClearTestTable("customers")
-		log.Println("teardown test")
-	}
-}
 
 func TestAddCustomer(t *testing.T) {
 	newCustomer := Customer{
