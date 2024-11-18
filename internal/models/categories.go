@@ -12,7 +12,7 @@ type Category struct {
 }
 
 func GetCategories() ([]Category, error) {
-	rows, err := DB.Query("SELECT id, name FROM categories")
+	rows, err := DB.Query("SELECT id, name FROM categories WHERE enabled=TRUE")
 	if err != nil {
 		return nil, err
 	}
