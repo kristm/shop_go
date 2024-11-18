@@ -24,5 +24,8 @@ RUN make migrate_up
 RUN go build cmd/main.go
 #
 EXPOSE 8080
-#
+
+# build: docker build -t shop_go .
+# run:   docker run --rm -p 8080:8080 shop_go
+
 CMD ["./main"]
