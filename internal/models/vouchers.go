@@ -47,3 +47,17 @@ func GetVoucherByCode(code string) (*Voucher, error) {
 
 	return &voucher, nil
 }
+
+func ValidateVoucher(code string) (bool, error) {
+	stmt, err := DB.Prepare("SELECT id, voucher_type_id, code, valid FROM vouchers WHERE code = ? AND valid = TRUE")
+	if err != nil {
+		return false, err
+	}
+	voucher := Voucher{}
+	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid)
+	if sqlErr != nil {
+		return false, sqlErr
+	}
+
+	return true, nil
+}

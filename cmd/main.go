@@ -106,13 +106,13 @@ func getOrderByReference(c *gin.Context) {
 
 func getVoucherByCode(c *gin.Context) {
 	voucherCode := c.Param("code")
-	voucher, err := models.GetVoucherByCode(voucherCode)
+	ok, err := models.ValidateVoucher(voucherCode)
 	checkErr(err)
 
-	if voucher != nil {
-		c.JSON(http.StatusOK, gin.H{"data": voucher})
+	if ok {
+		c.JSON(http.StatusOK, gin.H{"valid": true})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"valid": false, "error": err})
 	}
 }
 
