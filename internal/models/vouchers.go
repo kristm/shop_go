@@ -32,3 +32,18 @@ func AddVoucher(voucher *Voucher) error {
 	return nil
 
 }
+
+func GetVoucherByCode(code string) (*Voucher, error) {
+	stmt, err := DB.Prepare("SELECT id, voucher_type_id, code, valid FROM vouchers WHERE code = ?")
+	if err != nil {
+		return nil, err
+	}
+
+	voucher := Voucher{}
+	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid)
+	if sqlErr != nil {
+		return nil, sqlErr
+	}
+
+	return &voucher, nil
+}
