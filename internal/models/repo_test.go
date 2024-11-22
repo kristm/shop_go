@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+var testTables = []string{"categories", "customers", "orders", "order_products", "shipping", "vouchers"}
+
 func ClearTestTable(tableName string) (bool, error) {
 	tx, err := DB.Begin()
 	if err != nil {
@@ -61,7 +63,6 @@ func TestMain(m *testing.M) {
 	}
 	log.Printf("OK CFG TEST MAIN %v", &cfg)
 	ConnectTestDatabase(&cfg)
-	testTables := []string{"categories", "customers", "orders", "order_products", "shipping"}
 	log.Println("Prepare Test tables")
 	for _, table := range testTables {
 		_, err := ClearTestTable(table)
@@ -71,7 +72,6 @@ func TestMain(m *testing.M) {
 	}
 	code := m.Run()
 
-	testTables = []string{"categories", "customers", "orders", "order_products", "shipping"}
 	log.Println("Models Teardown")
 	for _, table := range testTables {
 		_, err := ClearTestTable(table)
@@ -80,9 +80,9 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	_, err = ClearProductTestData()
-	if err != nil {
-		log.Printf("product test teardown error %v", err)
-	}
+	//_, err = ClearProductTestData()
+	//if err != nil {
+	//	log.Printf("product test teardown error %v", err)
+	//}
 	os.Exit(code)
 }

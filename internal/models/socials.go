@@ -64,5 +64,7 @@ func AddSocials(socials *Socials) (bool, error) {
 		return false, err
 	}
 
+	tx.Commit()
+
 	return true, nil
 }
