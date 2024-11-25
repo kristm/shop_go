@@ -65,3 +65,19 @@ func GetPhotosBySku(sku string) (Photo, error) {
 
 	return photo, nil
 }
+
+func GetPhotosById(id int) (Photo, error) {
+	stmt, err := DB.Prepare("SELECT product_id, images FROM product_gallery WHERE product_id = ?")
+	if err != nil {
+		return Photo{}, err
+	}
+	defer stmt.Close()
+
+	photo := Photo{}
+	sqlErr := stmt.QueryRow(id).Scan(&photo.ProductId, &photo.Paths)
+	if sqlErr != nil {
+		return Photo{}, err
+	}
+
+	return photo, nil
+}

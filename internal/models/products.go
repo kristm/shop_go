@@ -79,6 +79,7 @@ func GetProducts(category_id int) ([]Product, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer stmt.Close()
 
 	rows, sqlErr := stmt.Query(category_id)
 	if sqlErr != nil {
@@ -96,6 +97,9 @@ func GetProducts(category_id int) ([]Product, error) {
 			return nil, err
 		}
 
+		photos, _ := GetPhotosById(product.Id)
+		product.Photos = photos
+
 		products = append(products, product)
 	}
 	//TODO handle error
@@ -109,6 +113,7 @@ func GetProductById(id int) (Product, error) {
 	if err != nil {
 		return Product{}, err
 	}
+	defer stmt.Close()
 
 	product := Product{}
 	sqlErr := stmt.QueryRow(id).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
@@ -118,6 +123,10 @@ func GetProductById(id int) (Product, error) {
 		}
 		return Product{}, sqlErr
 	}
+
+	photos, _ := GetPhotosById(product.Id)
+	product.Photos = photos
+
 	return product, nil
 }
 
@@ -126,6 +135,7 @@ func GetProductBySku(sku string) (Product, error) {
 	if err != nil {
 		return Product{}, err
 	}
+	defer stmt.Close()
 
 	product := Product{}
 	sqlErr := stmt.QueryRow(sku).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
@@ -135,6 +145,10 @@ func GetProductBySku(sku string) (Product, error) {
 		}
 		return Product{}, sqlErr
 	}
+
+	photos, _ := GetPhotosById(product.Id)
+	product.Photos = photos
+
 	return product, nil
 }
 
@@ -199,6 +213,7 @@ func GetProductInventory(productId int) (Inventory, error) {
 	if err != nil {
 		return Inventory{}, err
 	}
+	defer stmt.Close()
 
 	inventory := Inventory{}
 	sqlErr := stmt.QueryRow(productId).Scan(&inventory.Id, &inventory.ProductId, &inventory.Qty)
