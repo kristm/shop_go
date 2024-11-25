@@ -39,10 +39,12 @@ func (prod Product) MarshalJSON() ([]byte, error) {
 	computedPrice := float64(int(prod.Price)) / 100.00
 	return json.Marshal(&struct {
 		*Alias
-		Price float64 `json:"price"`
+		Price  float64 `json:"price"`
+		Photos string  `json:"images"`
 	}{
-		Alias: (*Alias)(&prod),
-		Price: computedPrice,
+		Alias:  (*Alias)(&prod),
+		Price:  computedPrice,
+		Photos: prod.Photos.Paths,
 	})
 }
 
