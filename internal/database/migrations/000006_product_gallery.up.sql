@@ -1,0 +1,10 @@
+CREATE TABLE product_gallery (
+  id INTEGER NOT NULL PRIMARY KEY,
+  product_id INTEGER,
+  images TEXT,
+  created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+

@@ -1,12 +1,15 @@
 package models
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 type Path string
 
 type Photo struct {
-	ProductId int      `json:"product_id"`
-	Paths     []string `json:"images"`
+	ProductId int    `json:"product_id"`
+	Paths     string `json:"images"`
 }
 
 func AddPhoto(sku string, filename string) error {
@@ -22,7 +25,7 @@ func AddPhoto(sku string, filename string) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO product_gallery (product_id, image) VALUES (?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO product_gallery (product_id, images) VALUES (?, ?)")
 
 	if err != nil {
 		return err
@@ -30,8 +33,9 @@ func AddPhoto(sku string, filename string) error {
 	defer stmt.Close()
 
 	photo := Photo{ProductId: product.Id}
+	image := fmt.Sprintf("'[%s]'", filename)
 
-	_, err = stmt.Exec(photo.ProductId, filename)
+	_, err = stmt.Exec(photo.ProductId, image)
 
 	if err != nil {
 		log.Printf("ERROR FOUND")
@@ -49,20 +53,18 @@ func GetPhotosBySku(sku string) (*Photo, error) {
 		return nil, err
 	}
 
-	stmt, err := DB.Prepare("SELECT product_id, image, image2, image3 FROM product_gallery WHERE product_id = ?")
+	stmt, err := DB.Prepare("SELECT product_id, images FROM product_gallery WHERE product_id = ?")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
 	photo := Photo{}
-	var path1, path2, path3 string
-	sqlErr := stmt.QueryRow(product.Id).Scan(&photo.ProductId, &path1, &path2, &path3)
+	sqlErr := stmt.QueryRow(product.Id).Scan(&photo.ProductId, &photo.Paths)
 	if sqlErr != nil {
 		return nil, err
 	}
 
-	photo.Paths = []string{path1, path2, path3}
 	return &photo, nil
 
 }
