@@ -32,6 +32,7 @@ func ConnectTestDatabase(cfg *config.Config) error {
 	log.Printf("TEST DB path %s\n", dbPath)
 
 	db, err := sql.Open("sqlite3", dbPath)
+	//db.SetMaxOpenConns(1)
 	if err != nil {
 		log.Fatal("cannot load DB ", dbPath)
 		return err

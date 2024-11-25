@@ -19,9 +19,12 @@ func checkSocials(socials *Socials) (bool, error) {
 
 	existingSocials := Socials{}
 	sqlErr := stmt.QueryRow(socials.CustomerId, socials.Subscribe, socials.Socials).Scan(&existingSocials.Id, &existingSocials.CustomerId, &existingSocials.Subscribe, &existingSocials.Socials)
+
 	if sqlErr != nil {
 		return false, sqlErr
 	}
+
+	defer stmt.Close()
 
 	return true, nil
 }

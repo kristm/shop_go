@@ -1,37 +1,40 @@
 package models
 
+import "log"
+
 type Path string
 
 type Photo struct {
-	ProductId int    `json:"product_id"`
-	Paths     []Path `json:"images"`
+	ProductId int      `json:"product_id"`
+	Paths     []string `json:"images"`
 }
 
-func AddPhoto(sku string, filename Path) error {
+func AddPhoto(sku string, filename string) error {
 	product, err := GetProductBySku(sku)
 	if err != nil {
 		return err
 	}
+
+	log.Printf("PRODUCT %v ", product)
 
 	tx, err := DB.Begin()
 	if err != nil {
 		return err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO product_gallery (product_id, image, image2, image3) VALUES (?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO product_gallery (product_id, image) VALUES (?, ?)")
 
 	if err != nil {
 		return err
 	}
-
 	defer stmt.Close()
 
-	photos := []Path{filename}
+	photo := Photo{ProductId: product.Id}
 
-	photo := Photo{ProductId: product.Id, Paths: photos}
-	_, err = stmt.Exec(photo.ProductId, photo.Paths)
+	_, err = stmt.Exec(photo.ProductId, filename)
 
 	if err != nil {
+		log.Printf("ERROR FOUND")
 		return err
 	}
 
@@ -50,15 +53,16 @@ func GetPhotosBySku(sku string) (*Photo, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer stmt.Close()
 
 	photo := Photo{}
-	var path1, path2, path3 Path
+	var path1, path2, path3 string
 	sqlErr := stmt.QueryRow(product.Id).Scan(&photo.ProductId, &path1, &path2, &path3)
 	if sqlErr != nil {
 		return nil, err
 	}
 
-	photo.Paths = []Path{path1, path2, path3}
+	photo.Paths = []string{path1, path2, path3}
 	return &photo, nil
 
 }

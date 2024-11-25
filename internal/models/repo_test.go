@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var testTables = []string{"categories", "customers", "orders", "order_products", "shipping", "vouchers"}
+var testTables = []string{"categories", "customers", "orders", "order_products", "shipping", "vouchers", "product_gallery"}
 
 func ClearTestTable(tableName string) (bool, error) {
 	tx, err := DB.Begin()
@@ -38,14 +38,14 @@ func ClearProductTestData() (bool, error) {
 		return false, err
 	}
 
-	query := "DELETE FROM products WHERE sku LIKE ?"
+	query := "DELETE FROM products WHERE id > ?"
 	stmt, err := DB.Prepare(query)
 	if err != nil {
 		return false, err
 	}
 
 	defer stmt.Close()
-	_, err = stmt.Exec("WKW%")
+	_, err = stmt.Exec(4)
 	if err != nil {
 		return false, err
 	}
@@ -80,9 +80,9 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	//_, err = ClearProductTestData()
-	//if err != nil {
-	//	log.Printf("product test teardown error %v", err)
-	//}
+	_, err = ClearProductTestData()
+	if err != nil {
+		log.Printf("product test teardown error %v", err)
+	}
 	os.Exit(code)
 }

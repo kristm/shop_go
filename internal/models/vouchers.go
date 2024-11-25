@@ -53,6 +53,8 @@ func ValidateVoucher(code string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer stmt.Close()
+
 	voucher := Voucher{}
 	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid)
 	if sqlErr != nil {
