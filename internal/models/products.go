@@ -37,14 +37,15 @@ type Inventory struct {
 func (prod Product) MarshalJSON() ([]byte, error) {
 	type Alias Product
 	computedPrice := float64(int(prod.Price)) / 100.00
+	photosCollection := strings.Split(prod.Photos.Paths, ", ")
 	return json.Marshal(&struct {
 		*Alias
-		Price  float64 `json:"price"`
-		Photos string  `json:"images"`
+		Price  float64  `json:"price"`
+		Photos []string `json:"images"`
 	}{
 		Alias:  (*Alias)(&prod),
 		Price:  computedPrice,
-		Photos: prod.Photos.Paths,
+		Photos: photosCollection,
 	})
 }
 
