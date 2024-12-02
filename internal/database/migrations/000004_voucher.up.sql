@@ -22,3 +22,4 @@ INSERT INTO voucher_types VALUES
   (NULL, "freeship", "Free Shipping", CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 ALTER TABLE orders ADD voucher VARCHAR(50);
+
