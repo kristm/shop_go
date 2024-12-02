@@ -100,6 +100,7 @@ var readonly = false
 func main() {
 	showcsv := flag.Bool("showcsv", false, "a bool")
 	getproducts := flag.Bool("getproducts", false, "a bool")
+	csvPath := flag.String("csv", "", "path to csv")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -122,7 +123,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	data, err := readCSVFile("mini_inventory.csv")
+	data, err := readCSVFile(*csvPath)
 	if err != nil {
 		fmt.Println("Error reading file:", err)
 		return
