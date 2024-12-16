@@ -109,10 +109,10 @@ func getVoucherByCode(c *gin.Context) {
 	ok, err := models.ValidateVoucher(voucherCode)
 	checkErr(err)
 
-	if ok {
-		c.JSON(http.StatusOK, gin.H{"valid": true})
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"valid": ok})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"valid": false, "error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"valid": ok, "error": err})
 	}
 }
 
