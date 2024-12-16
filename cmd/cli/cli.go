@@ -95,6 +95,22 @@ func showProducts() {
 	}
 }
 
+func markPaidOrder(reference string) {
+	//Get Order By reference
+	//order, err := models.GetOrderByReference(reference)
+	// update Order status
+	//ok, err := models.UpdateOrderStatus(reference, models.Paid)
+	// get Order Items
+	//items, err := models.GetOrderItems(order.Id)
+	// update product inventory for each item
+	// for item := range items {
+	// get product qty
+	// get item qty
+	// subtract item qty from product qty
+	// update product status
+	//}
+}
+
 var readonly = false
 
 func main() {
