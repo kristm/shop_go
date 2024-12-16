@@ -305,3 +305,26 @@ func AddOrderItem(newOrderItem OrderItem) (bool, error) {
 
 	return true, nil
 }
+
+func UpdateOrderStatus(reference string, status OrderStatus) (bool, error) {
+	tx, err := DB.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	stmt, err := tx.Prepare("UPDATE orders SET STATUS = ? WHERE reference_code = ?")
+	if err != nil {
+		return false, err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(status, reference)
+	if err != nil {
+		return false, err
+	}
+
+	tx.Commit()
+
+	return true, nil
+}

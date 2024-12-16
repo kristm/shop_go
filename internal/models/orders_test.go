@@ -127,3 +127,25 @@ func TestUnmarshalOrderItem(t *testing.T) {
 	// price needs to be converted to cents before inserting to db
 	assert.Equal(t, orderItem.Price, float64(29999))
 }
+
+func TestUpdateOrder(t *testing.T) {
+	items := []OrderItem{
+		OrderItem{ProductId: 2, Qty: 1, Price: 200.00},
+		OrderItem{ProductId: 3, Qty: 2, Price: 250.00},
+	}
+
+	order := Order{
+		CustomerId: 1,
+		ShippingId: 1,
+		Status:     0,
+		Amount:     0,
+		Items:      items,
+	}
+
+	_, reference, err := AddOrder(order)
+	require.NoError(t, err)
+
+	ok, err := UpdateOrderStatus(reference, Paid)
+	require.NoError(t, err)
+	assert.Equal(t, ok, true)
+}
