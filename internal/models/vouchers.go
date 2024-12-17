@@ -19,7 +19,7 @@ func AddVoucher(voucher *Voucher) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO vouchers (voucher_type_id, code, valid) VALUES (?,?,?)")
+	stmt, err := tx.Prepare("INSERT INTO vouchers (voucher_type_id, code, valid, expires_at) VALUES (?,?,?, ?)")
 
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func AddVoucher(voucher *Voucher) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(voucher.TypeId, voucher.Code, voucher.Valid)
+	_, err = stmt.Exec(voucher.TypeId, voucher.Code, voucher.Valid, voucher.Expires)
 
 	if err != nil {
 		return err
