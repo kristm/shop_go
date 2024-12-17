@@ -1,12 +1,16 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+	"log"
+)
 
 type Voucher struct {
-	Id     int    `json:"id"`
-	TypeId int    `json:"voucher_type_id"`
-	Code   string `json:"code"`
-	Valid  bool   `json:"valid"`
+	Id      int    `json:"id"`
+	TypeId  int    `json:"voucher_type_id"`
+	Code    string `json:"code"`
+	Valid   bool   `json:"valid"`
+	Expires string `json:"expires_at"`
 }
 
 func AddVoucher(voucher *Voucher) error {
@@ -51,18 +55,20 @@ func GetVoucherByCode(code string) (*Voucher, error) {
 }
 
 func ValidateVoucher(code string) (bool, error) {
-	stmt, err := DB.Prepare("SELECT id, voucher_type_id, code, valid FROM vouchers WHERE code = ? AND valid = TRUE")
+	stmt, err := DB.Prepare("SELECT id, voucher_type_id, code, valid, expires_at FROM vouchers WHERE code = ? AND valid = TRUE AND datetime('now') < expires_at")
 	if err != nil {
+		log.Printf("err %v", err)
 		return false, err
 	}
 	defer stmt.Close()
 
 	voucher := Voucher{}
-	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid)
+	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.Expires)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
 			return false, nil
 		}
+		log.Printf("sqlerr %v", sqlErr)
 		return false, sqlErr
 	}
 
