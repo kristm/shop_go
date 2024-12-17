@@ -160,6 +160,7 @@ func createOrder(m mailer, cfg *config.Config) gin.HandlerFunc {
 			ShippingId:       shippingId,
 			CustomerId:       customerId,
 			Status:           0,
+			VoucherCode:      requestBody.Voucher,
 			PaymentReference: requestBody.PaymentReference,
 			Items:            requestBody.Orders,
 		}
