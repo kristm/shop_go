@@ -1,5 +1,7 @@
 package models
 
+import "database/sql"
+
 type Voucher struct {
 	Id     int    `json:"id"`
 	TypeId int    `json:"voucher_type_id"`
@@ -58,6 +60,9 @@ func ValidateVoucher(code string) (bool, error) {
 	voucher := Voucher{}
 	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid)
 	if sqlErr != nil {
+		if sqlErr == sql.ErrNoRows {
+			return false, nil
+		}
 		return false, sqlErr
 	}
 

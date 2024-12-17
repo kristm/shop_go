@@ -18,6 +18,7 @@ type OrderPayload struct {
 	Customer         models.Customer
 	Socials          models.Socials
 	Shipping         models.Shipping
+	Voucher          string `json:"voucher"`
 	PaymentReference string `json:"reference"`
 	DeviceProfile    string `json:"device_profile"`
 }
@@ -107,12 +108,11 @@ func getOrderByReference(c *gin.Context) {
 func getVoucherByCode(c *gin.Context) {
 	voucherCode := c.Param("code")
 	ok, err := models.ValidateVoucher(voucherCode)
-	checkErr(err)
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"valid": ok})
+		c.JSON(http.StatusBadRequest, gin.H{"valid": false, "error": err})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"valid": ok, "error": err})
+		c.JSON(http.StatusOK, gin.H{"valid": ok})
 	}
 }
 
