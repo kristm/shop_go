@@ -278,30 +278,31 @@ func AddProductInventory(productId int, qty int) (bool, error) {
 
 	if inventory.Id > 0 {
 		UpdateProductInventory(productId, qty)
+		return true, nil
+	} else {
+		//add inventory
+		tx, err := DB.Begin()
+		if err != nil {
+			return false, err
+		}
+
+		stmt, err := tx.Prepare("INSERT INTO product_inventory (product_id, qty) VALUES (?, ?)")
+
+		if err != nil {
+			return false, err
+		}
+
+		defer stmt.Close()
+		inventory = Inventory{ProductId: productId, Qty: qty}
+
+		_, err = stmt.Exec(inventory.ProductId, inventory.Qty)
+
+		if err != nil {
+			return false, err
+		}
+
+		tx.Commit()
+		return true, nil
 	}
 
-	//add inventory
-	tx, err := DB.Begin()
-	if err != nil {
-		return false, err
-	}
-
-	stmt, err := tx.Prepare("INSERT INTO product_inventory (product_id, qty) VALUES (?, ?)")
-
-	if err != nil {
-		return false, err
-	}
-
-	defer stmt.Close()
-	inventory = Inventory{ProductId: productId, Qty: qty}
-
-	_, err = stmt.Exec(inventory.ProductId, inventory.Qty)
-
-	if err != nil {
-		return false, err
-	}
-
-	tx.Commit()
-
-	return true, nil
 }
