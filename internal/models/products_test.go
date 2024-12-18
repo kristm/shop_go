@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"testing"
 	"time"
 
@@ -31,8 +32,10 @@ func TestAddProduct(t *testing.T) {
 }
 
 func TestGetProductBySku(t *testing.T) {
+	r := rand.IntN(100)
+	sku := fmt.Sprintf("FRISK %d", r)
 	newProduct := Product{
-		Sku:         "FISKBO",
+		Sku:         sku,
 		Name:        "Frame",
 		Description: "",
 		CategoryId:  4,
@@ -50,7 +53,7 @@ func TestAddProductInventory(t *testing.T) {
 	sku := fmt.Sprintf("WKWS %d", timestamp)
 	newProduct := Product{
 		Sku:         sku,
-		Name:        "Something Nice",
+		Name:        "Something Dice",
 		Description: "",
 		CategoryId:  4,
 		Price:       10000,
@@ -146,7 +149,7 @@ func TestGetProductStatus(t *testing.T) {
 		Status:      InStock,
 	}
 	outofstockProduct := Product{
-		Sku:         "ZOID",
+		Sku:         "GAMELA",
 		Name:        "Desk toy",
 		Description: "",
 		CategoryId:  4,
@@ -154,9 +157,20 @@ func TestGetProductStatus(t *testing.T) {
 		Status:      InStock,
 	}
 
-	id1, _ := AddProductWithQty(instockProduct, 20)
-	id2, _ := AddProductWithQty(lowstockProduct, 9)
-	id3, _ := AddProductWithQty(outofstockProduct, -1)
+	id1, err := AddProductWithQty(instockProduct, 20)
+	require.NoError(t, err)
+	id2, err := AddProductWithQty(lowstockProduct, 9)
+	require.NoError(t, err)
+	id3, err := AddProductWithQty(outofstockProduct, -1)
+	require.NoError(t, err)
+
+	inv1, _ := GetProductInventory(id1)
+	inv2, _ := GetProductInventory(id2)
+	inv3, _ := GetProductInventory(id3)
+
+	assert.Equal(t, 20, inv1.Qty)
+	assert.Equal(t, 9, inv2.Qty)
+	assert.Equal(t, -1, inv3.Qty)
 
 	prod1, _ := GetProductById(id1)
 	prod2, _ := GetProductById(id2)
@@ -166,8 +180,7 @@ func TestGetProductStatus(t *testing.T) {
 	stat2 := getProductStatus(&prod2)
 	stat3 := getProductStatus(&prod3)
 
-	assert.Equal(t, stat1, InStock)
-	assert.Equal(t, 0, prod1.Qty)
-	assert.Equal(t, stat2, LowStock)
-	assert.Equal(t, stat3, OutofStock)
+	assert.Equal(t, InStock, stat1)
+	assert.Equal(t, LowStock, stat2)
+	assert.Equal(t, OutofStock, stat3)
 }
