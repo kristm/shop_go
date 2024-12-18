@@ -127,6 +127,8 @@ func GetProductById(id int) (Product, error) {
 		return Product{}, sqlErr
 	}
 
+	product.Status = getProductStatus(&product)
+
 	photos, _ := GetPhotosById(product.Id)
 	product.Photos = photos
 
@@ -149,19 +151,29 @@ func GetProductBySku(sku string) (Product, error) {
 		return Product{}, sqlErr
 	}
 
-	inventory, _ := GetProductInventory(product.Id)
-	qty := inventory.Qty
-	switch {
-	case qty < 10:
-		product.Status = LowStock
-	case qty < 0:
-		product.Status = OutofStock
-	}
+	product.Status = getProductStatus(&product)
 
 	photos, _ := GetPhotosById(product.Id)
 	product.Photos = photos
 
 	return product, nil
+}
+
+func getProductStatus(product *Product) ProductStatus {
+	var status ProductStatus
+	inventory, _ := GetProductInventory(product.Id)
+	qty := inventory.Qty
+
+	switch {
+	case qty < 0:
+		status = OutofStock
+	case qty < 10:
+		status = LowStock
+	default:
+		status = InStock
+	}
+
+	return status
 }
 
 // move this to cli tool
