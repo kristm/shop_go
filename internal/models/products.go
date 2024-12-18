@@ -149,6 +149,15 @@ func GetProductBySku(sku string) (Product, error) {
 		return Product{}, sqlErr
 	}
 
+	inventory, _ := GetProductInventory(product.Id)
+	qty := inventory.Qty
+	switch {
+	case qty < 10:
+		product.Status = LowStock
+	case qty < 0:
+		product.Status = OutofStock
+	}
+
 	photos, _ := GetPhotosById(product.Id)
 	product.Photos = photos
 

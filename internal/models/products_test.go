@@ -30,6 +30,21 @@ func TestAddProduct(t *testing.T) {
 	}
 }
 
+func TestGetProductBySku(t *testing.T) {
+	newProduct := Product{
+		Sku:         "FISKBO",
+		Name:        "Frame",
+		Description: "",
+		CategoryId:  4,
+		Price:       15000,
+		Status:      InStock,
+	}
+
+	productId, err := AddProduct(newProduct)
+	require.NoError(t, err)
+	assert.Greater(t, productId, 0)
+}
+
 func TestAddProductInventory(t *testing.T) {
 	timestamp := time.Now().Unix()
 	sku := fmt.Sprintf("WKWS %d", timestamp)
