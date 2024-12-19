@@ -97,18 +97,31 @@ func showProducts() {
 
 func markPaidOrder(reference string) {
 	//Get Order By reference
-	//order, err := models.GetOrderByReference(reference)
+	order, _ := models.GetOrderByReference(reference)
 	// update Order status
-	//ok, err := models.UpdateOrderStatus(reference, models.Paid)
+	_, err := models.UpdateOrderStatus(reference, models.Paid)
+	if err != nil {
+		log.Printf("ERROR: Updating Order Status, Order %s", reference)
+		return
+	}
 	// get Order Items
-	//items, err := models.GetOrderItems(order.Id)
 	// update product inventory for each item
-	// for item := range items {
-	// get product qty
-	// get item qty
-	// subtract item qty from product qty
-	// update product status
-	//}
+	items, _ := models.GetOrderItems(order.Id)
+	for _, item := range items {
+		// get item qty
+		qty := item.Qty
+		productId := item.ProductId
+		// get product qty
+		inventory, _ := models.GetProductInventory(productId)
+		prodQty := inventory.Qty
+		// subtract item qty from product qty
+		updatedQty := prodQty - qty
+		// update product inventory
+		_, err := models.UpdateProductInventory(productId, updatedQty)
+		if err != nil {
+			log.Printf("ERROR: Updating Inventory for Product %d %d", productId, updatedQty)
+		}
+	}
 }
 
 var readonly = false
