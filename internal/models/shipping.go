@@ -9,6 +9,7 @@ type Shipping struct {
 	Country    string `json:"country"`
 	Zip        string `json:"zip"`
 	Phone      string `json:"phone"`
+	Notes      string `json:"notes"`
 }
 
 func AddShipping(newAddress *Shipping) (int, error) {
@@ -21,7 +22,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 	//	return -1, nil
 	//}
 
-	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone,notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 
 	if err != nil {
 		return -1, err
@@ -29,7 +30,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 
 	defer stmt.Close()
 
-	res, err := stmt.Exec(newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone)
+	res, err := stmt.Exec(newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone, newAddress.Notes)
 
 	if err != nil {
 		return -1, err
