@@ -130,6 +130,7 @@ func main() {
 	showcsv := flag.Bool("showcsv", false, "a bool")
 	getproducts := flag.Bool("getproducts", false, "a bool")
 	csvPath := flag.String("csv", "", "path to csv")
+	orderRef := flag.String("setpaid", "", "order reference")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -149,6 +150,11 @@ func main() {
 	if *getproducts {
 		fmt.Println("SHOW PRODUCTS")
 		showProducts()
+		os.Exit(1)
+	}
+
+	if len(*orderRef) > 0 {
+		markPaidOrder(*orderRef)
 		os.Exit(1)
 	}
 
