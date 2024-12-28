@@ -15,6 +15,7 @@ const (
 	InStock ProductStatus = iota
 	LowStock
 	OutofStock
+	Preorder
 )
 
 type Product struct {
