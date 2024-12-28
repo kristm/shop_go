@@ -201,7 +201,7 @@ type mailer func(*models.Order, *models.Customer, *config.Config) (bool, error)
 type configLoader func() (*config.Config, error)
 type connectDB func(*config.Config) error
 
-func setupRouter(m mailer, cl configLoader, cdb connectDB) *gin.Engine {
+func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config.Config) {
 	cfg, _ := cl()
 	err := cdb(cfg)
 	checkErr(err)
@@ -230,12 +230,21 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) *gin.Engine {
 		v1.GET("vouchers/:code", getVoucherByCode)
 		v1.POST("orders", createOrder(m, cfg))
 	}
-	return router
+
+	if len(cfg.SSL_CERT) > 0 && len(cfg.SSL_KEY) > 0 {
+		return router, cfg
+	}
+
+	return router, nil
 }
 
 func main() {
 
-	r := setupRouter(mail.NotifyOrder, loadConfig, models.ConnectDatabase)
+	r, cfg := setupRouter(mail.NotifyOrder, loadConfig, models.ConnectDatabase)
+
+	if cfg != nil {
+		r.RunTLS(":8080", cfg.SSL_CERT, cfg.SSL_KEY)
+	}
 
 	r.Run()
 }
