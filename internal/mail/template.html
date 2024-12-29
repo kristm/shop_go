@@ -1,23 +1,19 @@
 <!DOCTYPE html>
 <html>
   <body>
-    Order
-      <dl>
-        <dt>Reference</dt>
-        <dd>{{.ReferenceCode}}</dd>
-        <dt>Payment Reference</dt>
-        <dd>{{.PaymentReference}}</dd>
-        <dt>Amount</dt>
-        <dd>{{.Amount}}</dd>
-        <dt>Status</dt>
-        <dd>{{.Status}}</dd>
-      </dl>
+    <pre id="order">
+      <h4>Order Reference {{.Referencecode}}</h4>
+      Amount: {{.Amount}}
+      Payment Reference: {{.PaymentReference}}
+      Status: {{.Status}}
 
+      <small id="guide"><a href="https://shop.yakalstmoving.co/guide">Ordering guide</a></small>
       Items
       {{range .Items}}
         <div style="display: flex;">
           {{.ProductName}} x {{.Qty}} ({{.Price}})
         </div>
       {{end}}
+    </pre>
   </body>
 </html>
