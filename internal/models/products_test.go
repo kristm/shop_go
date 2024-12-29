@@ -205,10 +205,11 @@ func TestSetPreorder(t *testing.T) {
 
 	//Preorder status can only be applied to products with 0 inventory
 	_, err = UpdateProductInventory(id1, 1)
+	// updating product inventory does not update product status
 	require.NoError(t, err)
-	//status := getProductStatus(&prod1)
+	status := getProductStatus(&prod1)
 	notok, err := SetPreorder(&prod1)
 	require.NoError(t, err)
 	assert.Equal(t, false, notok)
-	//assert.Equal(t, LowStock, status)
+	assert.Equal(t, LowStock, status)
 }

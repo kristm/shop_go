@@ -161,16 +161,16 @@ func GetProductBySku(sku string) (Product, error) {
 }
 
 func getProductStatus(product *Product) ProductStatus {
-	if product.Status == Preorder {
-		//Preorder is a special status not only derived from qty
-		return Preorder
-	}
 	var status ProductStatus
 	inventory, _ := GetProductInventory(product.Id)
 	qty := inventory.Qty
 
 	switch {
 	case qty <= 0:
+		if product.Status == Preorder {
+			//Preorder is a special status
+			return Preorder
+		}
 		status = OutofStock
 	case qty < 10:
 		status = LowStock
