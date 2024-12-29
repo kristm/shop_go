@@ -11,10 +11,16 @@ import (
 	gomail "github.com/Shopify/gomail"
 )
 
+func StatusLabel(status models.OrderStatus) string {
+	return [...]string{"Pending", "Cancelled", "Paid"}[status]
+}
+
 func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Config) (bool, error) {
 
 	var err error
-	t, err := template.ParseFiles("internal/mail/template.html")
+	t, err := template.New("template.html").Funcs(template.FuncMap{
+		"StatusLabel": StatusLabel,
+	}).ParseFiles("internal/mail/template.html")
 	if err != nil {
 		log.Println(err)
 	}
