@@ -124,6 +124,25 @@ func markPaidOrder(reference string) {
 	}
 }
 
+func setPreorderFromSku(sku string) {
+	product, err := models.GetProductBySku(sku)
+	if err != nil {
+		log.Printf("Product does not exist %s", sku)
+		return
+	}
+
+	_, _ = models.UpdateProductInventory(product.Id, 0)
+
+	ok, err := models.SetPreorder(&product)
+	if err != nil {
+		log.Printf("Error updating status %s", err)
+	}
+	if ok {
+		log.Printf("Updated Product Status to Preorder: %d", product.Id)
+		return
+	}
+}
+
 var readonly = false
 
 func main() {
@@ -131,6 +150,7 @@ func main() {
 	getproducts := flag.Bool("getproducts", false, "a bool")
 	csvPath := flag.String("csv", "", "path to csv")
 	orderRef := flag.String("setpaid", "", "order reference")
+	preorder := flag.String("setpreorder", "", "product sku")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -155,6 +175,11 @@ func main() {
 
 	if len(*orderRef) > 0 {
 		markPaidOrder(*orderRef)
+		os.Exit(1)
+	}
+
+	if len(*preorder) > 0 {
+		setPreorderFromSku(*preorder)
 		os.Exit(1)
 	}
 

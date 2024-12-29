@@ -113,14 +113,14 @@ func GetProducts(category_id int) ([]Product, error) {
 }
 
 func GetProductById(id int) (Product, error) {
-	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents FROM products WHERE id = ?")
+	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents, status FROM products WHERE id = ?")
 	if err != nil {
 		return Product{}, err
 	}
 	defer stmt.Close()
 
 	product := Product{}
-	sqlErr := stmt.QueryRow(id).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
+	sqlErr := stmt.QueryRow(id).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price, &product.Status)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
 			return Product{}, nil
@@ -137,14 +137,14 @@ func GetProductById(id int) (Product, error) {
 }
 
 func GetProductBySku(sku string) (Product, error) {
-	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents FROM products WHERE sku = ?")
+	stmt, err := DB.Prepare("SELECT id, name, sku, description, category_id, price_in_cents, status FROM products WHERE sku = ?")
 	if err != nil {
 		return Product{}, err
 	}
 	defer stmt.Close()
 
 	product := Product{}
-	sqlErr := stmt.QueryRow(sku).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price)
+	sqlErr := stmt.QueryRow(sku).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price, &product.Status)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
 			return Product{}, nil
@@ -161,6 +161,10 @@ func GetProductBySku(sku string) (Product, error) {
 }
 
 func getProductStatus(product *Product) ProductStatus {
+	if product.Status == Preorder {
+		//Preorder is a special status not only derived from qty
+		return Preorder
+	}
 	var status ProductStatus
 	inventory, _ := GetProductInventory(product.Id)
 	qty := inventory.Qty
@@ -177,13 +181,32 @@ func getProductStatus(product *Product) ProductStatus {
 	return status
 }
 
-func SetPreorder(product *Product) bool {
+func SetPreorder(product *Product) (bool, error) {
 	if product.Status == OutofStock {
 		product.Status = Preorder
-		return true
+
+		tx, err := DB.Begin()
+		if err != nil {
+			return false, err
+		}
+
+		stmt, err := tx.Prepare("UPDATE products SET status = ? WHERE id = ?")
+		if err != nil {
+			return false, err
+		}
+
+		defer stmt.Close()
+
+		_, err = stmt.Exec(Preorder, product.Id)
+		if err != nil {
+			return false, err
+		}
+
+		tx.Commit()
+		return true, nil
 	}
 
-	return false
+	return false, nil
 
 }
 
