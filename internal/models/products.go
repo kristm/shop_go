@@ -166,7 +166,7 @@ func getProductStatus(product *Product) ProductStatus {
 	qty := inventory.Qty
 
 	switch {
-	case qty < 0:
+	case qty <= 0:
 		status = OutofStock
 	case qty < 10:
 		status = LowStock
@@ -175,6 +175,16 @@ func getProductStatus(product *Product) ProductStatus {
 	}
 
 	return status
+}
+
+func SetPreorder(product *Product) bool {
+	if product.Status == OutofStock {
+		product.Status = Preorder
+		return true
+	}
+
+	return false
+
 }
 
 // move this to cli tool

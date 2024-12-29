@@ -184,3 +184,29 @@ func TestGetProductStatus(t *testing.T) {
 	assert.Equal(t, LowStock, stat2)
 	assert.Equal(t, OutofStock, stat3)
 }
+
+func TestSetPreorder(t *testing.T) {
+	preorderProduct := Product{
+		Sku:         "PRE",
+		Name:        "Calendar",
+		Description: "",
+		CategoryId:  4,
+		Price:       35000,
+		Status:      OutofStock,
+	}
+
+	id1, err := AddProductWithQty(preorderProduct, 0)
+	require.NoError(t, err)
+	prod1, _ := GetProductById(id1)
+	ok := SetPreorder(&prod1)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, Preorder, prod1.Status)
+
+	//Preorder status can only be applied to products with 0 inventory
+	_, err = UpdateProductInventory(id1, 1)
+	require.NoError(t, err)
+	status := getProductStatus(&prod1)
+	notok := SetPreorder(&prod1)
+	assert.Equal(t, false, notok)
+	assert.Equal(t, LowStock, status)
+}
