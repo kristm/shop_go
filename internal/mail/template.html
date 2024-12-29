@@ -7,13 +7,13 @@
       Payment Reference: {{.PaymentReference}}
       Status: {{StatusLabel .Status}}
 
+      Items:
+      <ul style="display: inline-table">
+        {{range .Items}}
+          <li> {{.ProductName}} x {{.Qty}} ({{.Price}}) </li>
+        {{end}}
+      </ul>
       <small id="guide"><a href="https://shop.yakalstmoving.co/guide">Ordering guide</a></small>
-      Items
-      {{range .Items}}
-        <div style="display: flex;">
-          {{.ProductName}} x {{.Qty}} ({{.Price}})
-        </div>
-      {{end}}
     </pre>
   </body>
 </html>
