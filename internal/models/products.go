@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -182,6 +183,9 @@ func getProductStatus(product *Product) ProductStatus {
 }
 
 func SetPreorder(product *Product) (bool, error) {
+	if product.Status == Preorder {
+		return false, errors.New("Already a Preorder product")
+	}
 	if product.Status == OutofStock {
 		product.Status = Preorder
 
