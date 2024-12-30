@@ -47,7 +47,7 @@ func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Con
 	m := gomail.NewMessage()
 	m.SetHeader("From", cfg.EMAIL_FROM)
 	m.SetHeader("To", customer.Email)
-	m.SetAddressHeader("Cc", cfg.EMAIL_REPORTS, "Orders")
+	m.SetAddressHeader("Bcc", cfg.EMAIL_REPORTS, "Orders")
 	m.SetHeader("Subject", fmt.Sprintf("New Order: %s %s %s", customer.FirstName, customer.LastName, customer.Email))
 	m.SetBody("text/html", emailBody)
 	log.Printf("EMAIL %v", emailBody)
