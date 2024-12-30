@@ -102,6 +102,8 @@ func GetProducts(category_id int) ([]Product, error) {
 			return nil, err
 		}
 
+		product.Status = getProductStatus(&product)
+
 		photos, _ := GetPhotosById(product.Id)
 		product.Photos = photos
 
