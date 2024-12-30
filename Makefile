@@ -31,3 +31,6 @@ shell:
 
 run_shop:
 	docker run --rm -p 8080:8080 shop_go
+
+build:
+	GIN_MODE=release go build cmd/main.go
