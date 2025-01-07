@@ -3,6 +3,7 @@
   <body>
     {{ with .customer }}
       <p>Hello {{.FirstName}}</p>
+      <p>Thank you for your order.</p>
     {{ end }}
     <pre id="order">
       {{ with .order }}
@@ -19,7 +20,10 @@
       </ul>
       {{ end }}
       {{ with .store }}
-      <p><a href="{{.Link}}">{{.LinkLabel}}</a></p>
+      <p>
+        <a href="{{.Url}}/order/{{$.order.ReferenceCode}}">Check the status of your order here</a>
+        <a href="{{.Link}}">{{.LinkLabel}}</a>
+      </p>
       <img src="{{.Logo}}"/>
       {{ end }}
     </pre>

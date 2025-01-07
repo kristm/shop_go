@@ -11,6 +11,7 @@ type Config struct {
 	EMAIL_LOGO       string `mapstructure:"EMAIL_LOGO"`
 	EMAIL_LINK       string `mapstructure:"EMAIL_LINK"`
 	EMAIL_LINK_LABEL string `mapstructure:"EMAIL_LINK_LABEL"`
+	STORE_URL        string `mapstructure:"STORE_URL"`
 	SSL_CERT         string `mapstructure:"SSL_CERT"`
 	SSL_KEY          string `mapstructure:"SSL_KEY"`
 }

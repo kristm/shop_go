@@ -15,6 +15,7 @@ type Store struct {
 	Logo      string
 	Link      string
 	LinkLabel string
+	Url       string
 }
 
 type M map[string]interface{}
@@ -46,7 +47,7 @@ func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Con
 
 	order.Amount = computedAmount
 
-	store := Store{Logo: cfg.EMAIL_LOGO, Link: cfg.EMAIL_LINK}
+	store := Store{Logo: cfg.EMAIL_LOGO, Link: cfg.EMAIL_LINK, LinkLabel: cfg.EMAIL_LINK_LABEL, Url: cfg.STORE_URL}
 
 	if err = t.Execute(&tpl, M{"order": order, "customer": customer, "store": store}); err != nil {
 		log.Println(err)
