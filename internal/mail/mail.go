@@ -11,6 +11,14 @@ import (
 	gomail "github.com/Shopify/gomail"
 )
 
+type Store struct {
+	Logo      string
+	Link      string
+	LinkLabel string
+}
+
+type M map[string]interface{}
+
 func StatusLabel(status models.OrderStatus) string {
 	return [...]string{"Pending", "Cancelled", "Paid"}[status]
 }
@@ -38,7 +46,9 @@ func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Con
 
 	order.Amount = computedAmount
 
-	if err = t.Execute(&tpl, order); err != nil {
+	store := Store{Logo: cfg.EMAIL_LOGO, Link: cfg.EMAIL_LINK}
+
+	if err = t.Execute(&tpl, M{"order": order, "customer": customer, "store": store}); err != nil {
 		log.Println(err)
 	}
 

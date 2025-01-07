@@ -3,13 +3,16 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	DB             string `mapstructure:"DB"`
-	TEST_DB        string `mapstructure:"TEST_DB"`
-	EMAIL_FROM     string `mapstructure:"EMAIL_FROM"`
-	EMAIL_PASSWORD string `mapstructure:"EMAIL_PASSWORD"`
-	EMAIL_REPORTS  string `mapstructure:"EMAIL_REPORTS"`
-	SSL_CERT       string `mapstructure:"SSL_CERT"`
-	SSL_KEY        string `mapstructure:"SSL_KEY"`
+	DB               string `mapstructure:"DB"`
+	TEST_DB          string `mapstructure:"TEST_DB"`
+	EMAIL_FROM       string `mapstructure:"EMAIL_FROM"`
+	EMAIL_PASSWORD   string `mapstructure:"EMAIL_PASSWORD"`
+	EMAIL_REPORTS    string `mapstructure:"EMAIL_REPORTS"`
+	EMAIL_LOGO       string `mapstructure:"EMAIL_LOGO"`
+	EMAIL_LINK       string `mapstructure:"EMAIL_LINK"`
+	EMAIL_LINK_LABEL string `mapstructure:"EMAIL_LINK_LABEL"`
+	SSL_CERT         string `mapstructure:"SSL_CERT"`
+	SSL_KEY          string `mapstructure:"SSL_KEY"`
 }
 
 func LoadConfig(path string) (Config, error) {

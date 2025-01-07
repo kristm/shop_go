@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
   <body>
+    {{ with .customer }}
+      <p>Hello {{.FirstName}}</p>
+    {{ end }}
     <pre id="order">
+      {{ with .order }}
       <h4>Order Reference {{.ReferenceCode}}</h4>
       Amount: {{.Amount}}
       Payment Reference: {{.PaymentReference}}
@@ -13,7 +17,11 @@
           <li> {{.ProductName}} x {{.Qty}} ({{.Price}}) </li>
         {{end}}
       </ul>
-      <p><a href="https://shop.yakalstmoving.co/guide">Ordering guide</a></p>
+      {{ end }}
+      {{ with .store }}
+      <p><a href="{{.Link}}">{{.LinkLabel}}</a></p>
+      <img src="{{.Logo}}"/>
+      {{ end }}
     </pre>
   </body>
 </html>
