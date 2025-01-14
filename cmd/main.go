@@ -7,6 +7,7 @@ import (
 	"shop_go/internal/mail"
 	"shop_go/internal/models"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -18,9 +19,10 @@ type OrderPayload struct {
 	Customer         models.Customer
 	Socials          models.Socials
 	Shipping         models.Shipping
-	Voucher          string `json:"voucher"`
-	PaymentReference string `json:"reference"`
-	DeviceProfile    string `json:"device_profile"`
+	Voucher          string  `json:"voucher"`
+	PaymentReference string  `json:"reference"`
+	DeviceProfile    string  `json:"device_profile"`
+	CartAge          float64 `json:"cart_age"`
 }
 
 func checkErr(err error) {
@@ -145,10 +147,12 @@ func createOrder(m mailer, cfg *config.Config) gin.HandlerFunc {
 		}
 
 		// create analytics
+		cartAge := strings.Join([]string{"cart_age=", strconv.FormatFloat(requestBody.CartAge, 'f', 2, 64)}, "")
 		_, err = models.AddAnalytics(&models.Analytics{
 			CustomerId: customerId,
 			IpAddress:  c.ClientIP(),
 			Device:     requestBody.DeviceProfile,
+			Others:     cartAge,
 		})
 		if err != nil {
 			log.Printf("ERROR creating analytics record %v\n", err)
