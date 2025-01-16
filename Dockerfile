@@ -17,6 +17,7 @@ COPY go.mod ./
 RUN go mod download
 
 COPY . ./
+RUN mv .env-docker .env
 RUN ls -al
 
 RUN sqlite3 internal/database/shop.db
