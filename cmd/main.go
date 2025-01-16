@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand/v2"
 	"net/http"
 	"shop_go/internal/config"
 	"shop_go/internal/mail"
@@ -10,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	cache "github.com/chenyahui/gin-cache"
+	"github.com/chenyahui/gin-cache/persist"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -53,6 +56,9 @@ func getProducts(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No records found"})
 		return
 	} else {
+		rand.Shuffle(len(products), func(i, j int) {
+			products[i], products[j] = products[j], products[i]
+		})
 		c.JSON(http.StatusOK, gin.H{"data": products})
 	}
 }
@@ -211,6 +217,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 	checkErr(err)
 
 	router := gin.Default()
+	memoryStore := persist.NewMemoryStore(1 * time.Minute)
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "OPTIONS"},
@@ -227,7 +234,8 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 	{
 		v1.GET("categories", getCategories)
 		v1.GET("categories/:id", getCategoryById)
-		v1.GET("products/category/:category_id", getProducts)
+		v1.GET("products/category/:category_id",
+			cache.CacheByRequestURI(memoryStore, 3*time.Hour), getProducts)
 		v1.GET("products/:id", getProductById)
 		v1.GET("products/sku/:sku", getProductBySku)
 		v1.GET("orders/:reference_code", getOrderByReference)
