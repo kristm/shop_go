@@ -15,6 +15,7 @@ import (
 	"github.com/chenyahui/gin-cache/persist"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 type OrderPayload struct {
@@ -217,7 +218,10 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 	checkErr(err)
 
 	router := gin.Default()
-	memoryStore := persist.NewMemoryStore(1 * time.Minute)
+	redisStore := persist.NewRedisStore(redis.NewClient(&redis.Options{
+		Network: "tcp",
+		Addr:    "127.0.0.1:6379",
+	}))
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "OPTIONS"},
@@ -235,7 +239,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 		v1.GET("categories", getCategories)
 		v1.GET("categories/:id", getCategoryById)
 		v1.GET("products/category/:category_id",
-			cache.CacheByRequestURI(memoryStore, 3*time.Hour), getProducts)
+			cache.CacheByRequestURI(redisStore, 6*time.Hour), getProducts)
 		v1.GET("products/:id", getProductById)
 		v1.GET("products/sku/:sku", getProductBySku)
 		v1.GET("orders/:reference_code", getOrderByReference)
