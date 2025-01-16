@@ -19,6 +19,7 @@ RUN go mod download
 COPY . ./
 RUN ls -al
 
+RUN sqlite3 internal/database/shop.db
 RUN make migrate_up
 #
 RUN make build
