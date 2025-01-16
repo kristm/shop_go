@@ -21,7 +21,7 @@ RUN ls -al
 
 RUN make migrate_up
 #
-RUN go build cmd/main.go
+RUN make build
 #
 EXPOSE 8080
 
