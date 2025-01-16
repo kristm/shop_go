@@ -9,7 +9,7 @@ import (
 type Category struct {
 	Id      int    `json:"id"`
 	Name    string `json:"name"`
-	Enabled bool   `json:"enabled"`
+	Enabled bool   `json:"enabled,omitempty"`
 }
 
 func AddCategory(category *Category) error {
