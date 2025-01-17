@@ -10,7 +10,7 @@ type Voucher struct {
 	TypeId  int    `json:"voucher_type_id"`
 	Code    string `json:"code"`
 	Valid   bool   `json:"valid"`
-	Expires string `json:"expires_at"`
+	Expires string `json:"expires_at,omitempty"`
 }
 
 func AddVoucher(voucher *Voucher) error {
