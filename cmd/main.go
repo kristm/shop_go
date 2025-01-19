@@ -120,7 +120,10 @@ func getVoucherByCode(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"valid": false, "error": err})
 	} else {
-		voucher, _ := models.GetVoucherByCode(voucherCode)
+		voucher, err := models.GetVoucherByCode(voucherCode)
+		if err != nil {
+			log.Printf("Voucher Error %v", err)
+		}
 		c.JSON(http.StatusOK, gin.H{"valid": ok, "voucher": voucher})
 	}
 }

@@ -10,6 +10,7 @@ type Voucher struct {
 	TypeId  int    `json:"voucher_type_id"`
 	Code    string `json:"code"`
 	Valid   bool   `json:"valid"`
+	Amount  int    `json:"amount,omitempty"`
 	Expires string `json:"expires_at,omitempty"`
 }
 
@@ -40,13 +41,13 @@ func AddVoucher(voucher *Voucher) error {
 }
 
 func GetVoucherByCode(code string) (*Voucher, error) {
-	stmt, err := DB.Prepare("SELECT id, voucher_type_id, code, valid FROM vouchers WHERE code = ?")
+	stmt, err := DB.Prepare("SELECT v.id, v.voucher_type_id, v.code, v.valid, vt.amount FROM vouchers v LEFT JOIN voucher_types vt ON v.voucher_type_id = vt.id WHERE code = ?")
 	if err != nil {
 		return nil, err
 	}
 
 	voucher := Voucher{}
-	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid)
+	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.Amount)
 	if sqlErr != nil {
 		return nil, sqlErr
 	}
