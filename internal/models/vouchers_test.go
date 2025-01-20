@@ -64,7 +64,8 @@ func TestApplyVoucher(t *testing.T) {
 		Valid:   true,
 		Expires: validMonth.Format(time.RFC3339),
 	})
-	discountedPrice, err := ApplyVoucher("50OFF", 165000.00)
+	price := 165000.00
+	err := ApplyVoucher("50OFF", &price)
 	require.NoError(t, err)
-	assert.Equal(t, 82500.00, discountedPrice)
+	assert.Equal(t, 82500.00, price)
 }

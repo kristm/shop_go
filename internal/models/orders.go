@@ -40,14 +40,21 @@ type OrderItem struct {
 // TODO
 func (order Order) MarshalJSON() ([]byte, error) {
 	type Alias Order
-	computedAmount := 0.0
+	var computedAmount float64
 	for _, item := range order.Items {
 		total := float64(item.Qty) * item.Price
 		computedAmount += total
 	}
+
 	log.Printf("MARSHAL JSONNNNNN ORDER %v", computedAmount)
-	discountedAmount, err := ApplyVoucher(order.VoucherCode, computedAmount)
-	log.Printf("DISCOUNTED AMOUNT %.2f %v", discountedAmount, err)
+	if order.VoucherCode != "" {
+		err := ApplyVoucher(order.VoucherCode, &computedAmount)
+		log.Printf("DISCOUNTED AMOUNT %.2f %v", computedAmount, err)
+		if err != nil {
+			log.Printf("Error applying voucher discount %s", err)
+		}
+	}
+
 	return json.Marshal(&struct {
 		*Alias
 		Amount float64 `json:"amount"`
