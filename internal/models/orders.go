@@ -122,13 +122,13 @@ func generateReferenceCode() string {
 }
 
 func GetOrderByReference(ref string) (*Order, error) {
-	stmt, err := DB.Prepare("SELECT id, shipping_id, customer_id, reference_code, payment_reference, amount_in_cents, status FROM orders WHERE reference_code = ?")
+	stmt, err := DB.Prepare("SELECT id, shipping_id, customer_id, reference_code, payment_reference, amount_in_cents, status, voucher FROM orders WHERE reference_code = ?")
 	if err != nil {
 		return nil, err
 	}
 
 	order := Order{}
-	sqlErr := stmt.QueryRow(ref).Scan(&order.Id, &order.ShippingId, &order.CustomerId, &order.ReferenceCode, &order.PaymentReference, &order.Amount, &order.Status)
+	sqlErr := stmt.QueryRow(ref).Scan(&order.Id, &order.ShippingId, &order.CustomerId, &order.ReferenceCode, &order.PaymentReference, &order.Amount, &order.Status, &order.VoucherCode)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
 			return nil, nil
