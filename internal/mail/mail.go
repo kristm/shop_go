@@ -45,6 +45,13 @@ func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Con
 		computedAmount += order.Items[i].Price * float64(order.Items[i].Qty)
 	}
 
+	if order.VoucherCode != "" {
+		err := models.ApplyVoucher(order.VoucherCode, &computedAmount)
+		if err != nil {
+			log.Printf("Error applying voucher discount %s", err)
+		}
+	}
+
 	order.Amount = computedAmount
 
 	store := Store{Logo: cfg.EMAIL_LOGO, Link: cfg.EMAIL_LINK, LinkLabel: cfg.EMAIL_LINK_LABEL, Url: cfg.STORE_URL}
