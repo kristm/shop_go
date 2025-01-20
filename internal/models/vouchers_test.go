@@ -54,3 +54,17 @@ func TestValidateVoucher(t *testing.T) {
 	assert.Equal(t, false, invalidVoucher)
 	assert.Equal(t, true, nowVoucher)
 }
+
+func TestApplyVoucher(t *testing.T) {
+	now := time.Now()
+	validMonth := now.AddDate(0, 1, 0)
+	_ = AddVoucher(&Voucher{
+		TypeId:  2,
+		Code:    "50OFF",
+		Valid:   true,
+		Expires: validMonth.Format(time.RFC3339),
+	})
+	discountedPrice, err := ApplyVoucher("50OFF", 165000.00)
+	require.NoError(t, err)
+	assert.Equal(t, 82500.00, discountedPrice)
+}

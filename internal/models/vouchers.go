@@ -5,6 +5,10 @@ import (
 	"log"
 )
 
+const LESS30 = 1
+const LESS50 = 2
+const FREESHIPPING = 3
+
 type Voucher struct {
 	Id      int    `json:"id"`
 	TypeId  int    `json:"voucher_type_id"`
@@ -74,4 +78,26 @@ func ValidateVoucher(code string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func ApplyVoucher(code string, price float64) (float64, error) {
+	stmt, err := DB.Prepare("SELECT v.voucher_type_id, vt.amount FROM vouchers v LEFT JOIN voucher_types vt ON v.voucher_type_id = vt.id WHERE v.code = ?")
+
+	if err != nil {
+		log.Printf("err %v", err)
+		return 0.0, err
+	}
+
+	var amount int
+	var voucher_type_id int
+	sqlErr := stmt.QueryRow(code).Scan(&voucher_type_id, &amount)
+	if sqlErr != nil {
+		return 0.0, sqlErr
+	}
+
+	if voucher_type_id < FREESHIPPING {
+		return price - (price * (float64(amount) * 0.01)), nil
+	}
+
+	return 0.0, nil
 }

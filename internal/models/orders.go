@@ -46,6 +46,8 @@ func (order Order) MarshalJSON() ([]byte, error) {
 		computedAmount += total
 	}
 	log.Printf("MARSHAL JSONNNNNN ORDER %v", computedAmount)
+	discountedAmount, err := ApplyVoucher(order.VoucherCode, computedAmount)
+	log.Printf("DISCOUNTED AMOUNT %.2f %v", discountedAmount, err)
 	return json.Marshal(&struct {
 		*Alias
 		Amount float64 `json:"amount"`
