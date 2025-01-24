@@ -14,9 +14,12 @@ const (
 
 var (
 	normal = lipgloss.Color("#EEEEEE")
+	base   = lipgloss.NewStyle().Foreground(normal)
 
-	base      = lipgloss.NewStyle().Foreground(normal)
-	highlight = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	background = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#CCCCCC"}
+	highlight  = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#61D4C6"}
+
+	viewport viewport.Model
 
 	statusBarStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
@@ -59,7 +62,7 @@ var (
 		BorderForeground(highlight).
 		Padding(0, 1)
 
-	activeTab = tab.Border(activeTabBorder, true)
+	activeTab = tab.Border(activeTabBorder, true).BorderForeground(highlight)
 
 	tabGap = tab.
 		BorderTop(false).
@@ -95,6 +98,12 @@ func main() {
 		gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
 		row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
 		doc.WriteString(row + "\n\n")
+	}
+	{
+		viewport := viewport.New(width, 50)
+		viewport.YPosition = 20
+		viewport.SetContent("HELLO")
+		doc.WriteString(viewport)
 	}
 
 	fmt.Println(docStyle.Render(doc.String()))
