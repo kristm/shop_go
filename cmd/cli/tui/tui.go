@@ -101,10 +101,10 @@ func main() {
 		doc.WriteString(row + "\n\n")
 	}
 	{
-		vp := viewport.New(width, 50)
+		vp := viewport.New(width, 20)
 		vp.YPosition = 20
 		vp.SetContent("HELLO")
-		doc.WriteString(vp)
+		doc.WriteString(vp.View())
 	}
 
 	fmt.Println(docStyle.Render(doc.String()))
