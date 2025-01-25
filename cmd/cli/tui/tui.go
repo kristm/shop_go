@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -19,7 +20,7 @@ var (
 	background = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#CCCCCC"}
 	highlight  = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#61D4C6"}
 
-	viewport viewport.Model
+	vp viewport.Model
 
 	statusBarStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
@@ -100,10 +101,10 @@ func main() {
 		doc.WriteString(row + "\n\n")
 	}
 	{
-		viewport := viewport.New(width, 50)
-		viewport.YPosition = 20
-		viewport.SetContent("HELLO")
-		doc.WriteString(viewport)
+		vp := viewport.New(width, 50)
+		vp.YPosition = 20
+		vp.SetContent("HELLO")
+		doc.WriteString(vp)
 	}
 
 	fmt.Println(docStyle.Render(doc.String()))
