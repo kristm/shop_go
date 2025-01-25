@@ -178,7 +178,7 @@ func GetOrderByReference(ref string) (*Order, error) {
 }
 
 func GetOrders(customerId int) ([]Order, error) {
-	stmt, err := DB.Prepare("SELECT id, customer_id, reference_code, amount_in_cents FROM orders WHERE customer_id = ?")
+	stmt, err := DB.Prepare("SELECT id, customer_id, reference_code, amount_in_cents, status FROM orders WHERE customer_id = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func GetOrders(customerId int) ([]Order, error) {
 
 	for rows.Next() {
 		order := Order{}
-		err = rows.Scan(&order.Id, &order.CustomerId, &order.Amount, &order.Status)
+		err = rows.Scan(&order.Id, &order.CustomerId, &order.ReferenceCode, &order.Amount, &order.Status)
 
 		if err != nil {
 			return nil, err

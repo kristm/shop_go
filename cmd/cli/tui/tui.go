@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"shop_go/internal/config"
 	"shop_go/internal/models"
 	"strconv"
 	"strings"
@@ -80,6 +82,11 @@ var (
 )
 
 func main() {
+	cfg, err := config.LoadConfig("../../../.env")
+	if err != nil {
+		log.Printf("ERROR LOADING CONFIG")
+	}
+	_ = models.ConnectDatabase(&cfg)
 	doc := strings.Builder{}
 	{
 		w := lipgloss.Width
@@ -118,7 +125,10 @@ func main() {
 			{Title: "Status", Width: 10},
 		}
 
-		orders, _ := models.GetOrders(2)
+		orders, err := models.GetOrders(2)
+		if err != nil {
+			log.Printf("ORDERS ERROR %v", err)
+		}
 		rows := []table.Row{}
 
 		for _, order := range orders {
