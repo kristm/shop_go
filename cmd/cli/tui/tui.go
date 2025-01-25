@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -20,7 +21,12 @@ var (
 	background = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#CCCCCC"}
 	highlight  = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#61D4C6"}
 
+	t  table.Model
 	vp viewport.Model
+
+	tableStyle = lipgloss.NewStyle().
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240"))
 
 	statusBarStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
@@ -75,8 +81,8 @@ func main() {
 	doc := strings.Builder{}
 	{
 		w := lipgloss.Width
-		leftStatus := statusStyle.Render("\\\\\\\\")
-		rightStatus := statusStyle.Render("////")
+		leftStatus := statusStyle.Render("<<<<")
+		rightStatus := statusStyle.Render(">>>>")
 		statusVal := statusText.
 			Width(width - w(leftStatus) - w(rightStatus) - 1).Render("SHOP DASHBOARD")
 
@@ -100,10 +106,44 @@ func main() {
 		row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
 		doc.WriteString(row + "\n\n")
 	}
+
+	{
+		columns := []table.Column{
+			{Title: "Reference", Width: 10},
+			{Title: "Amount", Width: 10},
+			{Title: "Status", Width: 10},
+		}
+
+		rows := []table.Row{
+			{"DBCFB0368F", "1340.00", "Pending"},
+			{"8163084D2", "600.00", "Pending"},
+			{"FFC159C105", "600.00", "Pending"},
+			{"31561A0270", "1600.00", "Paid"},
+		}
+
+		t = table.New(
+			table.WithColumns(columns),
+			table.WithRows(rows),
+			table.WithFocused(true),
+			table.WithHeight(10),
+		)
+		s := table.DefaultStyles()
+		s.Header = s.Header.
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240")).
+			BorderBottom(true).
+			Bold(false)
+		s.Selected = s.Selected.
+			Foreground(lipgloss.Color("229")).
+			Background(lipgloss.Color("57")).
+			Bold(false)
+		t.SetStyles(s)
+	}
+
 	{
 		vp := viewport.New(width, 20)
 		vp.YPosition = 20
-		vp.SetContent("HELLO")
+		vp.SetContent(t.View())
 		doc.WriteString(vp.View())
 	}
 
