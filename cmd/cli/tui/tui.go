@@ -121,8 +121,8 @@ func main() {
 	{
 		columns := []table.Column{
 			{Title: "Reference", Width: 10},
-			{Title: "Customer Id", Width: 10},
-			{Title: "Amount", Width: 10},
+			{Title: "Customer", Width: 10},
+			{Title: "Amount", Width: 15},
 			{Title: "Status", Width: 10},
 		}
 
@@ -133,7 +133,7 @@ func main() {
 		rows := []table.Row{}
 
 		for _, order := range orders {
-			amount := fmt.Sprintf("%.2f", order.Amount)
+			amount := fmt.Sprintf("%.2f", order.Amount/100.00)
 			status := strconv.Itoa(int(order.Status))
 			customerId := strconv.Itoa(order.CustomerId)
 			newRow := []string{order.ReferenceCode, customerId, amount, status}
