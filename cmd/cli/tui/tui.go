@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"shop_go/internal/models"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -99,8 +101,10 @@ func main() {
 			lipgloss.Top,
 			activeTab.Render("Orders"),
 			tab.Render("Customers"),
-			tab.Render("Address"),
+			tab.Render("Addresses"),
+			tab.Render("Products"),
 			tab.Render("Inventory"),
+			tab.Render("Vouchers"),
 		)
 		gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
 		row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
@@ -114,11 +118,14 @@ func main() {
 			{Title: "Status", Width: 10},
 		}
 
-		rows := []table.Row{
-			{"DBCFB0368F", "1340.00", "Pending"},
-			{"8163084D2", "600.00", "Pending"},
-			{"FFC159C105", "600.00", "Pending"},
-			{"31561A0270", "1600.00", "Paid"},
+		orders, _ := models.GetOrders(2)
+		rows := []table.Row{}
+
+		for _, order := range orders {
+			amount := fmt.Sprintf("%.2f", order.Amount)
+			status := strconv.Itoa(int(order.Status))
+			newRow := []string{order.ReferenceCode, amount, status}
+			rows = append(rows, newRow)
 		}
 
 		t = table.New(
