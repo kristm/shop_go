@@ -121,11 +121,12 @@ func main() {
 	{
 		columns := []table.Column{
 			{Title: "Reference", Width: 10},
+			{Title: "Customer Id", Width: 10},
 			{Title: "Amount", Width: 10},
 			{Title: "Status", Width: 10},
 		}
 
-		orders, err := models.GetOrders(2)
+		orders, err := models.GetOrdersByStatus(0)
 		if err != nil {
 			log.Printf("ORDERS ERROR %v", err)
 		}
@@ -134,7 +135,8 @@ func main() {
 		for _, order := range orders {
 			amount := fmt.Sprintf("%.2f", order.Amount)
 			status := strconv.Itoa(int(order.Status))
-			newRow := []string{order.ReferenceCode, amount, status}
+			customerId := strconv.Itoa(order.CustomerId)
+			newRow := []string{order.ReferenceCode, customerId, amount, status}
 			rows = append(rows, newRow)
 		}
 
@@ -142,7 +144,7 @@ func main() {
 			table.WithColumns(columns),
 			table.WithRows(rows),
 			table.WithFocused(true),
-			table.WithHeight(10),
+			table.WithHeight(20),
 		)
 		s := table.DefaultStyles()
 		s.Header = s.Header.
@@ -158,7 +160,7 @@ func main() {
 	}
 
 	{
-		vp := viewport.New(width, 20)
+		vp := viewport.New(width, 30)
 		vp.YPosition = 20
 		vp.SetContent(t.View())
 		doc.WriteString(vp.View())

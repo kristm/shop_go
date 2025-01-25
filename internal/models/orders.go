@@ -206,6 +206,35 @@ func GetOrders(customerId int) ([]Order, error) {
 	return orders, nil
 }
 
+func GetOrdersByStatus(status OrderStatus) ([]Order, error) {
+	stmt, err := DB.Prepare("SELECT id, customer_id, reference_code, amount_in_cents, status FROM orders WHERE status = ?")
+	if err != nil {
+		return nil, err
+	}
+
+	rows, sqlErr := stmt.Query(status)
+	if sqlErr != nil {
+		return nil, sqlErr
+	}
+
+	defer rows.Close()
+	orders := make([]Order, 0)
+
+	for rows.Next() {
+		order := Order{}
+		err = rows.Scan(&order.Id, &order.CustomerId, &order.ReferenceCode, &order.Amount, &order.Status)
+
+		if err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, order)
+	}
+	err = rows.Err()
+
+	return orders, nil
+}
+
 func GetOrderItems(orderId int) ([]OrderItem, error) {
 	stmt, err := DB.Prepare("SELECT id, order_id, product_id, qty, price_in_cents FROM order_products WHERE order_id = ?")
 	if err != nil {
