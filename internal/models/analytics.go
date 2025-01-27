@@ -31,3 +31,28 @@ func AddAnalytics(analytics *Analytics) (bool, error) {
 
 	return true, nil
 }
+
+func AddCartAnalytics(analytics *Analytics) (bool, error) {
+	tx, err := DB.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO analytics (ip_address, device, others) VALUES (?, ?, ?)")
+
+	if err != nil {
+		return false, err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(analytics.IpAddress, analytics.Device, analytics.Others)
+
+	if err != nil {
+		return false, err
+	}
+
+	tx.Commit()
+
+	return true, nil
+}
