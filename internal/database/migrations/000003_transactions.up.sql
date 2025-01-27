@@ -61,7 +61,7 @@ CREATE TABLE socials (
 
 CREATE TABLE analytics (
   id INTEGER NOT NULL PRIMARY KEY,
-  customer_id INTEGER NOT NULL,
+  customer_id INTEGER,
   ip_address VARCHAR(50),
   device VARCHAR(50),
   others VARCHAR(255),
