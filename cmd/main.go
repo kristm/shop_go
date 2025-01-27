@@ -28,6 +28,11 @@ type OrderPayload struct {
 	CartAge          float64 `json:"cart_age"`
 }
 
+type AnalyticPayload struct {
+	DeviceProfile string  `json:"device_profile"`
+	CartAge       float64 `json:"cart_age"`
+}
+
 func checkErr(err error) {
 	if err != nil {
 		log.Printf("ERROR: %s\n", err)
@@ -125,6 +130,22 @@ func getVoucherByCode(c *gin.Context) {
 			log.Printf("Voucher Error %v", err)
 		}
 		c.JSON(http.StatusOK, gin.H{"valid": ok, "voucher": voucher})
+	}
+}
+
+func createAnalytic(c *gin.Context) {
+	// create analytics
+	var requestBody AnalyticPayload
+	cartAge := strings.Join([]string{"cart_age=", strconv.FormatFloat(requestBody.CartAge, 'f', 2, 64)}, "")
+	_, err := models.AddCartAnalytics(&models.Analytics{
+		IpAddress: c.ClientIP(),
+		Device:    requestBody.DeviceProfile,
+		Others:    cartAge,
+	})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"ok": true})
 	}
 }
 
@@ -245,6 +266,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 		v1.GET("orders/:reference_code", getOrderByReference)
 		v1.GET("vouchers/:code", getVoucherByCode)
 		v1.POST("orders", createOrder(m, cfg))
+		v1.POST("analytics", createAnalytic)
 	}
 
 	if len(cfg.SSL_CERT) > 0 && len(cfg.SSL_KEY) > 0 {
