@@ -25,3 +25,4 @@ INSERT INTO voucher_types VALUES
 
 ALTER TABLE orders ADD voucher VARCHAR(50);
 
+-- insert into vouchers (voucher_type_id, code, valid, expires_at) values (2, 'snake', true, date('now', '+1 month'));
