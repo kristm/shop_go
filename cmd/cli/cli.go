@@ -10,9 +10,15 @@ import (
 	"os"
 	"shop_go/internal/config"
 	"shop_go/internal/models"
+	"shop_go/internal/tui"
 	"strconv"
 	"strings"
 )
+
+func runTUI() {
+	//log.Printf("TUI %v", tui)
+	tui.Run()
+}
 
 func readCSVFile(filename string) ([]byte, error) {
 	f, err := os.Open(filename)
@@ -151,6 +157,7 @@ func main() {
 	csvPath := flag.String("csv", "", "path to csv")
 	orderRef := flag.String("setpaid", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
+	runtui := flag.Bool("tui", false, "TUI mode")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -162,6 +169,11 @@ func main() {
 	}
 
 	log.Printf("ARGC %d %t", len(os.Args), *showcsv)
+
+	if *runtui {
+		runTUI()
+		os.Exit(1)
+	}
 
 	if *showcsv {
 		readonly = true

@@ -1,4 +1,4 @@
-package main
+package tui
 
 import (
 	"fmt"
@@ -81,8 +81,8 @@ var (
 		BorderRight(false)
 )
 
-func main() {
-	cfg, err := config.LoadConfig("../../../.env")
+func Run() {
+	cfg, err := config.LoadConfig(".env")
 	if err != nil {
 		log.Printf("ERROR LOADING CONFIG")
 	}
