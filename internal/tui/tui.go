@@ -18,6 +18,35 @@ const (
 	columnWidth = 30
 )
 
+//	type model struct {
+//		cursor   int
+//		sections []string
+//		selected int
+//	}
+//
+//	func initialModel() model {
+//		return model{
+//			sections: []string{"Basic Accented", "Basic Latin", "Latin-1 Supplement"},
+//			selected: 0,
+//		}
+//	}
+//
+//	func (m model) Init() tea.Cmd {
+//		return nil
+//	}
+// func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+// }
+//
+// func (m model) View() string {
+// }
+// func main() {
+// 	p := tea.NewProgram(initialModel())
+// 	if err := p.Start(); err != nil {
+// 		fmt.Printf("セバエラー")
+// 		os.Exit(1)
+// 	}
+// }
+
 var (
 	normal = lipgloss.Color("#EEEEEE")
 	base   = lipgloss.NewStyle().Foreground(normal)
