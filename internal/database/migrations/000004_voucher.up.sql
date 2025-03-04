@@ -3,6 +3,7 @@ CREATE TABLE vouchers (
   voucher_type_id INTEGER NOT NULL,
   code VARCHAR(100) NOT NULL UNIQUE,
   valid BOOL NOT NULL DEFAULT TRUE,
+  minimum_spend INTEGER DEFAULT 0,
   expires_at TIMESTAMP(3) NOT NULL,
   created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -25,4 +26,4 @@ INSERT INTO voucher_types VALUES
 
 ALTER TABLE orders ADD voucher VARCHAR(50);
 
--- insert into vouchers (voucher_type_id, code, valid, expires_at) values (2, 'snake', true, date('now', '+1 month'));
+insert into vouchers (voucher_type_id, code, valid, minimum_spend, expires_at) values (2, 'snake', true, 1000, date('now', '+1 month'));

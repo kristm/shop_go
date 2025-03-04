@@ -10,12 +10,13 @@ const LESS50 = 2
 const FREESHIPPING = 3
 
 type Voucher struct {
-	Id      int    `json:"id"`
-	TypeId  int    `json:"voucher_type_id"`
-	Code    string `json:"code"`
-	Valid   bool   `json:"valid"`
-	Amount  int    `json:"amount,omitempty"`
-	Expires string `json:"expires_at,omitempty"`
+	Id             int    `json:"id"`
+	TypeId         int    `json:"voucher_type_id"`
+	Code           string `json:"code"`
+	Valid          bool   `json:"valid"`
+	RequiredAmount int    `json:"minimum_spend"`
+	Amount         int    `json:"amount,omitempty"`
+	Expires        string `json:"expires_at,omitempty"`
 }
 
 func AddVoucher(voucher *Voucher) error {
@@ -45,13 +46,13 @@ func AddVoucher(voucher *Voucher) error {
 }
 
 func GetVoucherByCode(code string) (*Voucher, error) {
-	stmt, err := DB.Prepare("SELECT v.id, v.voucher_type_id, v.code, v.valid, vt.amount FROM vouchers v LEFT JOIN voucher_types vt ON v.voucher_type_id = vt.id WHERE code = ?")
+	stmt, err := DB.Prepare("SELECT v.id, v.voucher_type_id, v.code, v.valid, v.minimum_spend, vt.amount FROM vouchers v LEFT JOIN voucher_types vt ON v.voucher_type_id = vt.id WHERE code = ?")
 	if err != nil {
 		return nil, err
 	}
 
 	voucher := Voucher{}
-	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.Amount)
+	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.RequiredAmount, &voucher.Amount)
 	if sqlErr != nil {
 		return nil, sqlErr
 	}
@@ -60,7 +61,7 @@ func GetVoucherByCode(code string) (*Voucher, error) {
 }
 
 func ValidateVoucher(code string) (bool, error) {
-	stmt, err := DB.Prepare("SELECT id, voucher_type_id, code, valid, expires_at FROM vouchers WHERE code = ? AND valid = TRUE AND datetime('now') < expires_at")
+	stmt, err := DB.Prepare("SELECT id, voucher_type_id, code, valid, minimum_spend, expires_at FROM vouchers WHERE code = ? AND valid = TRUE AND datetime('now') < expires_at")
 	if err != nil {
 		log.Printf("err %v", err)
 		return false, err
@@ -68,7 +69,7 @@ func ValidateVoucher(code string) (bool, error) {
 	defer stmt.Close()
 
 	voucher := Voucher{}
-	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.Expires)
+	sqlErr := stmt.QueryRow(code).Scan(&voucher.Id, &voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.RequiredAmount, &voucher.Expires)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
 			return false, nil
