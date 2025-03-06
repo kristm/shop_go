@@ -82,7 +82,7 @@ func ValidateVoucher(code string) (bool, error) {
 }
 
 func ApplyVoucher(code string, price *float64) error {
-	stmt, err := DB.Prepare("SELECT v.voucher_type_id, vt.amount FROM vouchers v LEFT JOIN voucher_types vt ON v.voucher_type_id = vt.id WHERE v.code = ?")
+	stmt, err := DB.Prepare("SELECT v.voucher_type_id, v.minimum_spend, vt.amount FROM vouchers v LEFT JOIN voucher_types vt ON v.voucher_type_id = vt.id WHERE v.code = ?")
 
 	if err != nil {
 		log.Printf("err %v", err)
@@ -90,13 +90,14 @@ func ApplyVoucher(code string, price *float64) error {
 	}
 
 	var amount int
+	var minimum_spend int
 	var voucher_type_id int
-	sqlErr := stmt.QueryRow(code).Scan(&voucher_type_id, &amount)
+	sqlErr := stmt.QueryRow(code).Scan(&voucher_type_id, &minimum_spend, &amount)
 	if sqlErr != nil {
 		return sqlErr
 	}
 
-	if voucher_type_id < FREESHIPPING {
+	if voucher_type_id < FREESHIPPING && int(*price) >= minimum_spend {
 		*price = *price - (*price * (float64(amount) * 0.01))
 	}
 
