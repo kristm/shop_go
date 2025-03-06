@@ -133,6 +133,22 @@ func getVoucherByCode(c *gin.Context) {
 	}
 }
 
+func getVoucherComputation(c *gin.Context) {
+	voucherCode := c.Param("code")
+	amount, _ := strconv.ParseFloat(c.Param("amount"), 64)
+	ok, err := models.ValidateVoucher(voucherCode)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"valid": false, "error": err})
+	} else {
+		err := models.ApplyVoucher(voucherCode, &amount)
+		if err != nil {
+			log.Printf("Voucher Error %v", err)
+		}
+		c.JSON(http.StatusOK, gin.H{"valid": ok, "updated_amount": amount})
+	}
+}
+
 func createAnalytic(c *gin.Context) {
 	// create analytics
 	var requestBody AnalyticPayload
@@ -265,6 +281,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 		v1.GET("products/sku/:sku", getProductBySku)
 		v1.GET("orders/:reference_code", getOrderByReference)
 		v1.GET("vouchers/:code", getVoucherByCode)
+		v1.GET("vouchers/:code/apply/:amount", getVoucherComputation)
 		v1.POST("orders", createOrder(m, cfg))
 		v1.POST("analytics", createAnalytic)
 	}
