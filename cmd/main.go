@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"math/rand/v2"
 	"net/http"
+	"os"
 	"shop_go/internal/config"
 	"shop_go/internal/mail"
 	"shop_go/internal/models"
@@ -16,6 +19,13 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
+
+type News struct {
+	Title       string   `json:"title"`
+	Subtitle    string   `json:"subtitle"`
+	Description string   `json:"description"`
+	Events      []string `json:"events"`
+}
 
 type OrderPayload struct {
 	Orders           []models.OrderItem
@@ -238,6 +248,35 @@ func createOrder(m mailer, cfg *config.Config) gin.HandlerFunc {
 	return gin.HandlerFunc(fn)
 }
 
+func getNews(c *gin.Context) {
+	jsonFile, err := os.Open("news.json")
+	jsonOk := true
+	if err != nil {
+		jsonOk = false
+		log.Printf("Can't find file %v", err)
+	}
+
+	log.Printf("jsonfile %s", jsonFile)
+	defer jsonFile.Close()
+
+	bytes, err := ioutil.ReadAll(jsonFile)
+	log.Printf("bv %+v", bytes)
+	log.Printf("raw ", string(bytes))
+	if err != nil {
+		log.Printf("Error parsing JSON %v", err)
+		jsonOk = false
+	}
+
+	if !jsonOk {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "no news file found"})
+	} else {
+		var events News
+		json.Unmarshal(bytes, &events)
+		log.Printf("events %+v", events)
+		c.JSON(http.StatusOK, gin.H{"message": "ok", "news": events})
+	}
+}
+
 func loadConfig() (*config.Config, error) {
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -284,6 +323,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 		v1.GET("vouchers/:code/apply/:amount", getVoucherComputation)
 		v1.POST("orders", createOrder(m, cfg))
 		v1.POST("analytics", createAnalytic)
+		v1.GET("news", getNews)
 	}
 
 	if len(cfg.SSL_CERT) > 0 && len(cfg.SSL_KEY) > 0 {
