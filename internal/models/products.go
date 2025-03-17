@@ -164,6 +164,11 @@ func GetProductBySku(sku string) (Product, error) {
 }
 
 func getProductStatus(product *Product) ProductStatus {
+
+	if product.CategoryId == 6 {
+		return product.Status // skip inventory for digital products
+	}
+
 	var status ProductStatus
 	inventory, _ := GetProductInventory(product.Id)
 	qty := inventory.Qty
