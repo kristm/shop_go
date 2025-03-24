@@ -33,6 +33,7 @@ type OrderItem struct {
 	OrderId     int     `json:"order_id"`
 	ProductId   int     `json:"product_id"`
 	ProductName string  `json:"name"`
+	ProductLink string  `json:"link"`
 	Qty         int     `json:"qty"`
 	Price       float64 `json:"price"`
 }
@@ -145,7 +146,7 @@ func GetOrderByReference(ref string) (*Order, error) {
 		return nil, sqlErr
 	}
 
-	stmt, err = DB.Prepare("SELECT op.id, op.order_id, p.name, op.qty, op.price_in_cents FROM order_products as op LEFT JOIN products as p ON p.id = op.product_id WHERE op.order_id = ?")
+	stmt, err = DB.Prepare("SELECT op.id, op.order_id, p.name, op.qty, op.price_in_cents, COALESCE(pl.url, '') FROM order_products as op LEFT JOIN products as p ON p.id = op.product_id LEFT JOIN product_links as pl ON p.id = pl.product_id WHERE op.order_id = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +161,7 @@ func GetOrderByReference(ref string) (*Order, error) {
 
 	for rows.Next() {
 		orderItem := OrderItem{}
-		err = rows.Scan(&orderItem.Id, &orderItem.OrderId, &orderItem.ProductName, &orderItem.Qty, &orderItem.Price)
+		err = rows.Scan(&orderItem.Id, &orderItem.OrderId, &orderItem.ProductName, &orderItem.Qty, &orderItem.Price, &orderItem.ProductLink)
 
 		if err != nil {
 			return nil, err
