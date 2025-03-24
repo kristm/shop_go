@@ -256,12 +256,12 @@ func getNews(c *gin.Context) {
 		log.Printf("Can't find file %v", err)
 	}
 
-	log.Printf("jsonfile %s", jsonFile)
+	//log.Printf("jsonfile %s", jsonFile)
 	defer jsonFile.Close()
 
 	bytes, err := ioutil.ReadAll(jsonFile)
-	log.Printf("bv %+v", bytes)
-	log.Printf("raw ", string(bytes))
+	//log.Printf("bv %+v", bytes)
+	//log.Printf("raw ", string(bytes))
 	if err != nil {
 		log.Printf("Error parsing JSON %v", err)
 		jsonOk = false
