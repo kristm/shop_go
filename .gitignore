@@ -12,3 +12,4 @@
 *.env
 .env-*
 *.sql
+!/internal/database/migrations/*.sql
