@@ -351,3 +351,25 @@ func AddProductInventory(productId int, qty int) (bool, error) {
 	}
 
 }
+
+func AddProductLink(productId int, path string) (bool, error) {
+	tx, err := DB.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO product_links (product_id, url) VALUES (?, ?)")
+	if err != nil {
+		return false, err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(productId, path)
+	if err != nil {
+		return false, err
+	}
+
+	tx.Commit()
+	return true, nil
+}

@@ -212,3 +212,27 @@ func TestSetPreorder(t *testing.T) {
 	assert.Equal(t, false, notok)
 	assert.Equal(t, LowStock, status)
 }
+
+func TestGetProductLink(t *testing.T) {
+	timestamp := time.Now().Unix()
+	sku := fmt.Sprintf("DL %d", timestamp)
+	newProduct := Product{
+		Sku:         sku,
+		Name:        "Downloadable",
+		Description: "",
+		CategoryId:  6,
+		Price:       0,
+		Status:      InStock,
+	}
+
+	productId, err := AddProduct(newProduct)
+	if err != nil {
+		t.Errorf("Error when adding Product %v", err)
+	}
+	if productId < 0 {
+		t.Errorf("Failed to add Product %v", err)
+	}
+	ok, err := AddProductLink(productId, "download.jpg")
+	require.NoError(t, err)
+	assert.Equal(t, ok, true)
+}
