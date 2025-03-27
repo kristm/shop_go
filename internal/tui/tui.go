@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 )
 
 const (
@@ -132,17 +133,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	cfg, err := config.LoadConfig(".env")
-	if err != nil {
-		log.Printf("ERROR LOADING CONFIG")
-	}
-	_ = models.ConnectDatabase(&cfg)
 	doc := strings.Builder{}
-	//physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
 
 	// Tabs
 	// get model.selected to determine activeTab
 	{
+		w := lipgloss.Width
+		leftStatus := statusStyle.Render("<<<<")
+		rightStatus := statusStyle.Render(">>>>")
+		statusVal := statusText.
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render("SHOP DASHBOARD")
+
+		bar := lipgloss.JoinHorizontal(lipgloss.Top,
+			leftStatus,
+			statusVal,
+			rightStatus,
+		)
+
+		doc.WriteString(statusBarStyle.Width(width).Render(bar) + "\n\n")
+
 		var nav [5]string
 		for i, menuItem := range m.sections {
 			if m.cursor == i {
@@ -208,12 +217,17 @@ func (m model) View() string {
 		doc.WriteString(vp.View())
 	}
 
-	fmt.Println(docStyle.Render(doc.String()))
+	//fmt.Println(docStyle.Render(doc.String()))
 
 	return docStyle.Render(doc.String())
 }
 
 func Run() {
+	cfg, err := config.LoadConfig(".env")
+	_ = models.ConnectDatabase(&cfg)
+	if err != nil {
+		log.Printf("ERROR LOADING CONFIG")
+	}
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
 		fmt.Printf("セバエラー")
