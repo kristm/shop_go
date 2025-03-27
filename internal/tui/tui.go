@@ -182,7 +182,6 @@ func (m model) View() string {
 			log.Printf("ORDERS ERROR %v", err)
 		}
 		rows := []table.Row{}
-		ordersSet := []string{}
 
 		for _, order := range orders {
 			amount := fmt.Sprintf("%.2f", order.Amount/100.00)
@@ -190,14 +189,7 @@ func (m model) View() string {
 			customerId := strconv.Itoa(order.CustomerId)
 			newRow := []string{order.ReferenceCode, customerId, amount, status}
 			rows = append(rows, newRow)
-			ordersSet = append(ordersSet, newRow[0])
 		}
-		orderRow := lipgloss.JoinVertical(
-			lipgloss.Top,
-			ordersSet[0],
-			ordersSet[1],
-		)
-		doc.WriteString(orderRow)
 
 		t := table.New(
 			table.WithColumns(columns),
@@ -219,7 +211,7 @@ func (m model) View() string {
 	}
 
 	{
-		vp := viewport.New(width, 30)
+		vp := viewport.New(width, 20)
 		vp.YPosition = 20
 		vp.SetContent(t.View())
 		doc.WriteString(vp.View())
@@ -228,24 +220,110 @@ func (m model) View() string {
 	return docStyle.Render(doc.String())
 }
 
-func Run() {
-	f, err := tea.LogToFile("debug.log", "debug")
-	if err != nil {
-		fmt.Println("fatal: ", err)
-		os.Exit(1)
+func PrintOrders() {
+	doc := strings.Builder{}
+	{
+		w := lipgloss.Width
+		leftStatus := statusStyle.Render("<<<<")
+		rightStatus := statusStyle.Render(">>>>")
+		statusVal := statusText.
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render("SHOP DASHBOARD")
+
+		bar := lipgloss.JoinHorizontal(lipgloss.Top,
+			leftStatus,
+			statusVal,
+			rightStatus,
+		)
+
+		doc.WriteString(statusBarStyle.Width(width).Render(bar) + "\n\n")
+	}
+	{
+		row := lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			activeTab.Render("Orders"),
+			tab.Render("Customers"),
+			tab.Render("Addresses"),
+			tab.Render("Products"),
+			tab.Render("Inventory"),
+			tab.Render("Vouchers"),
+		)
+		gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
+		row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
+		doc.WriteString(row + "\n\n")
 	}
 
-	defer f.Close()
+	{
+		columns := []table.Column{
+			{Title: "Reference", Width: 10},
+			{Title: "Customer", Width: 10},
+			{Title: "Amount", Width: 15},
+			{Title: "Status", Width: 10},
+		}
+
+		orders, err := models.GetOrdersByStatus(0)
+		if err != nil {
+			log.Printf("ORDERS ERROR %v", err)
+		}
+		rows := []table.Row{}
+
+		for _, order := range orders {
+			amount := fmt.Sprintf("%.2f", order.Amount/100.00)
+			status := strconv.Itoa(int(order.Status))
+			customerId := strconv.Itoa(order.CustomerId)
+			newRow := []string{order.ReferenceCode, customerId, amount, status}
+			rows = append(rows, newRow)
+		}
+
+		t = table.New(
+			table.WithColumns(columns),
+			table.WithRows(rows),
+			table.WithFocused(true),
+			table.WithHeight(20),
+		)
+		s := table.DefaultStyles()
+		s.Header = s.Header.
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240")).
+			BorderBottom(true).
+			Bold(false)
+		s.Selected = s.Selected.
+			Foreground(lipgloss.Color("229")).
+			Background(lipgloss.Color("57")).
+			Bold(false)
+		t.SetStyles(s)
+	}
+
+	{
+		vp := viewport.New(width, 30)
+		vp.YPosition = 20
+		vp.SetContent(t.View())
+		doc.WriteString(vp.View())
+	}
+
+	fmt.Println(docStyle.Render(doc.String()))
+}
+
+func Run() {
+	//f, err := tea.LogToFile("debug.log", "debug")
+	//if err != nil {
+	//	fmt.Println("fatal: ", err)
+	//	os.Exit(1)
+	//}
+	//defer f.Close()
+
 	cfg, err := config.LoadConfig(".env")
 	_ = models.ConnectDatabase(&cfg)
 	if err != nil {
 		log.Printf("ERROR LOADING CONFIG")
 	}
-	p := tea.NewProgram(initialModel())
-	if err := p.Start(); err != nil {
-		fmt.Printf("セバエラー")
-		os.Exit(1)
-	}
+
+	PrintOrders()
+
+	//p := tea.NewProgram(initialModel())
+	//if err := p.Start(); err != nil {
+	//	fmt.Printf("セバエラー")
+	//	os.Exit(1)
+	//}
 }
 
 //var (
