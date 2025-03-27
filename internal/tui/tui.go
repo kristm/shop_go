@@ -166,7 +166,7 @@ func (m model) View() string {
 
 		gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
 		row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
-		doc.WriteString(row)
+		doc.WriteString(row + "\n\n")
 	}
 
 	{
@@ -182,6 +182,7 @@ func (m model) View() string {
 			log.Printf("ORDERS ERROR %v", err)
 		}
 		rows := []table.Row{}
+		ordersSet := []string{}
 
 		for _, order := range orders {
 			amount := fmt.Sprintf("%.2f", order.Amount/100.00)
@@ -189,13 +190,20 @@ func (m model) View() string {
 			customerId := strconv.Itoa(order.CustomerId)
 			newRow := []string{order.ReferenceCode, customerId, amount, status}
 			rows = append(rows, newRow)
+			ordersSet = append(ordersSet, newRow[0])
 		}
+		orderRow := lipgloss.JoinVertical(
+			lipgloss.Top,
+			ordersSet[0],
+			ordersSet[1],
+		)
+		doc.WriteString(orderRow)
 
 		t := table.New(
 			table.WithColumns(columns),
 			table.WithRows(rows),
 			table.WithFocused(true),
-			table.WithHeight(20),
+			table.WithHeight(10),
 		)
 		s := table.DefaultStyles()
 		s.Header = s.Header.
@@ -217,12 +225,17 @@ func (m model) View() string {
 		doc.WriteString(vp.View())
 	}
 
-	//fmt.Println(docStyle.Render(doc.String()))
-
 	return docStyle.Render(doc.String())
 }
 
 func Run() {
+	f, err := tea.LogToFile("debug.log", "debug")
+	if err != nil {
+		fmt.Println("fatal: ", err)
+		os.Exit(1)
+	}
+
+	defer f.Close()
 	cfg, err := config.LoadConfig(".env")
 	_ = models.ConnectDatabase(&cfg)
 	if err != nil {
