@@ -21,7 +21,7 @@ const (
 	columnWidth = 30
 )
 
-type fn func() string
+type fn func(int) string
 
 var (
 	t  table.Model
@@ -128,6 +128,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = 0
 			}
+		case "up":
+			m.selected++
+		case "down":
+			m.selected--
 		}
 	}
 
@@ -181,23 +185,23 @@ func (m model) View() string {
 		}
 		vp := viewport.New(96, 20)
 		vp.YPosition = 20
-		vp.SetContent(SetActiveContent(activeContent))
+		vp.SetContent(SetActiveContent(activeContent, m.selected))
 		doc.WriteString(vp.View())
 	}
 
 	return docStyle.Render(doc.String())
 }
 
-func SetActiveContent(f fn) string {
-	return f()
+func SetActiveContent(f fn, s int) string {
+	return f(s)
 }
 
-func Blank() string {
+func Blank(int) string {
 	str := ""
 	return str
 }
 
-func GetOrders() string {
+func GetOrders(selected int) string {
 	columns := []table.Column{
 		{Title: "Reference", Width: 10},
 		{Title: "Customer", Width: 10},
@@ -211,11 +215,15 @@ func GetOrders() string {
 	}
 	rows := []table.Row{}
 
-	for _, order := range orders {
+	for i, order := range orders {
 		amount := fmt.Sprintf("%.2f", order.Amount/100.00)
 		status := strconv.Itoa(int(order.Status))
 		customerId := strconv.Itoa(order.CustomerId)
 		newRow := []string{order.ReferenceCode, customerId, amount, status}
+		newRow = newRow.NewRow(newRow)
+		if i == selected {
+			newRow = newRow.Selected(true)
+		}
 		rows = append(rows, newRow)
 	}
 
