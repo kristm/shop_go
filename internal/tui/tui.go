@@ -9,16 +9,20 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/term"
+	"github.com/evertras/bubble-table/table"
 )
 
 const (
-	width       = 96
-	columnWidth = 30
+	width              = 96
+	columnWidth        = 30
+	columnKeyID        = "id"
+	columnKeyReference = "reference"
+	columnKeyCustomer  = "customer"
+	columnKeyAmount    = "amount"
+	columnKeyStatus    = "status"
 )
 
 type fn func(int) string
@@ -73,6 +77,26 @@ var (
 		BottomRight: "┴",
 	}
 
+	customBorder = table.Border{
+		Top:    "─",
+		Left:   "│",
+		Right:  "│",
+		Bottom: "─",
+
+		TopRight:    "╮",
+		TopLeft:     "╭",
+		BottomRight: "╯",
+		BottomLeft:  "╰",
+
+		TopJunction:    "╥",
+		LeftJunction:   "├",
+		RightJunction:  "┤",
+		BottomJunction: "╨",
+		InnerJunction:  "╫",
+
+		InnerDivider: "│",
+	}
+
 	tab = lipgloss.NewStyle().
 		Border(tabBorder, true).
 		BorderForeground(highlight).
@@ -94,20 +118,43 @@ func max(a, b int) int {
 }
 
 type model struct {
-	cursor   int
-	sections []string
-	selected int
+	cursor     int
+	sections   []string
+	selected   int
+	tableModel table.Model
 }
 
 func initialModel() model {
+	ordersTable := GetOrders()
 	return model{
-		sections: []string{"Orders", "Customers", "Addresses", "Products", "Vouchers"},
-		selected: 0,
+		sections:   []string{"Orders", "Customers", "Addresses", "Products", "Vouchers"},
+		selected:   0,
+		tableModel: ordersTable,
 	}
 }
 
 func (m model) Init() tea.Cmd {
 	return nil
+}
+
+func BlankTable() table.Model {
+	columns := []table.Column{
+		table.NewColumn(columnKeyID, "ID", 10),
+	}
+	rows := []table.Row{}
+	t := table.New(columns).
+		WithRows(rows).
+		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true))
+
+	return t
+}
+
+func (m *model) updateTableModel() {
+	if m.cursor > 0 {
+		m.tableModel = BlankTable()
+	} else {
+		m.tableModel = GetOrders()
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -128,10 +175,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = 0
 			}
-		case "up":
-			m.selected++
-		case "down":
-			m.selected--
+			//case "up":
+			//	m.selected++
+			//case "down":
+			//	m.selected--
 		}
 	}
 
@@ -141,8 +188,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	doc := strings.Builder{}
 
-	// Tabs
-	// get model.selected to determine activeTab
 	{
 		w := lipgloss.Width
 		leftStatus := statusStyle.Render("<<<<")
@@ -158,6 +203,9 @@ func (m model) View() string {
 
 		doc.WriteString(statusBarStyle.Width(width).Render(bar) + "\n\n")
 
+		m.updateTableModel()
+		// Tabs
+		// get model.selected to determine activeTab
 		var nav [5]string
 		for i, menuItem := range m.sections {
 			if m.cursor == i {
@@ -176,156 +224,68 @@ func (m model) View() string {
 	}
 
 	{
-		var activeContent fn
-		switch m.cursor {
-		case 0:
-			activeContent = GetOrders
-		default:
-			activeContent = Blank
-		}
-		vp := viewport.New(96, 20)
-		vp.YPosition = 20
-		vp.SetContent(SetActiveContent(activeContent, m.selected))
-		doc.WriteString(vp.View())
+		//vp := viewport.New(96, 20)
+		//vp.YPosition = 20
+		//vp.SetContent(m.tableModel.View())
+		doc.WriteString(m.tableModel.View())
 	}
 
 	return docStyle.Render(doc.String())
 }
 
-func SetActiveContent(f fn, s int) string {
-	return f(s)
-}
-
-func Blank(int) string {
-	str := ""
-	return str
-}
-
-func GetOrders(selected int) string {
-	columns := []table.Column{
-		{Title: "Reference", Width: 10},
-		{Title: "Customer", Width: 10},
-		{Title: "Amount", Width: 15},
-		{Title: "Status", Width: 10},
-	}
-
+func GetOrders() table.Model {
 	orders, err := models.GetOrdersByStatus(0)
 	if err != nil {
 		log.Printf("ORDERS ERROR %v", err)
 	}
+
+	columns := []table.Column{
+		table.NewColumn(columnKeyReference, "Reference", 15).WithStyle(
+			lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#88f")).
+				Align(lipgloss.Center)),
+		table.NewColumn(columnKeyCustomer, "Customer", 10),
+		table.NewColumn(columnKeyAmount, "Amount", 15),
+		table.NewColumn(columnKeyStatus, "Status", 10),
+	}
 	rows := []table.Row{}
 
-	for i, order := range orders {
+	for _, order := range orders {
 		amount := fmt.Sprintf("%.2f", order.Amount/100.00)
 		status := strconv.Itoa(int(order.Status))
 		customerId := strconv.Itoa(order.CustomerId)
-		newRow := []string{order.ReferenceCode, customerId, amount, status}
-		newRow = newRow.NewRow(newRow)
-		if i == selected {
-			newRow = newRow.Selected(true)
-		}
+		newRow := table.NewRow(table.RowData{
+			columnKeyReference: order.ReferenceCode,
+			columnKeyCustomer:  customerId,
+			columnKeyAmount:    amount,
+			columnKeyStatus:    status,
+		})
 		rows = append(rows, newRow)
 	}
 
-	t := table.New(
-		table.WithColumns(columns),
-		table.WithRows(rows),
-		table.WithFocused(true),
-		table.WithHeight(10),
-	)
-	s := table.DefaultStyles()
-	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
-		BorderBottom(true).
-		Bold(false)
-	s.Selected = s.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
-		Bold(false)
-	t.SetStyles(s)
+	// Start with the default key map and change it slightly, just for demoing
+	keys := table.DefaultKeyMap()
+	keys.RowDown.SetKeys("j", "down", "s")
+	keys.RowUp.SetKeys("k", "up", "w")
 
-	return t.View()
-}
-
-func PrintOrders() {
-	doc := strings.Builder{}
-	{
-		w := lipgloss.Width
-		leftStatus := statusStyle.Render("<<<<")
-		rightStatus := statusStyle.Render(">>>>")
-		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render("SHOP DASHBOARD")
-
-		bar := lipgloss.JoinHorizontal(lipgloss.Top,
-			leftStatus,
-			statusVal,
-			rightStatus,
+	t = table.New(columns).
+		WithRows(rows).
+		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
+		SelectableRows(true).
+		Focused(true).
+		Border(customBorder).
+		WithKeyMap(keys).
+		WithStaticFooter("Footer!").
+		WithPageSize(5).
+		WithSelectedText(" ", "✓").
+		WithBaseStyle(
+			lipgloss.NewStyle().
+				BorderForeground(lipgloss.Color("#a38")).
+				Foreground(lipgloss.Color("#a7a")).
+				Align(lipgloss.Left),
 		)
 
-		doc.WriteString(statusBarStyle.Width(width).Render(bar) + "\n\n")
-	}
-	{
-		row := lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			activeTab.Render("Orders"),
-			tab.Render("Customers"),
-			tab.Render("Addresses"),
-			tab.Render("Products"),
-			tab.Render("Inventory"),
-			tab.Render("Vouchers"),
-		)
-		gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
-		row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
-		doc.WriteString(row + "\n\n")
-	}
-
-	{
-		vp := viewport.New(96, 30)
-		//vp.YPosition = 20
-		columns := []table.Column{
-			{Title: "Reference", Width: 10},
-			{Title: "Customer", Width: 10},
-			{Title: "Amount", Width: 15},
-			{Title: "Status", Width: 10},
-		}
-
-		orders, err := models.GetOrdersByStatus(0)
-		if err != nil {
-			log.Printf("ORDERS ERROR %v", err)
-		}
-		rows := []table.Row{}
-
-		for _, order := range orders {
-			amount := fmt.Sprintf("%.2f", order.Amount/100.00)
-			status := strconv.Itoa(int(order.Status))
-			customerId := strconv.Itoa(order.CustomerId)
-			newRow := []string{order.ReferenceCode, customerId, amount, status}
-			rows = append(rows, newRow)
-		}
-
-		t = table.New(
-			table.WithColumns(columns),
-			table.WithRows(rows),
-			table.WithFocused(true),
-			table.WithHeight(20),
-		)
-		s := table.DefaultStyles()
-		s.Header = s.Header.
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("240")).
-			BorderBottom(true).
-			Bold(false)
-		s.Selected = s.Selected.
-			Foreground(lipgloss.Color("229")).
-			Background(lipgloss.Color("57")).
-			Bold(false)
-		t.SetStyles(s)
-		vp.SetContent(t.View())
-		doc.WriteString(vp.View())
-	}
-
-	fmt.Println(docStyle.Render(doc.String()))
+	return t
 }
 
 func Run() {
@@ -341,8 +301,6 @@ func Run() {
 	if err != nil {
 		log.Printf("ERROR LOADING CONFIG")
 	}
-
-	//PrintOrders()
 
 	p := tea.NewProgram(initialModel())
 	if err := p.Start(); err != nil {
