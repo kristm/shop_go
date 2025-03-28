@@ -158,11 +158,18 @@ func (m *model) updateTableModel() {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+	m.tableModel, cmd = m.tableModel.Update(msg)
+	cmds = append(cmds, cmd)
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q", "esc":
-			return m, tea.Quit
+			cmds = append(cmds, tea.Quit)
 		case "left", "<":
 			if m.cursor > 0 {
 				m.cursor--
@@ -175,14 +182,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = 0
 			}
-			//case "up":
-			//	m.selected++
-			//case "down":
-			//	m.selected--
 		}
 	}
 
-	return m, nil
+	//m.updateTableModel()
+	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
@@ -203,7 +207,6 @@ func (m model) View() string {
 
 		doc.WriteString(statusBarStyle.Width(width).Render(bar) + "\n\n")
 
-		m.updateTableModel()
 		// Tabs
 		// get model.selected to determine activeTab
 		var nav [5]string
@@ -227,6 +230,7 @@ func (m model) View() string {
 		//vp := viewport.New(96, 20)
 		//vp.YPosition = 20
 		//vp.SetContent(m.tableModel.View())
+		m.updateTableModel()
 		doc.WriteString(m.tableModel.View())
 	}
 
@@ -271,7 +275,6 @@ func GetOrders() table.Model {
 	t = table.New(columns).
 		WithRows(rows).
 		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
-		SelectableRows(true).
 		Focused(true).
 		Border(customBorder).
 		WithKeyMap(keys).
