@@ -88,11 +88,11 @@ var (
 		BottomRight: "╯",
 		BottomLeft:  "╰",
 
-		TopJunction:    "╥",
+		TopJunction:    "┬",
 		LeftJunction:   "├",
 		RightJunction:  "┤",
-		BottomJunction: "╨",
-		InnerJunction:  "╫",
+		BottomJunction: "┴",
+		InnerJunction:  "┼",
 
 		InnerDivider: "│",
 	}
