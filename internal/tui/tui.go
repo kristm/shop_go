@@ -21,6 +21,8 @@ const (
 	columnWidth = 30
 )
 
+type fn func() string
+
 var (
 	t  table.Model
 	vp viewport.Model
@@ -170,51 +172,72 @@ func (m model) View() string {
 	}
 
 	{
+		var activeContent fn
+		switch m.cursor {
+		case 0:
+			activeContent = GetOrders
+		default:
+			activeContent = Blank
+		}
 		vp := viewport.New(96, 20)
 		vp.YPosition = 20
-		columns := []table.Column{
-			{Title: "Reference", Width: 10},
-			{Title: "Customer", Width: 10},
-			{Title: "Amount", Width: 15},
-			{Title: "Status", Width: 10},
-		}
-
-		orders, err := models.GetOrdersByStatus(0)
-		if err != nil {
-			log.Printf("ORDERS ERROR %v", err)
-		}
-		rows := []table.Row{}
-
-		for _, order := range orders {
-			amount := fmt.Sprintf("%.2f", order.Amount/100.00)
-			status := strconv.Itoa(int(order.Status))
-			customerId := strconv.Itoa(order.CustomerId)
-			newRow := []string{order.ReferenceCode, customerId, amount, status}
-			rows = append(rows, newRow)
-		}
-
-		t := table.New(
-			table.WithColumns(columns),
-			table.WithRows(rows),
-			table.WithFocused(true),
-			table.WithHeight(10),
-		)
-		s := table.DefaultStyles()
-		s.Header = s.Header.
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("240")).
-			BorderBottom(true).
-			Bold(false)
-		s.Selected = s.Selected.
-			Foreground(lipgloss.Color("229")).
-			Background(lipgloss.Color("57")).
-			Bold(false)
-		t.SetStyles(s)
-		vp.SetContent(t.View())
+		vp.SetContent(SetActiveContent(activeContent))
 		doc.WriteString(vp.View())
 	}
 
 	return docStyle.Render(doc.String())
+}
+
+func SetActiveContent(f fn) string {
+	return f()
+}
+
+func Blank() string {
+	str := ""
+	return str
+}
+
+func GetOrders() string {
+	columns := []table.Column{
+		{Title: "Reference", Width: 10},
+		{Title: "Customer", Width: 10},
+		{Title: "Amount", Width: 15},
+		{Title: "Status", Width: 10},
+	}
+
+	orders, err := models.GetOrdersByStatus(0)
+	if err != nil {
+		log.Printf("ORDERS ERROR %v", err)
+	}
+	rows := []table.Row{}
+
+	for _, order := range orders {
+		amount := fmt.Sprintf("%.2f", order.Amount/100.00)
+		status := strconv.Itoa(int(order.Status))
+		customerId := strconv.Itoa(order.CustomerId)
+		newRow := []string{order.ReferenceCode, customerId, amount, status}
+		rows = append(rows, newRow)
+	}
+
+	t := table.New(
+		table.WithColumns(columns),
+		table.WithRows(rows),
+		table.WithFocused(true),
+		table.WithHeight(10),
+	)
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	t.SetStyles(s)
+
+	return t.View()
 }
 
 func PrintOrders() {
