@@ -120,15 +120,15 @@ func max(a, b int) int {
 type model struct {
 	cursor     int
 	sections   []string
-	selected   int
+	rowIndex   int
 	tableModel table.Model
 }
 
 func initialModel() model {
-	ordersTable := GetOrders()
+	ordersTable := GetOrders(0)
 	return model{
 		sections:   []string{"Orders", "Customers", "Addresses", "Products", "Vouchers"},
-		selected:   0,
+		rowIndex:   0,
 		tableModel: ordersTable,
 	}
 }
@@ -149,11 +149,12 @@ func BlankTable() table.Model {
 	return t
 }
 
+// func (m *model) updateTableModel(rowIndex int) {
 func (m *model) updateTableModel() {
 	if m.cursor > 0 {
 		m.tableModel = BlankTable()
 	} else {
-		m.tableModel = GetOrders()
+		m.tableModel = GetOrders(m.rowIndex)
 	}
 }
 
@@ -182,6 +183,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = 0
 			}
+		case "up":
+			if m.rowIndex > 0 {
+				m.rowIndex--
+			}
+		case "down":
+			m.rowIndex++
+			//doesn't work, focus only works on Input fields
+			//case "enter":
+			//	m.tableModel.Focus()
 		}
 	}
 
@@ -208,7 +218,7 @@ func (m model) View() string {
 		doc.WriteString(statusBarStyle.Width(width).Render(bar) + "\n\n")
 
 		// Tabs
-		// get model.selected to determine activeTab
+		// get model.rowIndex to determine activeTab
 		var nav [5]string
 		for i, menuItem := range m.sections {
 			if m.cursor == i {
@@ -227,17 +237,17 @@ func (m model) View() string {
 	}
 
 	{
-		//vp := viewport.New(96, 20)
-		//vp.YPosition = 20
-		//vp.SetContent(m.tableModel.View())
 		m.updateTableModel()
-		doc.WriteString(m.tableModel.View())
+		vp := viewport.New(96, 20)
+		vp.YPosition = 20
+		vp.SetContent(m.tableModel.View())
+		doc.WriteString(vp.View())
 	}
 
 	return docStyle.Render(doc.String())
 }
 
-func GetOrders() table.Model {
+func GetOrders(rowIndex int) table.Model {
 	orders, err := models.GetOrdersByStatus(0)
 	if err != nil {
 		log.Printf("ORDERS ERROR %v", err)
@@ -249,7 +259,7 @@ func GetOrders() table.Model {
 				Foreground(lipgloss.Color("#88f")).
 				Align(lipgloss.Center)),
 		table.NewColumn(columnKeyCustomer, "Customer", 10),
-		table.NewColumn(columnKeyAmount, "Amount", 15),
+		table.NewColumn(columnKeyAmount, "Amount", 10),
 		table.NewColumn(columnKeyStatus, "Status", 10),
 	}
 	rows := []table.Row{}
@@ -271,6 +281,8 @@ func GetOrders() table.Model {
 	keys := table.DefaultKeyMap()
 	keys.RowDown.SetKeys("j", "down", "s")
 	keys.RowUp.SetKeys("k", "up", "w")
+	keys.PageUp.SetKeys("")
+	keys.PageDown.SetKeys("")
 
 	t = table.New(columns).
 		WithRows(rows).
@@ -281,6 +293,7 @@ func GetOrders() table.Model {
 		WithStaticFooter("Footer!").
 		WithPageSize(5).
 		WithSelectedText(" ", "✓").
+		WithHighlightedRow(rowIndex).
 		WithBaseStyle(
 			lipgloss.NewStyle().
 				BorderForeground(lipgloss.Color("#a38")).
