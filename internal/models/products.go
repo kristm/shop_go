@@ -25,6 +25,7 @@ type Product struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	CategoryId  int           `json:"category_id"`
+	Category    string        `json:"category"`
 	Price       float64       `json:"price"`
 	Status      ProductStatus `json:"status"`
 	Photos      Photo         `json:"images"`
@@ -51,28 +52,52 @@ func (prod Product) MarshalJSON() ([]byte, error) {
 	})
 }
 
+//func GetAllProducts() ([]Product, error) {
+//	rows, err := DB.Query("SELECT id, name, sku, description, category_id, price_in_cents, status FROM products")
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	defer rows.Close()
+//	products := make([]Product, 0)
+//
+//	for rows.Next() {
+//		product := Product{}
+//		err = rows.Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price, &product.Status)
+//
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		products = append(products, product)
+//	}
+//	err = rows.Err()
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return products, err
+//}
+
 func GetAllProducts() ([]Product, error) {
-	rows, err := DB.Query("SELECT id, name, sku, description, category_id, price_in_cents, status FROM products")
+	rows, err := DB.Query("SELECT p.category_id, c.name, p.name, p.sku, p.description, p.price_in_cents FROM products p LEFT JOIN categories c ON c.id = p.category_id ORDER BY category_id")
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
-	products := make([]Product, 0)
 
+	var products []Product
 	for rows.Next() {
-		product := Product{}
-		err = rows.Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price, &product.Status)
-
-		if err != nil {
+		var product Product
+		if err := rows.Scan(&product.CategoryId, &product.Category, &product.Name, &product.Sku, &product.Description, &product.Price); err != nil {
 			return nil, err
 		}
-
+		product.Status = getProductStatus(&product)
 		products = append(products, product)
 	}
-	err = rows.Err()
 
-	if err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 

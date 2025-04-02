@@ -16,22 +16,27 @@ import (
 )
 
 const (
-	width              = 110
-	columnWidth        = 30
-	columnKeyID        = "id"
-	columnKeyReference = "reference"
-	columnKeyCustomer  = "customer"
-	columnKeyAmount    = "amount"
-	columnKeyStatus    = "status"
-	columnKeyFirstName = "firstname"
-	columnKeyLastName  = "lastname"
-	columnKeyEmail     = "email"
-	columnKeyPhone     = "phone"
-	columnKeyAddress   = "address"
-	columnKeyCity      = "city"
-	columnKeyCountry   = "country"
-	columnKeyZip       = "zip"
-	columnKeyNotes     = "notes"
+	width                  = 110
+	columnWidth            = 30
+	columnKeyID            = "id"
+	columnKeyReference     = "reference"
+	columnKeyCustomer      = "customer"
+	columnKeyAmount        = "amount"
+	columnKeyStatus        = "status"
+	columnKeyFirstName     = "firstname"
+	columnKeyLastName      = "lastname"
+	columnKeyEmail         = "email"
+	columnKeyPhone         = "phone"
+	columnKeyAddress       = "address"
+	columnKeyCity          = "city"
+	columnKeyCountry       = "country"
+	columnKeyZip           = "zip"
+	columnKeyNotes         = "notes"
+	columnKeyCategory      = "category"
+	columnKeyName          = "name"
+	columnKeySku           = "sku"
+	columnKeyPrice         = "price"
+	columnKeyProductStatus = "productstatus"
 )
 
 type fn func(int) string
@@ -168,6 +173,8 @@ func (m *model) updateTableModel() {
 		m.tableModel, m.tableRows = GetCustomers(m.rowIndex)
 	case 2:
 		m.tableModel, m.tableRows = GetAddresses(m.rowIndex)
+	case 3:
+		m.tableModel, m.tableRows = GetProducts(m.rowIndex)
 	default:
 		m.tableModel, m.tableRows = BlankTable()
 	}
@@ -367,14 +374,45 @@ func GetAddresses(rowIndex int) (table.Model, int) {
 	return t, len(rows)
 }
 
+func GetProducts(rowIndex int) (table.Model, int) {
+	products, err := models.GetAllProducts()
+	if err != nil {
+		log.Printf("PRODUCTS ERROR %v", err)
+	}
+
+	columns := []table.Column{
+		table.NewColumn(columnKeyCategory, "Category", 15),
+		table.NewColumn(columnKeyName, "Name", 25),
+		table.NewColumn(columnKeySku, "Sku", 15),
+		table.NewColumn(columnKeyPrice, "Price", 15),
+		table.NewColumn(columnKeyProductStatus, "Product Status", 10),
+	}
+	rows := []table.Row{}
+
+	for _, product := range products {
+		price := fmt.Sprintf("%.2f", product.Price/100.00)
+		newRow := table.NewRow(table.RowData{
+			columnKeyCategory:      product.Category,
+			columnKeyName:          product.Name,
+			columnKeySku:           product.Sku,
+			columnKeyPrice:         price,
+			columnKeyProductStatus: product.Status,
+		})
+		rows = append(rows, newRow)
+	}
+
+	t = resetTable(columns, rows, rowIndex)
+
+	return t, len(rows)
+}
+
 func resetTable(columns []table.Column, rows []table.Row, rowIndex int) table.Model {
-	footer := fmt.Sprintf("rows: %d", len(rows))
+	//footer := fmt.Sprintf("rows: %d", len(rows))
 	return table.New(columns).
 		WithRows(rows).
 		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
 		Focused(true).
 		Border(customBorder).
-		WithStaticFooter(footer).
 		WithPageSize(10).
 		WithSelectedText(" ", "✓").
 		WithHighlightedRow(rowIndex).
