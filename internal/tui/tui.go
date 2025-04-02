@@ -160,7 +160,6 @@ func BlankTable() (table.Model, int) {
 	return t, 0
 }
 
-// func (m *model) updateTableModel(rowIndex int) {
 func (m *model) updateTableModel() {
 	switch m.cursor {
 	case 0:
