@@ -101,7 +101,7 @@ func GetAllProducts() ([]Product, error) {
 		return nil, err
 	}
 
-	return products, err
+	return products, nil
 }
 
 func GetProducts(category_id int) ([]Product, error) {

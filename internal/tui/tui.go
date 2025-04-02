@@ -414,7 +414,6 @@ func resetTable(columns []table.Column, rows []table.Row, rowIndex int) table.Mo
 		Focused(true).
 		Border(customBorder).
 		WithPageSize(10).
-		WithSelectedText(" ", "✓").
 		WithHighlightedRow(rowIndex).
 		WithBaseStyle(
 			lipgloss.NewStyle().

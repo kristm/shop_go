@@ -19,6 +19,29 @@ type Voucher struct {
 	Expires        string `json:"expires_at,omitempty"`
 }
 
+func GetVouchers() ([]Voucher, error) {
+	rows, err := DB.Query("SELECT voucher_type_id, code, valid, minimum_spend, amount, expires_at FROM vouchers ORDER BY expires_at")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var vouchers []Voucher
+	for rows.Next() {
+		var voucher Voucher
+		if err := rows.Scan(&voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.RequiredAmouont, &voucher.Amount, &voucher.Expires); err != nil {
+			return nil, err
+		}
+		vouchers = append(vouchers, voucher)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return vouchers, nil
+}
+
 func AddVoucher(voucher *Voucher) error {
 	tx, err := DB.Begin()
 	if err != nil {
