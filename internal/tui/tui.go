@@ -47,6 +47,7 @@ const (
 )
 
 var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
+var productStatus = [4]string{"Instock", "Low Stock", "Out of Stock", "Preorder"}
 
 type fn func(int) string
 
@@ -394,22 +395,26 @@ func GetProducts(rowIndex int) (table.Model, int) {
 	}
 
 	columns := []table.Column{
-		table.NewColumn(columnKeyCategory, "Category", 15),
+		table.NewColumn(columnKeyCategory, "Category", 15).WithStyle(
+			lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#88f")).
+				Align(lipgloss.Center)),
 		table.NewColumn(columnKeyName, "Name", 25),
 		table.NewColumn(columnKeySku, "Sku", 15),
 		table.NewColumn(columnKeyPrice, "Price", 15),
-		table.NewColumn(columnKeyProductStatus, "Product Status", 10),
+		table.NewColumn(columnKeyProductStatus, "Inventory", 20),
 	}
 	rows := []table.Row{}
 
 	for _, product := range products {
 		price := fmt.Sprintf("%.2f", product.Price/100.00)
+		status := productStatus[int(product.Status)]
 		newRow := table.NewRow(table.RowData{
 			columnKeyCategory:      product.Category,
 			columnKeyName:          product.Name,
 			columnKeySku:           product.Sku,
 			columnKeyPrice:         price,
-			columnKeyProductStatus: product.Status,
+			columnKeyProductStatus: status,
 		})
 		rows = append(rows, newRow)
 	}
