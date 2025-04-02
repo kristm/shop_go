@@ -46,6 +46,8 @@ const (
 	columnKeyExpires        = "expires"
 )
 
+var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
+
 type fn func(int) string
 
 var (
@@ -299,7 +301,7 @@ func GetOrders(rowIndex int) (table.Model, int) {
 
 	for _, order := range orders {
 		amount := fmt.Sprintf("%.2f", order.Amount/100.00)
-		status := strconv.Itoa(int(order.Status))
+		status := orderStatus[int(order.Status)]
 		customerId := strconv.Itoa(order.CustomerId)
 		newRow := table.NewRow(table.RowData{
 			columnKeyReference: order.ReferenceCode,
