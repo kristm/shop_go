@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	width              = 96
+	width              = 110
 	columnWidth        = 30
 	columnKeyID        = "id"
 	columnKeyReference = "reference"
@@ -27,6 +27,11 @@ const (
 	columnKeyLastName  = "lastname"
 	columnKeyEmail     = "email"
 	columnKeyPhone     = "phone"
+	columnKeyAddress   = "address"
+	columnKeyCity      = "city"
+	columnKeyCountry   = "country"
+	columnKeyZip       = "zip"
+	columnKeyNotes     = "notes"
 )
 
 type fn func(int) string
@@ -162,6 +167,8 @@ func (m *model) updateTableModel() {
 		m.tableModel, m.tableRows = GetOrders(m.rowIndex)
 	case 1:
 		m.tableModel, m.tableRows = GetCustomers(m.rowIndex)
+	case 2:
+		m.tableModel, m.tableRows = GetAddresses(m.rowIndex)
 	default:
 		m.tableModel, m.tableRows = BlankTable()
 	}
@@ -248,7 +255,7 @@ func (m model) View() string {
 
 	{
 		m.updateTableModel()
-		vp := viewport.New(96, 20)
+		vp := viewport.New(width, 20)
 		vp.YPosition = 20
 		vp.SetContent(m.tableModel.View())
 		doc.WriteString(vp.View())
@@ -287,29 +294,6 @@ func GetOrders(rowIndex int) (table.Model, int) {
 		rows = append(rows, newRow)
 	}
 
-	// Start with the default key map and change it slightly, just for demoing
-	//keys := table.DefaultKeyMap()
-	//keys.RowDown.SetKeys("j", "down", "s")
-	//keys.RowUp.SetKeys("k", "up", "w")
-	//keys.PageUp.SetKeys("") //clear up,down keys
-	//keys.PageDown.SetKeys("")
-	//footer := fmt.Sprintf("rows: %d", len(rows))
-
-	//t = table.New(columns).
-	//	WithRows(rows).
-	//	HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
-	//	Focused(true).
-	//	Border(customBorder).
-	//	WithStaticFooter(footer).
-	//	WithPageSize(10).
-	//	WithSelectedText(" ", "✓").
-	//	WithHighlightedRow(rowIndex).
-	//	WithBaseStyle(
-	//		lipgloss.NewStyle().
-	//			BorderForeground(lipgloss.Color("#a38")).
-	//			Foreground(lipgloss.Color("#a7a")).
-	//			Align(lipgloss.Left),
-	//	)
 	t = resetTable(columns, rows, rowIndex)
 
 	return t, len(rows)
@@ -344,23 +328,41 @@ func GetCustomers(rowIndex int) (table.Model, int) {
 		rows = append(rows, newRow)
 	}
 
-	//footer := fmt.Sprintf("rows: %d", len(rows))
-	//
-	//t = table.New(columns).
-	//	WithRows(rows).
-	//	HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
-	//	Focused(true).
-	//	Border(customBorder).
-	//	WithStaticFooter(footer).
-	//	WithPageSize(10).
-	//	WithSelectedText(" ", "✓").
-	//	WithHighlightedRow(rowIndex).
-	//	WithBaseStyle(
-	//		lipgloss.NewStyle().
-	//			BorderForeground(lipgloss.Color("#a38")).
-	//			Foreground(lipgloss.Color("#a7a")).
-	//			Align(lipgloss.Left),
-	//	)
+	t = resetTable(columns, rows, rowIndex)
+
+	return t, len(rows)
+}
+
+func GetAddresses(rowIndex int) (table.Model, int) {
+	addresses, err := models.GetShippingAddresses()
+	if err != nil {
+		log.Printf("ADDRESSES ERROR %v", err)
+	}
+
+	columns := []table.Column{
+		table.NewColumn(columnKeyCustomer, "Customer Id", 5),
+		table.NewColumn(columnKeyAddress, "Address", 20),
+		table.NewColumn(columnKeyCity, "City", 10),
+		table.NewColumn(columnKeyCountry, "Country", 10),
+		table.NewColumn(columnKeyZip, "Zip", 10),
+		table.NewColumn(columnKeyPhone, "Phone", 15),
+		table.NewColumn(columnKeyNotes, "Notes", 15),
+	}
+	rows := []table.Row{}
+
+	for _, address := range addresses {
+		newRow := table.NewRow(table.RowData{
+			columnKeyCustomer: address.CustomerId,
+			columnKeyAddress:  address.Address,
+			columnKeyCity:     address.City,
+			columnKeyCountry:  address.Country,
+			columnKeyZip:      address.Zip,
+			columnKeyPhone:    address.Phone,
+			columnKeyNotes:    address.Notes,
+		})
+		rows = append(rows, newRow)
+	}
+
 	t = resetTable(columns, rows, rowIndex)
 
 	return t, len(rows)

@@ -43,7 +43,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 }
 
 func GetShippingAddresses() ([]Shipping, error) {
-	rows, err := DB.Query("SELECT customer_id, address, city, country, zip, phone, notes ORDER BY customer_id")
+	rows, err := DB.Query("SELECT customer_id, address, city, country, zip, phone, notes FROM shipping ORDER BY customer_id")
 	if err != nil {
 		return nil, err
 	}
