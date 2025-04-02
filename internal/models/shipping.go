@@ -41,3 +41,26 @@ func AddShipping(newAddress *Shipping) (int, error) {
 
 	return int(id), nil
 }
+
+func GetShippingAddresses() ([]Shipping, error) {
+	rows, err := DB.Query("SELECT customer_id, address, city, country, zip, phone, notes ORDER BY customer_id")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var addresses []Shipping
+	for rows.Next() {
+		var address Shipping
+		if err := rows.Scan(&address.CustomerId, &address.Address, &address.City, &address.Country, &address.Zip, &address.Phone, &address.Notes); err != nil {
+			return nil, err
+		}
+		addresses = append(addresses, address)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return addresses, err
+}

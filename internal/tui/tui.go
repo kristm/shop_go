@@ -293,23 +293,24 @@ func GetOrders(rowIndex int) (table.Model, int) {
 	//keys.RowUp.SetKeys("k", "up", "w")
 	//keys.PageUp.SetKeys("") //clear up,down keys
 	//keys.PageDown.SetKeys("")
-	footer := fmt.Sprintf("rows: %d", len(rows))
+	//footer := fmt.Sprintf("rows: %d", len(rows))
 
-	t = table.New(columns).
-		WithRows(rows).
-		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
-		Focused(true).
-		Border(customBorder).
-		WithStaticFooter(footer).
-		WithPageSize(10).
-		WithSelectedText(" ", "✓").
-		WithHighlightedRow(rowIndex).
-		WithBaseStyle(
-			lipgloss.NewStyle().
-				BorderForeground(lipgloss.Color("#a38")).
-				Foreground(lipgloss.Color("#a7a")).
-				Align(lipgloss.Left),
-		)
+	//t = table.New(columns).
+	//	WithRows(rows).
+	//	HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
+	//	Focused(true).
+	//	Border(customBorder).
+	//	WithStaticFooter(footer).
+	//	WithPageSize(10).
+	//	WithSelectedText(" ", "✓").
+	//	WithHighlightedRow(rowIndex).
+	//	WithBaseStyle(
+	//		lipgloss.NewStyle().
+	//			BorderForeground(lipgloss.Color("#a38")).
+	//			Foreground(lipgloss.Color("#a7a")).
+	//			Align(lipgloss.Left),
+	//	)
+	t = resetTable(columns, rows, rowIndex)
 
 	return t, len(rows)
 }
@@ -343,9 +344,31 @@ func GetCustomers(rowIndex int) (table.Model, int) {
 		rows = append(rows, newRow)
 	}
 
-	footer := fmt.Sprintf("rows: %d", len(rows))
+	//footer := fmt.Sprintf("rows: %d", len(rows))
+	//
+	//t = table.New(columns).
+	//	WithRows(rows).
+	//	HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
+	//	Focused(true).
+	//	Border(customBorder).
+	//	WithStaticFooter(footer).
+	//	WithPageSize(10).
+	//	WithSelectedText(" ", "✓").
+	//	WithHighlightedRow(rowIndex).
+	//	WithBaseStyle(
+	//		lipgloss.NewStyle().
+	//			BorderForeground(lipgloss.Color("#a38")).
+	//			Foreground(lipgloss.Color("#a7a")).
+	//			Align(lipgloss.Left),
+	//	)
+	t = resetTable(columns, rows, rowIndex)
 
-	t = table.New(columns).
+	return t, len(rows)
+}
+
+func resetTable(columns []table.Column, rows []table.Row, rowIndex int) table.Model {
+	footer := fmt.Sprintf("rows: %d", len(rows))
+	return table.New(columns).
 		WithRows(rows).
 		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
 		Focused(true).
@@ -360,8 +383,6 @@ func GetCustomers(rowIndex int) (table.Model, int) {
 				Foreground(lipgloss.Color("#a7a")).
 				Align(lipgloss.Left),
 		)
-
-	return t, len(rows)
 }
 
 func Run() {
