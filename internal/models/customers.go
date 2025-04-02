@@ -31,6 +31,29 @@ func ValidateNotEmpty(customer *Customer) bool {
 	return true
 }
 
+func GetCustomers() ([]Customer, error) {
+	rows, err := DB.Query("SELECT id, first_name, last_name, email, phone FROM customers")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var customers []Customer
+	for rows.Next() {
+		var customer Customer
+		if err := rows.Scan(&customer.Id, &customer.FirstName, &customer.LastName, &customer.Email, &customer.Phone); err != nil {
+			return nil, err
+		}
+		customers = append(customers, customer)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return customers, err
+}
+
 func getCustomer(customer *Customer) (int, error) {
 	sql := fmt.Sprintf("SELECT id, first_name, last_name, email, phone FROM customers WHERE first_name = ? AND last_name = ? AND email = ? AND phone = ? ORDER BY created_at LIMIT 1")
 	stmt, err := DB.Prepare(sql)

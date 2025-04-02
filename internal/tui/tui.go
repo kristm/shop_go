@@ -23,6 +23,10 @@ const (
 	columnKeyCustomer  = "customer"
 	columnKeyAmount    = "amount"
 	columnKeyStatus    = "status"
+	columnKeyFirstName = "firstname"
+	columnKeyLastName  = "lastname"
+	columnKeyEmail     = "email"
+	columnKeyPhone     = "phone"
 )
 
 type fn func(int) string
@@ -122,14 +126,16 @@ type model struct {
 	sections   []string
 	rowIndex   int
 	tableModel table.Model
+	tableRows  int
 }
 
 func initialModel() model {
-	ordersTable := GetOrders(0)
+	ordersTable, numRows := GetOrders(0)
 	return model{
 		sections:   []string{"Orders", "Customers", "Addresses", "Products", "Vouchers"},
 		rowIndex:   0,
 		tableModel: ordersTable,
+		tableRows:  numRows,
 	}
 }
 
@@ -137,7 +143,7 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func BlankTable() table.Model {
+func BlankTable() (table.Model, int) {
 	columns := []table.Column{
 		table.NewColumn(columnKeyID, "ID", 10),
 	}
@@ -146,15 +152,18 @@ func BlankTable() table.Model {
 		WithRows(rows).
 		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true))
 
-	return t
+	return t, 0
 }
 
 // func (m *model) updateTableModel(rowIndex int) {
 func (m *model) updateTableModel() {
-	if m.cursor > 0 {
-		m.tableModel = BlankTable()
-	} else {
-		m.tableModel = GetOrders(m.rowIndex)
+	switch m.cursor {
+	case 0:
+		m.tableModel, m.tableRows = GetOrders(m.rowIndex)
+	case 1:
+		m.tableModel, m.tableRows = GetCustomers(m.rowIndex)
+	default:
+		m.tableModel, m.tableRows = BlankTable()
 	}
 }
 
@@ -183,19 +192,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.cursor = 0
 			}
-		case "up":
+		case "up", "k":
 			if m.rowIndex > 0 {
 				m.rowIndex--
 			}
-		case "down":
-			m.rowIndex++
-			//doesn't work, focus only works on Input fields
-			//case "enter":
-			//	m.tableModel.Focus()
+		case "down", "j":
+			if m.rowIndex < m.tableRows {
+				m.rowIndex++
+			}
 		}
 	}
 
-	//m.updateTableModel()
 	return m, tea.Batch(cmds...)
 }
 
@@ -247,7 +254,7 @@ func (m model) View() string {
 	return docStyle.Render(doc.String())
 }
 
-func GetOrders(rowIndex int) table.Model {
+func GetOrders(rowIndex int) (table.Model, int) {
 	orders, err := models.GetOrdersByStatus(0)
 	if err != nil {
 		log.Printf("ORDERS ERROR %v", err)
@@ -278,20 +285,20 @@ func GetOrders(rowIndex int) table.Model {
 	}
 
 	// Start with the default key map and change it slightly, just for demoing
-	keys := table.DefaultKeyMap()
-	keys.RowDown.SetKeys("j", "down", "s")
-	keys.RowUp.SetKeys("k", "up", "w")
-	keys.PageUp.SetKeys("")
-	keys.PageDown.SetKeys("")
+	//keys := table.DefaultKeyMap()
+	//keys.RowDown.SetKeys("j", "down", "s")
+	//keys.RowUp.SetKeys("k", "up", "w")
+	//keys.PageUp.SetKeys("") //clear up,down keys
+	//keys.PageDown.SetKeys("")
+	footer := fmt.Sprintf("rows: %d", len(rows))
 
 	t = table.New(columns).
 		WithRows(rows).
 		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
 		Focused(true).
 		Border(customBorder).
-		WithKeyMap(keys).
-		WithStaticFooter("Footer!").
-		WithPageSize(5).
+		WithStaticFooter(footer).
+		WithPageSize(10).
 		WithSelectedText(" ", "✓").
 		WithHighlightedRow(rowIndex).
 		WithBaseStyle(
@@ -301,7 +308,57 @@ func GetOrders(rowIndex int) table.Model {
 				Align(lipgloss.Left),
 		)
 
-	return t
+	return t, len(rows)
+}
+
+func GetCustomers(rowIndex int) (table.Model, int) {
+	customers, err := models.GetCustomers()
+	if err != nil {
+		log.Printf("CUSTOMERS ERROR %v", err)
+	}
+
+	columns := []table.Column{
+		table.NewColumn(columnKeyID, "ID", 5).WithStyle(
+			lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#88f")).
+				Align(lipgloss.Center)),
+		table.NewColumn(columnKeyFirstName, "First Name", 15),
+		table.NewColumn(columnKeyLastName, "Last Name", 15),
+		table.NewColumn(columnKeyEmail, "Email", 20),
+		table.NewColumn(columnKeyPhone, "Phone", 15),
+	}
+	rows := []table.Row{}
+
+	for _, customer := range customers {
+		newRow := table.NewRow(table.RowData{
+			columnKeyID:        customer.Id,
+			columnKeyFirstName: customer.FirstName,
+			columnKeyLastName:  customer.LastName,
+			columnKeyEmail:     customer.Email,
+			columnKeyPhone:     customer.Phone,
+		})
+		rows = append(rows, newRow)
+	}
+
+	footer := fmt.Sprintf("rows: %d", len(rows))
+
+	t = table.New(columns).
+		WithRows(rows).
+		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
+		Focused(true).
+		Border(customBorder).
+		WithStaticFooter(footer).
+		WithPageSize(10).
+		WithSelectedText(" ", "✓").
+		WithHighlightedRow(rowIndex).
+		WithBaseStyle(
+			lipgloss.NewStyle().
+				BorderForeground(lipgloss.Color("#a38")).
+				Foreground(lipgloss.Color("#a7a")).
+				Align(lipgloss.Left),
+		)
+
+	return t, len(rows)
 }
 
 func Run() {
