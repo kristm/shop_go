@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -81,7 +82,7 @@ func (prod Product) MarshalJSON() ([]byte, error) {
 //}
 
 func GetAllProducts() ([]Product, error) {
-	rows, err := DB.Query("SELECT p.category_id, c.name, p.name, p.sku, p.description, p.price_in_cents FROM products p LEFT JOIN categories c ON c.id = p.category_id ORDER BY category_id")
+	rows, err := DB.Query("SELECT p.id, p.category_id, c.name, p.name, p.sku, p.description, p.price_in_cents, p.status FROM products p LEFT JOIN categories c ON c.id = p.category_id LEFT JOIN product_inventory pi ON pi.product_id = p.id ORDER BY category_id")
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func GetAllProducts() ([]Product, error) {
 	var products []Product
 	for rows.Next() {
 		var product Product
-		if err := rows.Scan(&product.CategoryId, &product.Category, &product.Name, &product.Sku, &product.Description, &product.Price); err != nil {
+		if err := rows.Scan(&product.Id, &product.CategoryId, &product.Category, &product.Name, &product.Sku, &product.Description, &product.Price, &product.Status); err != nil {
 			return nil, err
 		}
 		product.Status = getProductStatus(&product)
@@ -195,7 +196,10 @@ func getProductStatus(product *Product) ProductStatus {
 	}
 
 	var status ProductStatus
-	inventory, _ := GetProductInventory(product.Id)
+	inventory, err := GetProductInventory(product.Id)
+	if err != nil {
+		log.Printf("ERROR retrieving Inventory %v", err)
+	}
 	qty := inventory.Qty
 
 	switch {

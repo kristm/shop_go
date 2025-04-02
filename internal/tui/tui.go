@@ -399,6 +399,7 @@ func GetProducts(rowIndex int) (table.Model, int) {
 			lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#88f")).
 				Align(lipgloss.Center)),
+		table.NewColumn(columnKeyID, "ID", 10),
 		table.NewColumn(columnKeyName, "Name", 25),
 		table.NewColumn(columnKeySku, "Sku", 15),
 		table.NewColumn(columnKeyPrice, "Price", 15),
@@ -408,13 +409,13 @@ func GetProducts(rowIndex int) (table.Model, int) {
 
 	for _, product := range products {
 		price := fmt.Sprintf("%.2f", product.Price/100.00)
-		status := productStatus[int(product.Status)]
 		newRow := table.NewRow(table.RowData{
+			columnKeyID:            product.Id,
 			columnKeyCategory:      product.Category,
 			columnKeyName:          product.Name,
 			columnKeySku:           product.Sku,
 			columnKeyPrice:         price,
-			columnKeyProductStatus: status,
+			columnKeyProductStatus: productStatus[int(product.Status)],
 		})
 		rows = append(rows, newRow)
 	}
