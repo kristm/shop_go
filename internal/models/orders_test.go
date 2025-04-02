@@ -99,7 +99,7 @@ func TestMarshalOrder(t *testing.T) {
 	res, err := json.Marshal(order)
 
 	jsonStr := fmt.Sprintf("%s", res)
-	expect := "{\"id\":0,\"shipping_id\":0,\"customer_id\":1,\"reference_code\":\"\",\"payment_reference\":\"\",\"amount_in_cents\":0,\"status\":0,\"voucher\":\"\",\"orders\":[{\"id\":0,\"order_id\":0,\"product_id\":2,\"name\":\"\",\"link\":\"\",\"qty\":1,\"price\":200},{\"id\":0,\"order_id\":0,\"product_id\":3,\"name\":\"\",\"link\":\"\",\"qty\":2,\"price\":250.5}],\"amount\":701}"
+	expect := "{\"id\":0,\"shipping_id\":0,\"customer_id\":1,\"reference_code\":\"\",\"payment_reference\":\"\",\"amount_in_cents\":0,\"status\":0,\"voucher\":\"\",\"orders\":[{\"id\":0,\"order_id\":0,\"product_id\":2,\"name\":\"\",\"link\":\"\",\"qty\":1,\"price\":200},{\"id\":0,\"order_id\":0,\"product_id\":3,\"name\":\"\",\"link\":\"\",\"qty\":2,\"price\":250.5}],\"created_at\":\"\",\"amount\":701}"
 
 	require.NoError(t, err)
 	assert.Equal(t, expect, jsonStr)
