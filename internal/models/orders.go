@@ -26,6 +26,7 @@ type Order struct {
 	Status           OrderStatus `json:"status"`
 	VoucherCode      string      `json:"voucher"`
 	Items            []OrderItem `json:"orders"`
+	CreatedAt        string      `json:"created_at"`
 }
 
 type OrderItem struct {
@@ -207,7 +208,7 @@ func GetOrders(customerId int) ([]Order, error) {
 }
 
 func GetOrdersByStatus(status OrderStatus) ([]Order, error) {
-	stmt, err := DB.Prepare("SELECT id, customer_id, reference_code, amount_in_cents, status FROM orders WHERE status = ?")
+	stmt, err := DB.Prepare("SELECT id, customer_id, reference_code, amount_in_cents, status, created_at FROM orders WHERE status = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +223,7 @@ func GetOrdersByStatus(status OrderStatus) ([]Order, error) {
 
 	for rows.Next() {
 		order := Order{}
-		err = rows.Scan(&order.Id, &order.CustomerId, &order.ReferenceCode, &order.Amount, &order.Status)
+		err = rows.Scan(&order.Id, &order.CustomerId, &order.ReferenceCode, &order.Amount, &order.Status, &order.CreatedAt)
 
 		if err != nil {
 			return nil, err

@@ -23,6 +23,7 @@ const (
 	columnKeyCustomer       = "customer"
 	columnKeyAmount         = "amount"
 	columnKeyStatus         = "status"
+	columnKeyCreatedAt      = "created"
 	columnKeyFirstName      = "firstname"
 	columnKeyLastName       = "lastname"
 	columnKeyEmail          = "email"
@@ -292,6 +293,7 @@ func GetOrders(rowIndex int) (table.Model, int) {
 		table.NewColumn(columnKeyCustomer, "Customer", 10),
 		table.NewColumn(columnKeyAmount, "Amount", 10),
 		table.NewColumn(columnKeyStatus, "Status", 10),
+		table.NewColumn(columnKeyCreatedAt, "Created", 25),
 	}
 	rows := []table.Row{}
 
@@ -304,6 +306,7 @@ func GetOrders(rowIndex int) (table.Model, int) {
 			columnKeyCustomer:  customerId,
 			columnKeyAmount:    amount,
 			columnKeyStatus:    status,
+			columnKeyCreatedAt: order.CreatedAt,
 		})
 		rows = append(rows, newRow)
 	}
