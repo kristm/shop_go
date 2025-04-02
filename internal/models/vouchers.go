@@ -12,6 +12,7 @@ const FREESHIPPING = 3
 type Voucher struct {
 	Id             int    `json:"id"`
 	TypeId         int    `json:"voucher_type_id"`
+	Type           string `json:"voucher_type"`
 	Code           string `json:"code"`
 	Valid          bool   `json:"valid"`
 	RequiredAmount int    `json:"minimum_spend"`
@@ -20,7 +21,7 @@ type Voucher struct {
 }
 
 func GetVouchers() ([]Voucher, error) {
-	rows, err := DB.Query("SELECT voucher_type_id, code, valid, minimum_spend, amount, expires_at FROM vouchers ORDER BY expires_at")
+	rows, err := DB.Query("SELECT vt.name, v.code, v.valid, v.minimum_spend, vt.amount, v.expires_at FROM vouchers v LEFT JOIN voucher_types vt ORDER BY expires_at")
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +30,7 @@ func GetVouchers() ([]Voucher, error) {
 	var vouchers []Voucher
 	for rows.Next() {
 		var voucher Voucher
-		if err := rows.Scan(&voucher.TypeId, &voucher.Code, &voucher.Valid, &voucher.RequiredAmouont, &voucher.Amount, &voucher.Expires); err != nil {
+		if err := rows.Scan(&voucher.Type, &voucher.Code, &voucher.Valid, &voucher.RequiredAmount, &voucher.Amount, &voucher.Expires); err != nil {
 			return nil, err
 		}
 		vouchers = append(vouchers, voucher)

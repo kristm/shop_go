@@ -16,27 +16,33 @@ import (
 )
 
 const (
-	width                  = 110
-	columnWidth            = 30
-	columnKeyID            = "id"
-	columnKeyReference     = "reference"
-	columnKeyCustomer      = "customer"
-	columnKeyAmount        = "amount"
-	columnKeyStatus        = "status"
-	columnKeyFirstName     = "firstname"
-	columnKeyLastName      = "lastname"
-	columnKeyEmail         = "email"
-	columnKeyPhone         = "phone"
-	columnKeyAddress       = "address"
-	columnKeyCity          = "city"
-	columnKeyCountry       = "country"
-	columnKeyZip           = "zip"
-	columnKeyNotes         = "notes"
-	columnKeyCategory      = "category"
-	columnKeyName          = "name"
-	columnKeySku           = "sku"
-	columnKeyPrice         = "price"
-	columnKeyProductStatus = "productstatus"
+	width                   = 110
+	columnWidth             = 30
+	columnKeyID             = "id"
+	columnKeyReference      = "reference"
+	columnKeyCustomer       = "customer"
+	columnKeyAmount         = "amount"
+	columnKeyStatus         = "status"
+	columnKeyFirstName      = "firstname"
+	columnKeyLastName       = "lastname"
+	columnKeyEmail          = "email"
+	columnKeyPhone          = "phone"
+	columnKeyAddress        = "address"
+	columnKeyCity           = "city"
+	columnKeyCountry        = "country"
+	columnKeyZip            = "zip"
+	columnKeyNotes          = "notes"
+	columnKeyCategory       = "category"
+	columnKeyName           = "name"
+	columnKeySku            = "sku"
+	columnKeyPrice          = "price"
+	columnKeyProductStatus  = "productstatus"
+	columnKeyVoucherType    = "vouchertype"
+	columnKeyVoucherCode    = "vouchercode"
+	columnKeyValid          = "valid"
+	columnKeyRequiredAmount = "requiredamount"
+	columnKeyDiscount       = "discount"
+	columnKeyExpires        = "expires"
 )
 
 type fn func(int) string
@@ -175,6 +181,8 @@ func (m *model) updateTableModel() {
 		m.tableModel, m.tableRows = GetAddresses(m.rowIndex)
 	case 3:
 		m.tableModel, m.tableRows = GetProducts(m.rowIndex)
+	case 4:
+		m.tableModel, m.tableRows = GetVouchers(m.rowIndex)
 	default:
 		m.tableModel, m.tableRows = BlankTable()
 	}
@@ -397,6 +405,39 @@ func GetProducts(rowIndex int) (table.Model, int) {
 			columnKeySku:           product.Sku,
 			columnKeyPrice:         price,
 			columnKeyProductStatus: product.Status,
+		})
+		rows = append(rows, newRow)
+	}
+
+	t = resetTable(columns, rows, rowIndex)
+
+	return t, len(rows)
+}
+
+func GetVouchers(rowIndex int) (table.Model, int) {
+	vouchers, err := models.GetVouchers()
+	if err != nil {
+		log.Printf("VOUCHERS ERROR %v", err)
+	}
+
+	columns := []table.Column{
+		table.NewColumn(columnKeyVoucherType, "Voucher Type", 10),
+		table.NewColumn(columnKeyVoucherCode, "Voucher Code", 15),
+		table.NewColumn(columnKeyValid, "Valid", 15),
+		table.NewColumn(columnKeyRequiredAmount, "Minimum Amount", 15),
+		table.NewColumn(columnKeyDiscount, "Discount", 15),
+		table.NewColumn(columnKeyExpires, "Expires", 20),
+	}
+	rows := []table.Row{}
+
+	for _, voucher := range vouchers {
+		newRow := table.NewRow(table.RowData{
+			columnKeyVoucherType:    voucher.Type,
+			columnKeyVoucherCode:    voucher.Code,
+			columnKeyValid:          voucher.Valid,
+			columnKeyRequiredAmount: voucher.RequiredAmount,
+			columnKeyDiscount:       voucher.Amount,
+			columnKeyExpires:        voucher.Expires,
 		})
 		rows = append(rows, newRow)
 	}
