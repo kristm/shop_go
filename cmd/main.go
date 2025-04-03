@@ -21,10 +21,12 @@ import (
 )
 
 type News struct {
-	Title       string   `json:"title"`
-	Subtitle    string   `json:"subtitle"`
-	Description string   `json:"description"`
-	Events      []string `json:"events"`
+	Title        string   `json:"title"`
+	Subtitle     string   `json:"subtitle"`
+	Description  string   `json:"description"`
+	Events       []string `json:"events"`
+	Marquee      string   `json:"marquee"`
+	MarqueeTheme string   `json:"marqueeTheme"`
 }
 
 type OrderPayload struct {
