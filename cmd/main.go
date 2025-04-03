@@ -25,6 +25,8 @@ type News struct {
 	Subtitle     string   `json:"subtitle"`
 	Description  string   `json:"description"`
 	Events       []string `json:"events"`
+	Hero         string   `json:"heroImage"`
+	Image        string   `json:"image"`
 	Marquee      string   `json:"marquee"`
 	MarqueeTheme string   `json:"marqueeTheme"`
 }
