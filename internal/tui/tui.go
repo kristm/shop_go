@@ -174,6 +174,7 @@ type model struct {
 	rowIndex   int
 	tableModel table.Model
 	tableRows  int
+	targetCol  string
 	modal      modalModel
 }
 
@@ -182,12 +183,13 @@ func initialModel() model {
 		visible: false,
 		content: "hello",
 	}
-	ordersTable, numRows := GetOrders(0)
+	ordersTable, numRows, columnName := GetOrders(0)
 	return model{
 		sections:   []string{"Orders", "Customers", "Addresses", "Products", "Vouchers"},
 		rowIndex:   0,
 		tableModel: ordersTable,
 		tableRows:  numRows,
+		targetCol:  columnName,
 		modal:      defaultModal,
 	}
 }
@@ -196,7 +198,7 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func BlankTable() (table.Model, int) {
+func BlankTable() (table.Model, int, string) {
 	columns := []table.Column{
 		table.NewColumn(columnKeyID, "ID", 10),
 	}
@@ -205,23 +207,23 @@ func BlankTable() (table.Model, int) {
 		WithRows(rows).
 		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true))
 
-	return t, 0
+	return t, 0, columnKeyID
 }
 
 func (m *model) updateTableModel() {
 	switch m.cursor {
 	case 0:
-		m.tableModel, m.tableRows = GetOrders(m.rowIndex)
+		m.tableModel, m.tableRows, m.targetCol = GetOrders(m.rowIndex)
 	case 1:
-		m.tableModel, m.tableRows = GetCustomers(m.rowIndex)
+		m.tableModel, m.tableRows, m.targetCol = GetCustomers(m.rowIndex)
 	case 2:
-		m.tableModel, m.tableRows = GetAddresses(m.rowIndex)
+		m.tableModel, m.tableRows, m.targetCol = GetAddresses(m.rowIndex)
 	case 3:
-		m.tableModel, m.tableRows = GetProducts(m.rowIndex)
+		m.tableModel, m.tableRows, m.targetCol = GetProducts(m.rowIndex)
 	case 4:
-		m.tableModel, m.tableRows = GetVouchers(m.rowIndex)
+		m.tableModel, m.tableRows, m.targetCol = GetVouchers(m.rowIndex)
 	default:
-		m.tableModel, m.tableRows = BlankTable()
+		m.tableModel, m.tableRows, m.targetCol = BlankTable()
 	}
 }
 
@@ -318,7 +320,7 @@ func (m model) View() string {
 		} else {
 			dialogTitle := dialogTitleStyle.Width(physicalWidth - innerMargin).Render("INFO")
 			titleUi := lipgloss.JoinHorizontal(lipgloss.Center, dialogTitle)
-			body := lipgloss.JoinVertical(lipgloss.Center, m.modal.content)
+			body := lipgloss.JoinVertical(lipgloss.Center, m.tableModel.HighlightedRow().Data[m.targetCol].(string))
 
 			ui := lipgloss.JoinVertical(lipgloss.Center, body)
 			view := lipgloss.JoinVertical(lipgloss.Center, titleUi, ui)
@@ -337,7 +339,7 @@ func (m model) View() string {
 	return docStyle.Render(doc.String())
 }
 
-func GetOrders(rowIndex int) (table.Model, int) {
+func GetOrders(rowIndex int) (table.Model, int, string) {
 	orders, err := models.GetOrdersByStatus(0)
 	if err != nil {
 		log.Printf("ORDERS ERROR %v", err)
@@ -371,10 +373,10 @@ func GetOrders(rowIndex int) (table.Model, int) {
 
 	t = resetTable(columns, rows, rowIndex)
 
-	return t, len(rows)
+	return t, len(rows), columnKeyReference
 }
 
-func GetCustomers(rowIndex int) (table.Model, int) {
+func GetCustomers(rowIndex int) (table.Model, int, string) {
 	customers, err := models.GetCustomers()
 	if err != nil {
 		log.Printf("CUSTOMERS ERROR %v", err)
@@ -405,10 +407,10 @@ func GetCustomers(rowIndex int) (table.Model, int) {
 
 	t = resetTable(columns, rows, rowIndex)
 
-	return t, len(rows)
+	return t, len(rows), columnKeyLastName
 }
 
-func GetAddresses(rowIndex int) (table.Model, int) {
+func GetAddresses(rowIndex int) (table.Model, int, string) {
 	addresses, err := models.GetShippingAddresses()
 	if err != nil {
 		log.Printf("ADDRESSES ERROR %v", err)
@@ -440,10 +442,10 @@ func GetAddresses(rowIndex int) (table.Model, int) {
 
 	t = resetTable(columns, rows, rowIndex)
 
-	return t, len(rows)
+	return t, len(rows), columnKeyCity
 }
 
-func GetProducts(rowIndex int) (table.Model, int) {
+func GetProducts(rowIndex int) (table.Model, int, string) {
 	products, err := models.GetAllProducts()
 	if err != nil {
 		log.Printf("PRODUCTS ERROR %v", err)
@@ -477,10 +479,10 @@ func GetProducts(rowIndex int) (table.Model, int) {
 
 	t = resetTable(columns, rows, rowIndex)
 
-	return t, len(rows)
+	return t, len(rows), columnKeySku
 }
 
-func GetVouchers(rowIndex int) (table.Model, int) {
+func GetVouchers(rowIndex int) (table.Model, int, string) {
 	vouchers, err := models.GetVouchers()
 	if err != nil {
 		log.Printf("VOUCHERS ERROR %v", err)
@@ -510,7 +512,7 @@ func GetVouchers(rowIndex int) (table.Model, int) {
 
 	t = resetTable(columns, rows, rowIndex)
 
-	return t, len(rows)
+	return t, len(rows), columnKeyVoucherCode
 }
 
 func resetTable(columns []table.Column, rows []table.Row, rowIndex int) table.Model {
