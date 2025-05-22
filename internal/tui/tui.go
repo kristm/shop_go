@@ -13,11 +13,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
+	"golang.org/x/term"
 )
 
 const (
 	width                   = 110
 	columnWidth             = 30
+	innerMargin             = 60
 	columnKeyID             = "id"
 	columnKeyReference      = "reference"
 	columnKeyCustomer       = "customer"
@@ -71,6 +73,15 @@ var (
 				Foreground(lipgloss.Color("#FFFDF5")).
 				Background(lipgloss.Color("#FF5F87")).
 				Padding(0, 1)
+
+	dialogBoxStyle = lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("#874BFD")).
+			Padding(0, 0).
+			BorderTop(true).
+			BorderLeft(true).
+			BorderRight(true).
+			BorderBottom(true)
 
 	tableStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
@@ -260,6 +271,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	doc := strings.Builder{}
+	physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
 
 	{
 		w := lipgloss.Width
@@ -304,15 +316,16 @@ func (m model) View() string {
 				doc.WriteString(vp.View())
 			}
 		} else {
-			dialogTitle := dialogTitleStyle.Width(width / 3).Render("INFO")
+			dialogTitle := dialogTitleStyle.Width(physicalWidth - innerMargin).Render("INFO")
 			titleUi := lipgloss.JoinHorizontal(lipgloss.Center, dialogTitle)
 			body := lipgloss.JoinVertical(lipgloss.Center, m.modal.content)
 
 			ui := lipgloss.JoinVertical(lipgloss.Center, body)
 			view := lipgloss.JoinVertical(lipgloss.Center, titleUi, ui)
+			dialogBody := dialogBoxStyle.Render(view)
 			dialog := lipgloss.Place(width, 15,
 				lipgloss.Center, lipgloss.Center,
-				view,
+				dialogBody,
 				lipgloss.WithWhitespaceChars("商店"),
 				lipgloss.WithWhitespaceForeground(subtle),
 			)
