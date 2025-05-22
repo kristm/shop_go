@@ -57,9 +57,20 @@ var (
 
 	normal = lipgloss.Color("#EEEEEE")
 	base   = lipgloss.NewStyle().Foreground(normal)
+	subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#585858"}
 
 	background = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#CCCCCC"}
 	highlight  = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#61D4C6"}
+
+	titleBarStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
+			Background(lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#353533"}).
+			Align(lipgloss.Center)
+	dialogTitleStyle = lipgloss.NewStyle().
+				Inherit(titleBarStyle).
+				Foreground(lipgloss.Color("#FFFDF5")).
+				Background(lipgloss.Color("#FF5F87")).
+				Padding(0, 1)
 
 	tableStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
@@ -141,21 +152,32 @@ func max(a, b int) int {
 	return b
 }
 
+type modalModel struct {
+	visible bool
+	content string
+}
+
 type model struct {
 	cursor     int
 	sections   []string
 	rowIndex   int
 	tableModel table.Model
 	tableRows  int
+	modal      modalModel
 }
 
 func initialModel() model {
+	defaultModal := modalModel{
+		visible: false,
+		content: "hello",
+	}
 	ordersTable, numRows := GetOrders(0)
 	return model{
 		sections:   []string{"Orders", "Customers", "Addresses", "Products", "Vouchers"},
 		rowIndex:   0,
 		tableModel: ordersTable,
 		tableRows:  numRows,
+		modal:      defaultModal,
 	}
 }
 
@@ -228,6 +250,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.rowIndex < m.tableRows {
 				m.rowIndex++
 			}
+		case "enter":
+			m.modal.visible = !m.modal.visible
 		}
 	}
 
@@ -252,31 +276,49 @@ func (m model) View() string {
 
 		doc.WriteString(statusBarStyle.Width(width).Render(bar) + "\n\n")
 
-		// Tabs
-		// get model.rowIndex to determine activeTab
-		var nav [5]string
-		for i, menuItem := range m.sections {
-			if m.cursor == i {
-				nav[i] = activeTab.Render(menuItem)
-			} else {
-				nav[i] = tab.Render(menuItem)
+		if !m.modal.visible {
+			// Tabs
+			// get model.rowIndex to determine activeTab
+			var nav [5]string
+			for i, menuItem := range m.sections {
+				if m.cursor == i {
+					nav[i] = activeTab.Render(menuItem)
+				} else {
+					nav[i] = tab.Render(menuItem)
+				}
 			}
+			row := lipgloss.JoinHorizontal(
+				lipgloss.Top, nav[0], nav[1], nav[2], nav[3], nav[4],
+			)
+
+			gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
+			row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
+			doc.WriteString(row + "\n\n")
+
+			// Table
+			{
+				m.updateTableModel()
+				vp := viewport.New(width, 20)
+				vp.YPosition = 20
+				vp.SetContent(m.tableModel.View())
+				doc.WriteString(vp.View())
+			}
+		} else {
+			dialogTitle := dialogTitleStyle.Width(width / 3).Render("INFO")
+			titleUi := lipgloss.JoinHorizontal(lipgloss.Center, dialogTitle)
+			body := lipgloss.JoinVertical(lipgloss.Center, m.modal.content)
+
+			ui := lipgloss.JoinVertical(lipgloss.Center, body)
+			view := lipgloss.JoinVertical(lipgloss.Center, titleUi, ui)
+			dialog := lipgloss.Place(width, 15,
+				lipgloss.Center, lipgloss.Center,
+				view,
+				lipgloss.WithWhitespaceChars("商店"),
+				lipgloss.WithWhitespaceForeground(subtle),
+			)
+			doc.WriteString(dialog + "\n\n")
 		}
-		row := lipgloss.JoinHorizontal(
-			lipgloss.Top, nav[0], nav[1], nav[2], nav[3], nav[4],
-		)
 
-		gap := tabGap.Render(strings.Repeat(" ", max(0, width-lipgloss.Width(row)-2)))
-		row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, gap)
-		doc.WriteString(row + "\n\n")
-	}
-
-	{
-		m.updateTableModel()
-		vp := viewport.New(width, 20)
-		vp.YPosition = 20
-		vp.SetContent(m.tableModel.View())
-		doc.WriteString(vp.View())
 	}
 
 	return docStyle.Render(doc.String())
