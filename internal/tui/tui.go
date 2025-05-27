@@ -242,29 +242,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q", "esc":
 			cmds = append(cmds, tea.Quit)
 		case "left", "<":
-			m.rowIndex = 0 //reset to first row when changing tabs
-			if m.cursor > 0 {
-				m.cursor--
-			} else {
-				m.cursor = len(m.sections) - 1
-			}
-		case "right", "tab", ">":
-			m.rowIndex = 0 //reset to first row when changing tabs
-			if m.cursor < len(m.sections)-1 {
-				m.cursor++
-			} else {
-				m.cursor = 0
-			}
+			MoveLeft(&m)
+		case "right", ">":
+			MoveRight(&m)
 		case "up", "k":
-			if m.rowIndex > 0 {
-				m.rowIndex--
-			}
+			MoveUp(&m)
 		case "down", "j":
-			if m.rowIndex < m.tableRows {
-				m.rowIndex++
-			}
+			MoveDown(&m)
 		case "enter":
-			m.modal.visible = !m.modal.visible
+			ToggleModal(&m)
 		}
 	}
 
