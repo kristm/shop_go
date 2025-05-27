@@ -242,13 +242,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q", "esc":
 			cmds = append(cmds, tea.Quit)
 		case "left", "<":
-			MoveLeft(&m)
+			if !m.modal.visible {
+				MoveLeft(&m)
+			}
 		case "right", ">":
-			MoveRight(&m)
+			if !m.modal.visible {
+				MoveRight(&m)
+			}
 		case "up", "k":
-			MoveUp(&m)
+			if !m.modal.visible {
+				MoveUp(&m)
+			}
 		case "down", "j":
-			MoveDown(&m)
+			if !m.modal.visible {
+				MoveDown(&m)
+			}
 		case "enter":
 			ToggleModal(&m)
 		}
@@ -304,7 +312,8 @@ func (m model) View() string {
 				doc.WriteString(vp.View())
 			}
 		} else {
-			dialogTitle := dialogTitleStyle.Width(physicalWidth - innerMargin).Render("INFO")
+			titleStr := fmt.Sprintf("INFO %d %t", m.rowIndex, m.modal.visible)
+			dialogTitle := dialogTitleStyle.Width(physicalWidth - innerMargin).Render(titleStr)
 			titleUi := lipgloss.JoinHorizontal(lipgloss.Center, dialogTitle)
 			body := lipgloss.JoinVertical(lipgloss.Center, m.tableModel.HighlightedRow().Data[m.targetCol].(string))
 
@@ -510,6 +519,7 @@ func resetTable(columns []table.Column, rows []table.Row, rowIndex int) table.Mo
 		Border(customBorder).
 		WithPageSize(10).
 		WithHighlightedRow(rowIndex).
+		WithKeyMap(table.KeyMap{}).
 		WithBaseStyle(
 			lipgloss.NewStyle().
 				BorderForeground(lipgloss.Color("#a38")).
