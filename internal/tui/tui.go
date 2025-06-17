@@ -74,6 +74,12 @@ var (
 				Background(lipgloss.Color("#FF5F87")).
 				Padding(0, 1)
 
+	modalBodyStyle = lipgloss.NewStyle().
+			Inherit(titleBarStyle).
+			Foreground(lipgloss.Color("#FF5F87")).
+			Background(lipgloss.Color("#000000")).
+			Padding(0, 1)
+
 	dialogBoxStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("#874BFD")).
@@ -316,12 +322,20 @@ func (m model) View() string {
 			dialogTitle := dialogTitleStyle.Width(physicalWidth - innerMargin).Render(titleStr)
 			titleUi := lipgloss.JoinHorizontal(lipgloss.Center, dialogTitle)
 
-			data := GetOrderDetail()
-			orderDetail := strings.Join((*data)[0], ": ")
-			detailLine := dialogTitleStyle.Render(orderDetail)
-			detail := lipgloss.JoinHorizontal(lipgloss.Center, detailLine)
+			reference := m.tableModel.HighlightedRow().Data[m.targetCol].(string)
+			data := GetOrderDetail(reference)
+			//orderDetail := strings.Join((*data)[0], ": ")
+			var lineItems []string
 
-			body := lipgloss.JoinVertical(lipgloss.Center, m.tableModel.HighlightedRow().Data[m.targetCol].(string), detail)
+			for _, orderItem := range *data {
+				orderDetail := strings.Join(orderItem, " - ")
+				lineItems = append(lineItems, orderDetail, "\n")
+			}
+
+			detailLine := modalBodyStyle.Render(lineItems...)
+			//detail := lipgloss.JoinVertical(lipgloss.Center, detailLine)
+
+			body := lipgloss.JoinVertical(lipgloss.Center, reference, detailLine)
 
 			ui := lipgloss.JoinVertical(lipgloss.Center, body)
 			view := lipgloss.JoinVertical(lipgloss.Center, titleUi, ui)

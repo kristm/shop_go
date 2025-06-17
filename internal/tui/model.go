@@ -1,13 +1,21 @@
 package tui
 
+import (
+	"fmt"
+	"shop_go/internal/models"
+)
+
 type OrderDetail [][]string
 
-func GetOrderDetail() *OrderDetail {
+func GetOrderDetail(ref string) *OrderDetail {
 	var orderDetail OrderDetail
+	order, _ := models.GetOrderByReference(ref)
 
-	orderDetail = append(orderDetail, []string{"charm", "200"})
-	orderDetail = append(orderDetail, []string{"comics", "250"})
-	orderDetail = append(orderDetail, []string{"failed notes", "100"})
+	for _, orderItem := range order.Items {
+		qty := fmt.Sprintf("%d", orderItem.Qty)
+		price := fmt.Sprintf("%.2f", orderItem.Price/100.00)
+		orderDetail = append(orderDetail, []string{orderItem.ProductName, qty, price})
+	}
 
 	return &orderDetail
 }
