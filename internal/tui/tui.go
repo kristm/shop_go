@@ -323,19 +323,22 @@ func (m model) View() string {
 			titleUi := lipgloss.JoinHorizontal(lipgloss.Center, dialogTitle)
 
 			reference := m.tableModel.HighlightedRow().Data[m.targetCol].(string)
-			data := GetOrderDetail(reference)
-			//orderDetail := strings.Join((*data)[0], ": ")
-			var lineItems []string
+			var body string
+			if m.cursor == 0 {
+				data := GetOrderDetail(reference)
+				var lineItems []string
 
-			for _, orderItem := range *data {
-				orderDetail := strings.Join(orderItem, " - ")
-				lineItems = append(lineItems, orderDetail, "\n")
+				for _, orderItem := range *data {
+					orderDetail := strings.Join(orderItem, " - ")
+					lineItems = append(lineItems, orderDetail, "\n")
+				}
+
+				detailLine := modalBodyStyle.Render(lineItems...)
+				detail := lipgloss.JoinHorizontal(lipgloss.Left, detailLine)
+				body = lipgloss.JoinVertical(lipgloss.Center, reference, detail)
+			} else {
+				body = lipgloss.JoinVertical(lipgloss.Center, reference)
 			}
-
-			detailLine := modalBodyStyle.Render(lineItems...)
-			//detail := lipgloss.JoinVertical(lipgloss.Center, detailLine)
-
-			body := lipgloss.JoinVertical(lipgloss.Center, reference, detailLine)
 
 			ui := lipgloss.JoinVertical(lipgloss.Center, body)
 			view := lipgloss.JoinVertical(lipgloss.Center, titleUi, ui)
