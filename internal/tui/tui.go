@@ -312,10 +312,16 @@ func (m model) View() string {
 				doc.WriteString(vp.View())
 			}
 		} else {
-			titleStr := fmt.Sprintf("INFO %d %t", m.rowIndex, m.modal.visible)
+			titleStr := fmt.Sprintf("INFO %d", m.rowIndex)
 			dialogTitle := dialogTitleStyle.Width(physicalWidth - innerMargin).Render(titleStr)
 			titleUi := lipgloss.JoinHorizontal(lipgloss.Center, dialogTitle)
-			body := lipgloss.JoinVertical(lipgloss.Center, m.tableModel.HighlightedRow().Data[m.targetCol].(string))
+
+			data := GetOrderDetail()
+			orderDetail := strings.Join((*data)[0], ": ")
+			detailLine := dialogTitleStyle.Render(orderDetail)
+			detail := lipgloss.JoinHorizontal(lipgloss.Center, detailLine)
+
+			body := lipgloss.JoinVertical(lipgloss.Center, m.tableModel.HighlightedRow().Data[m.targetCol].(string), detail)
 
 			ui := lipgloss.JoinVertical(lipgloss.Center, body)
 			view := lipgloss.JoinVertical(lipgloss.Center, titleUi, ui)
