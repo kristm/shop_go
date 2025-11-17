@@ -13,6 +13,8 @@ import (
 	"shop_go/internal/models"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func PrintJSON(obj interface{}) {
@@ -117,6 +119,8 @@ func getOrderDetails(reference string) {
 		log.Printf("error getting orders %v", err)
 	}
 
+	title := color.New(color.FgWhite, color.Bold, color.BgMagenta)
+	title.Println(" Customer Details ")
 	fmt.Printf("%s %s\n", customer.FirstName, customer.LastName)
 	fmt.Printf("%s \n", customer.Phone)
 	fmt.Printf("%s \n", customer.Email)
@@ -124,6 +128,7 @@ func getOrderDetails(reference string) {
 	fmt.Printf("%s \n", shipping.City)
 	fmt.Printf("%s %s\n", shipping.Country, shipping.Zip)
 	fmt.Printf("NOTES: %s \n", shipping.Notes)
+	title.Println(" Order Details ")
 	PrintJSON(order)
 	PrintJSON(shipping)
 }
