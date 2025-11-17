@@ -51,3 +51,19 @@ func TestDuplicateCustomer(t *testing.T) {
 	// returns existing id
 	assert.Equal(t, customer1, duplicateId)
 }
+
+func TestGetCustomerById(t *testing.T) {
+	customerId, err := AddCustomer(&Customer{
+		FirstName: "Giorgio",
+		LastName:  "Moroder",
+		Email:     "gior@gio.der",
+		Phone:     "676767",
+	})
+
+	customer, err := GetCustomerById(customerId)
+	require.NoError(t, err)
+	assert.Equal(t, customer.FirstName, "Giorgio")
+	assert.Equal(t, customer.LastName, "Moroder")
+	assert.Equal(t, customer.Email, "gior@gio.der")
+	assert.Equal(t, customer.Phone, "676767")
+}

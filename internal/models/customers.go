@@ -48,6 +48,22 @@ func getCustomer(customer *Customer) (int, error) {
 	return existingCustomer.Id, nil
 }
 
+func GetCustomerById(id int) (*Customer, error) {
+	stmt, err := DB.Prepare("SELECT first_name, last_name, email, phone FROM customers WHERE id = ?")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	customer := &Customer{}
+	sqlErr := stmt.QueryRow(id).Scan(&customer.FirstName, &customer.LastName, &customer.Email, &customer.Phone)
+	if err != nil {
+		return nil, sqlErr
+	}
+
+	return customer, nil
+}
+
 func AddOrGetCustomer(customer *Customer) (int, error) {
 	customerId, _ := getCustomer(customer)
 	if customerId > 0 {

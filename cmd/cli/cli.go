@@ -101,19 +101,29 @@ func showProducts() {
 	}
 }
 
-func getOrderByRef(reference string) {
+func getOrderDetails(reference string) {
 	order, err := models.GetOrderByReference(reference)
+	if err != nil {
+		log.Printf("error getting orders %v", err)
+	}
 
+	customer, err := models.GetCustomerById(order.CustomerId)
 	if err != nil {
 		log.Printf("error getting orders %v", err)
 	}
 
 	shipping, err := models.GetShippingById(order.ShippingId)
-
 	if err != nil {
 		log.Printf("error getting orders %v", err)
 	}
 
+	fmt.Printf("%s %s\n", customer.FirstName, customer.LastName)
+	fmt.Printf("%s \n", customer.Phone)
+	fmt.Printf("%s \n", customer.Email)
+	fmt.Printf("%s \n", shipping.Address)
+	fmt.Printf("%s \n", shipping.City)
+	fmt.Printf("%s %s\n", shipping.Country, shipping.Zip)
+	fmt.Printf("NOTES: %s \n", shipping.Notes)
 	PrintJSON(order)
 	PrintJSON(shipping)
 }
@@ -203,7 +213,7 @@ func main() {
 	}
 
 	if len(*orderRefCode) > 0 {
-		getOrderByRef(*orderRefCode)
+		getOrderDetails(*orderRefCode)
 		os.Exit(1)
 	}
 
