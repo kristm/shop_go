@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -13,6 +14,11 @@ import (
 	"strconv"
 	"strings"
 )
+
+func PrintJSON(obj interface{}) {
+	bytes, _ := json.MarshalIndent(obj, "\t", "\t")
+	fmt.Println(string(bytes))
+}
 
 func readCSVFile(filename string) ([]byte, error) {
 	f, err := os.Open(filename)
@@ -95,6 +101,23 @@ func showProducts() {
 	}
 }
 
+func getOrderByRef(reference string) {
+	order, err := models.GetOrderByReference(reference)
+
+	if err != nil {
+		log.Printf("error getting orders %v", err)
+	}
+
+	shipping, err := models.GetShippingById(order.ShippingId)
+
+	if err != nil {
+		log.Printf("error getting orders %v", err)
+	}
+
+	PrintJSON(order)
+	PrintJSON(shipping)
+}
+
 func markPaidOrder(reference string) {
 	//Get Order By reference
 	order, _ := models.GetOrderByReference(reference)
@@ -150,6 +173,7 @@ func main() {
 	getproducts := flag.Bool("getproducts", false, "a bool")
 	csvPath := flag.String("csv", "", "path to csv")
 	orderRef := flag.String("setpaid", "", "order reference")
+	orderRefCode := flag.String("getorder", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
@@ -175,6 +199,11 @@ func main() {
 
 	if len(*orderRef) > 0 {
 		markPaidOrder(*orderRef)
+		os.Exit(1)
+	}
+
+	if len(*orderRefCode) > 0 {
+		getOrderByRef(*orderRefCode)
 		os.Exit(1)
 	}
 
