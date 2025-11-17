@@ -133,7 +133,8 @@ func getOrderByReference(c *gin.Context) {
 }
 
 func getShippingById(c *gin.Context) {
-	id := c.Param("id")
+	id, err := strconv.Atoi(c.Param("id"))
+	checkErr(err)
 	shippingDetails, err := models.GetShippingById(id)
 	checkErr(err)
 
