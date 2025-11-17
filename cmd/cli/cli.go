@@ -13,6 +13,8 @@ import (
 	"shop_go/internal/models"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 func PrintJSON(obj interface{}) {
@@ -117,6 +119,19 @@ func getOrderDetails(reference string) {
 		log.Printf("error getting orders %v", err)
 	}
 
+	baseStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#FFF7DB"))
+
+	titleStyle := baseStyle.
+		Padding(0, 1).
+		Background(lipgloss.Color("#FF0073"))
+
+	headerStyle := baseStyle.
+		BorderStyle(lipgloss.NormalBorder()).
+		Padding(0, 1)
+
+	fmt.Println(headerStyle.Render(" Customer Details "))
 	fmt.Printf("%s %s\n", customer.FirstName, customer.LastName)
 	fmt.Printf("%s \n", customer.Phone)
 	fmt.Printf("%s \n", customer.Email)
@@ -124,6 +139,7 @@ func getOrderDetails(reference string) {
 	fmt.Printf("%s \n", shipping.City)
 	fmt.Printf("%s %s\n", shipping.Country, shipping.Zip)
 	fmt.Printf("NOTES: %s \n", shipping.Notes)
+	fmt.Println(titleStyle.Render("Order Details "))
 	PrintJSON(order)
 	PrintJSON(shipping)
 }
