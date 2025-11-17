@@ -132,6 +132,18 @@ func getOrderByReference(c *gin.Context) {
 	}
 }
 
+func getShippingById(c *gin.Context) {
+	id := c.Param("id")
+	shippingDetails, err := models.GetShippingById(id)
+	checkErr(err)
+
+	if shippingDetails != nil {
+		c.JSON(http.StatusOK, gin.H{"data": shippingDetails})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	}
+}
+
 func getVoucherByCode(c *gin.Context) {
 	voucherCode := c.Param("code")
 	ok, err := models.ValidateVoucher(voucherCode)
@@ -323,6 +335,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 		v1.GET("products/:id", getProductById)
 		v1.GET("products/sku/:sku", getProductBySku)
 		v1.GET("orders/:reference_code", getOrderByReference)
+		v1.GET("shipping/:id", getShippingById)
 		v1.GET("vouchers/:code", getVoucherByCode)
 		v1.GET("vouchers/:code/apply/:amount", getVoucherComputation)
 		v1.POST("orders", createOrder(m, cfg))

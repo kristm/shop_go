@@ -41,3 +41,19 @@ func AddShipping(newAddress *Shipping) (int, error) {
 
 	return int(id), nil
 }
+
+func GetShippingById(shippingId int) (Shipping, error) {
+	stmt, err := DB.Prepare("SELECT status, address, city, country, zip, phone, notes FROM shipping WHERE id = ?")
+	if err != nil {
+		return Photo{}, err
+	}
+	defer stmt.Close()
+
+	shipping := Shipping{}
+	sqlErr := stmt.QueryRow(id).Scan(&shipping.Status, &shipping.Address, &shipping.City, &shipping.Couuntry, &shipping.Zip, &shipping.Phone, &shipping.Notes)
+	if sqlErr != nil {
+		return Shipping{}, err
+	}
+
+	return shipping, nil
+}
