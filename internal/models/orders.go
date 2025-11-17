@@ -26,6 +26,7 @@ type Order struct {
 	Status           OrderStatus `json:"status"`
 	VoucherCode      string      `json:"voucher"`
 	Items            []OrderItem `json:"orders"`
+	ShippingStatus   int         `json:"shipping_status"`
 }
 
 type OrderItem struct {
@@ -145,6 +146,18 @@ func GetOrderByReference(ref string) (*Order, error) {
 		}
 		return nil, sqlErr
 	}
+
+	stmt, err = DB.Prepare("SELECT status FROM shipping WHERE id = ?")
+	if err != nil {
+		return nil, err
+	}
+
+	var shippingStatus int
+	sqlErr = stmt.QueryRow(order.ShippingId).Scan(&shippingStatus)
+	if sqlErr != nil {
+		shippingStatus = 0
+	}
+	order.ShippingStatus = shippingStatus
 
 	stmt, err = DB.Prepare("SELECT op.id, op.order_id, p.name, op.qty, op.price_in_cents, COALESCE(pl.url, '') FROM order_products as op LEFT JOIN products as p ON p.id = op.product_id LEFT JOIN product_links as pl ON p.id = pl.product_id WHERE op.order_id = ?")
 	if err != nil {
