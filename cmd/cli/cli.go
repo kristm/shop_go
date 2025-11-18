@@ -131,6 +131,31 @@ func getOrderDetails(reference string) {
 		BorderStyle(lipgloss.NormalBorder()).
 		Padding(0, 1)
 
+	doc := strings.Builder{}
+	const (
+		columnWidth = 60
+	)
+	var (
+		subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
+		list   = lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("#00DBC6")).
+			Padding(1, 1).
+			MarginRight(2).
+			Height(8).
+			Width(columnWidth + 1)
+
+		listHeader = baseStyle.
+				BorderStyle(lipgloss.NormalBorder()).
+				BorderBottom(true).
+				BorderForeground(subtle).
+				MarginRight(2).
+				Render
+
+		listItem = baseStyle.PaddingLeft(2).Render
+		docStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
+	)
+
 	fmt.Println(headerStyle.Render(" Customer Details "))
 	fmt.Printf("%s %s\n", customer.FirstName, customer.LastName)
 	fmt.Printf("%s \n", customer.Phone)
@@ -140,8 +165,40 @@ func getOrderDetails(reference string) {
 	fmt.Printf("%s %s\n", shipping.Country, shipping.Zip)
 	fmt.Printf("NOTES: %s \n", shipping.Notes)
 	fmt.Println(titleStyle.Render("Order Details "))
-	PrintJSON(order)
-	PrintJSON(shipping)
+
+	amount := fmt.Sprintf("Total: %.2f", order.Amount/100.00)
+	orderId := fmt.Sprintf("ID: %d", order.Id)
+	referenceLine := fmt.Sprintf("Reference: %s", reference)
+	orderStatus := fmt.Sprintf("Status: %d", order.Status)
+	paymentRef := fmt.Sprintf("Payment Reference: %s", order.PaymentReference)
+	customerId := fmt.Sprintf("Customer ID: %d", order.CustomerId)
+	shippingId := fmt.Sprintf("Shipping ID: %d", order.ShippingId)
+	lists := lipgloss.JoinHorizontal(lipgloss.Top,
+		list.Render(
+			lipgloss.JoinVertical(lipgloss.Left,
+				listHeader("Order Details"),
+				listItem(amount),
+				listItem(orderId),
+				listItem(referenceLine),
+				listItem(orderStatus),
+				listItem(paymentRef),
+				listItem(customerId),
+				listItem(shippingId),
+			),
+		),
+		list.Width(columnWidth).Render(
+			lipgloss.JoinVertical(lipgloss.Left,
+				listHeader("Actual Lip Gloss Vendors"),
+				listItem("Glossier"),
+				listItem("Claire‘s Boutique"),
+			),
+		),
+	)
+
+	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, lists))
+	fmt.Println(docStyle.Render(doc.String()))
+	//PrintJSON(order)
+	//PrintJSON(shipping)
 }
 
 func updateShipping(reference string) {
