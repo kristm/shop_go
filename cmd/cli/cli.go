@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/evertras/bubble-table/table"
 )
 
 func PrintJSON(obj interface{}) {
@@ -136,10 +137,14 @@ func getOrderDetails(reference string) {
 		columnWidth = 60
 	)
 	var (
-		subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
-		list   = lipgloss.NewStyle().
+		//subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
+		cyan = lipgloss.Color("#00DBC6")
+		//BorderStyle = lipgloss.NewStyle().Foreground(subtle)
+		center = lipgloss.NewStyle().
+			Align(lipgloss.Center)
+		list = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("#00DBC6")).
+			BorderForeground(cyan).
 			Padding(1, 1).
 			MarginRight(2).
 			Height(8).
@@ -148,7 +153,7 @@ func getOrderDetails(reference string) {
 		listHeader = baseStyle.
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderBottom(true).
-				BorderForeground(subtle).
+				BorderForeground(cyan).
 				MarginRight(2).
 				Render
 
@@ -171,6 +176,7 @@ func getOrderDetails(reference string) {
 	referenceLine := fmt.Sprintf("Reference: %s", reference)
 	orderStatus := fmt.Sprintf("Status: %d", order.Status)
 	paymentRef := fmt.Sprintf("Payment Reference: %s", order.PaymentReference)
+	voucher := fmt.Sprintf("Voucher: %s", order.VoucherCode)
 	customerId := fmt.Sprintf("Customer ID: %d", order.CustomerId)
 	shippingId := fmt.Sprintf("Shipping ID: %d", order.ShippingId)
 	lists := lipgloss.JoinHorizontal(lipgloss.Top,
@@ -182,21 +188,40 @@ func getOrderDetails(reference string) {
 				listItem(referenceLine),
 				listItem(orderStatus),
 				listItem(paymentRef),
+				listItem(voucher),
 				listItem(customerId),
 				listItem(shippingId),
 			),
 		),
-		list.Width(columnWidth).Render(
-			lipgloss.JoinVertical(lipgloss.Left,
-				listHeader("Actual Lip Gloss Vendors"),
-				listItem("Glossier"),
-				listItem("Claire‘s Boutique"),
-			),
-		),
 	)
 
-	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, lists))
+	items := []table.Row{}
+	orderRows := len(order.Items)
+	for i := 0; i < orderRows; i++ {
+		row := table.NewRow(table.RowData{
+			"NAME":  order.Items[i].ProductName,
+			"PRICE": fmt.Sprintf(" %.2f ", order.Items[i].Price/100.00),
+			"QTY":   fmt.Sprintf(" %d ", order.Items[i].Qty),
+		})
+		items = append(items, row)
+	}
+	columns := []table.Column{
+		table.NewColumn("NAME", "NAME", 40).WithStyle(baseStyle),
+		table.NewColumn("QTY", "QTY", 10).WithStyle(center),
+		table.NewColumn("PRICE", "PRICE", 10).WithStyle(center),
+	}
+	t := table.New(columns).
+		WithRows(items).
+		HeaderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)).
+		WithBaseStyle(
+			lipgloss.NewStyle().
+				Padding(2).
+				BorderForeground(cyan),
+		)
+
+	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, lists, t.View()))
 	fmt.Println(docStyle.Render(doc.String()))
+	//fmt.Println(t.View())
 	//PrintJSON(order)
 	//PrintJSON(shipping)
 }
