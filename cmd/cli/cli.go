@@ -137,14 +137,14 @@ func updateShipping(reference string) {
 	status := order.ShippingStatus
 	shippingId := order.ShippingId
 
-	if status < 4 {
+	if status < models.Delivered {
 		status++
 		_, err := models.UpdateShippingStatus(shippingId, status)
 		if err != nil {
 			log.Printf("error updating shipping status %v", err)
 		}
 
-		fmt.Printf("Updated Shipping Status\n")
+		fmt.Printf("Updated Shipping Status: %d\n", status)
 	}
 }
 

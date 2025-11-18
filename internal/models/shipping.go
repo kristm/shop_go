@@ -1,15 +1,24 @@
 package models
 
+type ShippingStatus int
+
+const (
+	Packing ShippingStatus = iota
+	InTransit
+	Shipped
+	Delivered
+)
+
 type Shipping struct {
-	Id         int    `json:"id"`
-	CustomerId int    `json:"customer_id"`
-	Status     int    `json:"status"`
-	Address    string `json:"address"`
-	City       string `json:"city"`
-	Country    string `json:"country"`
-	Zip        string `json:"zip"`
-	Phone      string `json:"phone"`
-	Notes      string `json:"notes"`
+	Id         int            `json:"id"`
+	CustomerId int            `json:"customer_id"`
+	Status     ShippingStatus `json:"status"`
+	Address    string         `json:"address"`
+	City       string         `json:"city"`
+	Country    string         `json:"country"`
+	Zip        string         `json:"zip"`
+	Phone      string         `json:"phone"`
+	Notes      string         `json:"notes"`
 }
 
 func AddShipping(newAddress *Shipping) (int, error) {
@@ -58,7 +67,7 @@ func GetShippingById(id int) (*Shipping, error) {
 	return shipping, nil
 }
 
-func UpdateShippingStatus(id int, status int) (bool, error) {
+func UpdateShippingStatus(id int, status ShippingStatus) (bool, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		return false, err

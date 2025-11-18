@@ -17,16 +17,16 @@ const (
 )
 
 type Order struct {
-	Id               int         `json:"id"`
-	ShippingId       int         `json:"shipping_id"`
-	CustomerId       int         `json:"customer_id"`
-	ReferenceCode    string      `json:"reference_code"`
-	PaymentReference string      `json:"payment_reference"`
-	Amount           float64     `json:"amount_in_cents"`
-	Status           OrderStatus `json:"status"`
-	VoucherCode      string      `json:"voucher"`
-	Items            []OrderItem `json:"orders"`
-	ShippingStatus   int         `json:"shipping_status"`
+	Id               int            `json:"id"`
+	ShippingId       int            `json:"shipping_id"`
+	CustomerId       int            `json:"customer_id"`
+	ReferenceCode    string         `json:"reference_code"`
+	PaymentReference string         `json:"payment_reference"`
+	Amount           float64        `json:"amount_in_cents"`
+	Status           OrderStatus    `json:"status"`
+	VoucherCode      string         `json:"voucher"`
+	Items            []OrderItem    `json:"orders"`
+	ShippingStatus   ShippingStatus `json:"shipping_status"`
 }
 
 type OrderItem struct {
@@ -152,7 +152,7 @@ func GetOrderByReference(ref string) (*Order, error) {
 		return nil, err
 	}
 
-	var shippingStatus int
+	var shippingStatus ShippingStatus
 	sqlErr = stmt.QueryRow(order.ShippingId).Scan(&shippingStatus)
 	if sqlErr != nil {
 		shippingStatus = 0
