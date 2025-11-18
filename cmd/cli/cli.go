@@ -120,28 +120,37 @@ func getOrderDetails(reference string) {
 		log.Printf("error getting orders %v", err)
 	}
 
-	baseStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FFF7DB"))
-
-	titleStyle := baseStyle.
-		Padding(0, 1).
-		Background(lipgloss.Color("#FF0073"))
-
-	headerStyle := baseStyle.
-		BorderStyle(lipgloss.NormalBorder()).
-		Padding(0, 1)
-
-	doc := strings.Builder{}
 	const (
 		columnWidth = 60
 	)
 	var (
-		//subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
+		doc = strings.Builder{}
+
 		cyan = lipgloss.Color("#00DBC6")
+
+		baseStyle = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(lipgloss.Color("#FFF7DB"))
+
+		titleStyle = baseStyle.
+				Padding(0, 2).
+				MarginBottom(1).
+				Bold(true).
+				Foreground(lipgloss.Color("#000000")).
+				Background(cyan)
+
+		//subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
 		//BorderStyle = lipgloss.NewStyle().Foreground(subtle)
 		center = lipgloss.NewStyle().
 			Align(lipgloss.Center)
+		div = lipgloss.NewStyle().
+			Padding(1, 1).
+			MarginRight(2).
+			Height(8).
+			Width(columnWidth + 1)
+
+		divItem = baseStyle.Foreground(lipgloss.Color("#FFD046")).Render
+
 		list = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			BorderForeground(cyan).
@@ -161,15 +170,25 @@ func getOrderDetails(reference string) {
 		docStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
 	)
 
-	fmt.Println(headerStyle.Render(" Customer Details "))
-	fmt.Printf("%s %s\n", customer.FirstName, customer.LastName)
-	fmt.Printf("%s \n", customer.Phone)
-	fmt.Printf("%s \n", customer.Email)
-	fmt.Printf("%s \n", shipping.Address)
-	fmt.Printf("%s \n", shipping.City)
-	fmt.Printf("%s %s\n", shipping.Country, shipping.Zip)
-	fmt.Printf("NOTES: %s \n", shipping.Notes)
-	fmt.Println(titleStyle.Render("Order Details "))
+	name := fmt.Sprintf("%s %s", customer.FirstName, customer.LastName)
+	phone := fmt.Sprintf("%s", customer.Phone)
+	email := fmt.Sprintf("%s", customer.Email)
+	address := fmt.Sprintf("%s", shipping.Address)
+	city := fmt.Sprintf("%s", shipping.City)
+	country_zip := fmt.Sprintf("%s %s", shipping.Country, shipping.Zip)
+	notes := fmt.Sprintf("NOTES: %s", shipping.Notes)
+	customerDetails := div.Render(
+		lipgloss.JoinVertical(lipgloss.Left,
+			titleStyle.Render("Customer Details"),
+			divItem(name),
+			divItem(phone),
+			divItem(email),
+			divItem(address),
+			divItem(city),
+			divItem(country_zip),
+			divItem(notes),
+		),
+	)
 
 	amount := fmt.Sprintf("Total: %.2f", order.Amount/100.00)
 	orderId := fmt.Sprintf("ID: %d", order.Id)
@@ -179,6 +198,7 @@ func getOrderDetails(reference string) {
 	voucher := fmt.Sprintf("Voucher: %s", order.VoucherCode)
 	customerId := fmt.Sprintf("Customer ID: %d", order.CustomerId)
 	shippingId := fmt.Sprintf("Shipping ID: %d", order.ShippingId)
+	shippingStatus := fmt.Sprintf("Shipping Status: %d", order.ShippingStatus)
 	lists := lipgloss.JoinHorizontal(lipgloss.Top,
 		list.Render(
 			lipgloss.JoinVertical(lipgloss.Left,
@@ -191,6 +211,7 @@ func getOrderDetails(reference string) {
 				listItem(voucher),
 				listItem(customerId),
 				listItem(shippingId),
+				listItem(shippingStatus),
 			),
 		),
 	)
@@ -219,7 +240,10 @@ func getOrderDetails(reference string) {
 				BorderForeground(cyan),
 		)
 
-	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, lists, t.View()))
+	firstRow := lipgloss.JoinHorizontal(lipgloss.Top, customerDetails)
+	secondRow := lipgloss.JoinHorizontal(lipgloss.Top, lists, t.View())
+
+	doc.WriteString(lipgloss.JoinVertical(lipgloss.Left, firstRow, secondRow))
 	fmt.Println(docStyle.Render(doc.String()))
 	//fmt.Println(t.View())
 	//PrintJSON(order)
