@@ -57,3 +57,26 @@ func GetShippingById(id int) (*Shipping, error) {
 
 	return shipping, nil
 }
+
+func UpdateShippingStatus(id int, status int) (bool, error) {
+	tx, err := DB.Begin()
+	if err != nil {
+		return false, err
+	}
+
+	stmt, err := tx.Prepare("UPDATE shipping SET STATUS = ? WHERE id = ?")
+	if err != nil {
+		return false, err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(status, id)
+	if err != nil {
+		return false, err
+	}
+
+	tx.Commit()
+
+	return true, nil
+}

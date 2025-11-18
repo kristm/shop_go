@@ -128,6 +128,26 @@ func getOrderDetails(reference string) {
 	PrintJSON(shipping)
 }
 
+func updateShipping(reference string) {
+	order, err := models.GetOrderByReference(reference)
+	if err != nil {
+		log.Printf("error getting order %v", err)
+	}
+
+	status := order.ShippingStatus
+	shippingId := order.ShippingId
+
+	if status < 4 {
+		status++
+		_, err := models.UpdateShippingStatus(shippingId, status)
+		if err != nil {
+			log.Printf("error updating shipping status %v", err)
+		}
+
+		fmt.Printf("Updated Shipping Status\n")
+	}
+}
+
 func markPaidOrder(reference string) {
 	//Get Order By reference
 	order, _ := models.GetOrderByReference(reference)
@@ -155,6 +175,7 @@ func markPaidOrder(reference string) {
 			log.Printf("ERROR: Updating Inventory for Product %d %d", productId, updatedQty)
 		}
 	}
+	fmt.Printf("Set Order as Paid\n")
 }
 
 func setPreorderFromSku(sku string) {
@@ -184,6 +205,7 @@ func main() {
 	csvPath := flag.String("csv", "", "path to csv")
 	orderRef := flag.String("setpaid", "", "order reference")
 	orderRefCode := flag.String("getorder", "", "order reference")
+	shippingRef := flag.String("updateship", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
@@ -214,6 +236,11 @@ func main() {
 
 	if len(*orderRefCode) > 0 {
 		getOrderDetails(*orderRefCode)
+		os.Exit(1)
+	}
+
+	if len(*shippingRef) > 0 {
+		updateShipping(*shippingRef)
 		os.Exit(1)
 	}
 
