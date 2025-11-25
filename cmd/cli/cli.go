@@ -11,6 +11,7 @@ import (
 	"os"
 	"shop_go/internal/config"
 	"shop_go/internal/models"
+	"shop_go/internal/tui"
 	"strconv"
 	"strings"
 
@@ -20,6 +21,8 @@ import (
 )
 
 func runTUI() {
+	//log.Printf("TUI %v", tui)
+	tui.Run()
 }
 
 func PrintJSON(obj interface{}) {
@@ -352,7 +355,7 @@ func main() {
 	orderRefCode := flag.String("getorder", "", "order reference")
 	shippingRef := flag.String("updateship", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
-	tui := flag.String("tui", "", "tui")
+	tui := flag.Bool("tui", false, "tui")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -395,7 +398,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(*tui) > 0 {
+	if *tui {
 		runTUI()
 		os.Exit(1)
 	}
