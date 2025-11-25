@@ -19,6 +19,9 @@ import (
 	"golang.org/x/term"
 )
 
+func runTUI() {
+}
+
 func PrintJSON(obj interface{}) {
 	bytes, _ := json.MarshalIndent(obj, "\t", "\t")
 	fmt.Println(string(bytes))
@@ -349,6 +352,7 @@ func main() {
 	orderRefCode := flag.String("getorder", "", "order reference")
 	shippingRef := flag.String("updateship", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
+	tui := flag.String("tui", "", "tui")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -388,6 +392,11 @@ func main() {
 
 	if len(*preorder) > 0 {
 		setPreorderFromSku(*preorder)
+		os.Exit(1)
+	}
+
+	if len(*tui) > 0 {
+		runTUI()
 		os.Exit(1)
 	}
 
