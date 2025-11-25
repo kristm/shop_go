@@ -20,9 +20,9 @@ import (
 	"golang.org/x/term"
 )
 
-func runTUI() {
+func runTUI(s string) {
 	//log.Printf("TUI %v", tui)
-	tui.Run()
+	tui.Run(s)
 }
 
 func PrintJSON(obj interface{}) {
@@ -355,7 +355,7 @@ func main() {
 	orderRefCode := flag.String("getorder", "", "order reference")
 	shippingRef := flag.String("updateship", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
-	tui := flag.Bool("tui", false, "tui")
+	tui := flag.String("tui", "", "order reference")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -398,8 +398,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *tui {
-		runTUI()
+	if len(*tui) > 0 {
+		runTUI(*tui)
 		os.Exit(1)
 	}
 

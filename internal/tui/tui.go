@@ -235,23 +235,46 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q", "esc":
 			return m, tea.Quit
-		}
-		cmds := make([]tea.Cmd, len(m.inputs))
-		for i := 0; i <= len(m.inputs)-1; i++ {
-			if i == m.focusIndex {
-				// Set focused state
-				cmds[i] = m.inputs[i].Focus()
-				m.inputs[i].PromptStyle = focusedStyle
-				m.inputs[i].TextStyle = focusedStyle
-				continue
-			}
-			// Remove focused state
-			m.inputs[i].Blur()
-			m.inputs[i].PromptStyle = noStyle
-			m.inputs[i].TextStyle = noStyle
-		}
 
-		return m, tea.Batch(cmds...)
+		case "tab", "shift+tab", "enter", "up", "down":
+			s := msg.String()
+
+			// Did the user press enter while the submit button was focused?
+			// If so, exit.
+			if s == "enter" && m.focusIndex == len(m.inputs) {
+				return m, tea.Quit
+			}
+
+			// Cycle indexes
+			if s == "up" || s == "shift+tab" {
+				m.focusIndex--
+			} else {
+				m.focusIndex++
+			}
+
+			if m.focusIndex > len(m.inputs) {
+				m.focusIndex = 0
+			} else if m.focusIndex < 0 {
+				m.focusIndex = len(m.inputs)
+			}
+
+			cmds := make([]tea.Cmd, len(m.inputs))
+			for i := 0; i <= len(m.inputs)-1; i++ {
+				if i == m.focusIndex {
+					// Set focused state
+					cmds[i] = m.inputs[i].Focus()
+					m.inputs[i].PromptStyle = focusedStyle
+					m.inputs[i].TextStyle = focusedStyle
+					continue
+				}
+				// Remove focused state
+				m.inputs[i].Blur()
+				m.inputs[i].PromptStyle = noStyle
+				m.inputs[i].TextStyle = noStyle
+			}
+
+			return m, tea.Batch(cmds...)
+		}
 
 	}
 	// Handle character input and blinking
@@ -297,15 +320,7 @@ func (m model) View() string {
 				divItem(fmt.Sprintf("%s%s", "Form:", m.inputs[3].View())),
 			),
 		)
-		//var form strings.Builder
-		//for i := range m.inputs {
-		//	form.WriteString(m.inputs[i].View())
-		//	if i < len(m.inputs)-1 {
-		//		form.WriteString("\n")
-		//	}
-		//}
 
-		//form := lipgloss.JoinVertical(lipgloss.Left, div)
 		body := lipgloss.JoinVertical(lipgloss.Left, bar, div)
 
 		doc.WriteString(lipgloss.NewStyle().Width(width).Render(body) + "\n\n")
@@ -314,7 +329,7 @@ func (m model) View() string {
 	return docStyle.Render(doc.String())
 }
 
-func Run() {
+func Run(ref string) {
 	cfg, err := config.LoadConfig(".env")
 	_ = models.ConnectDatabase(&cfg)
 	if err != nil {
