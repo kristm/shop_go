@@ -1,6 +1,5 @@
 package tui
 
-/*
 import (
 	"fmt"
 	"shop_go/internal/models"
@@ -20,4 +19,3 @@ func GetOrderDetail(ref string) *OrderDetail {
 
 	return &orderDetail
 }
-*/

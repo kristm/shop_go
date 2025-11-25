@@ -184,35 +184,39 @@ type model struct {
 	cursor     int
 	inputs     []textinput.Model
 	focusIndex int
+	product    models.Product
 	cursorMode cursor.Mode
 }
 
-func initialModel() model {
+func initialModel(product *models.Product) model {
 	m := model{
-		inputs:     make([]textinput.Model, 4),
+		inputs:     make([]textinput.Model, 5),
 		focusIndex: 0,
 		cursorMode: cursor.CursorBlink,
+		product:    *product,
 	}
 
 	var t textinput.Model
 	for i := range m.inputs {
 		t = textinput.New()
 		t.CharLimit = 32
-		t.Width = 50
+		t.Width = 70
 		t.Cursor.Style = cursorStyle
 
 		switch i {
 		case 0:
-			t.Placeholder = "Name"
+			t.Placeholder = product.Name
 			t.TextStyle = focusedStyle.Foreground(lipgloss.Color("#ffffff"))
 			t.PromptStyle = focusedStyle
 			t.Focus()
 		case 1:
-			t.Placeholder = "SKU"
+			t.Placeholder = product.Sku
 		case 2:
-			t.Placeholder = "Description"
+			t.Placeholder = product.Description
 		case 3:
-			t.Placeholder = "Price"
+			t.Placeholder = fmt.Sprintf("%.0f", product.Price)
+		case 4:
+			t.Placeholder = fmt.Sprintf("%d", product.CategoryId)
 		}
 
 		m.inputs[i] = t
@@ -304,7 +308,7 @@ func (m model) View() string {
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render("SHOP DASHBOARD")
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d", m.product.Id))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
@@ -317,7 +321,8 @@ func (m model) View() string {
 				divItem(fmt.Sprintf("%s%s", "Name:", m.inputs[0].View())),
 				divItem(fmt.Sprintf("%s%s", "SKU:", m.inputs[1].View())),
 				divItem(fmt.Sprintf("%s%s", "Description:", m.inputs[2].View())),
-				divItem(fmt.Sprintf("%s%s", "Form:", m.inputs[3].View())),
+				divItem(fmt.Sprintf("%s%s", "Price:", m.inputs[3].View())),
+				divItem(fmt.Sprintf("%s%s", "CategoryId:", m.inputs[4].View())),
 			),
 		)
 
@@ -336,7 +341,9 @@ func Run(ref string) {
 		log.Printf("ERROR LOADING CONFIG")
 	}
 
-	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
+	product, _ := models.GetProductBySku(ref)
+
+	if _, err := tea.NewProgram(initialModel(&product)).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)
 	}
