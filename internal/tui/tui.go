@@ -205,31 +205,6 @@ func initialModel(product *models.Product) model {
 	formModel.categoryId = tf
 
 	m.form = formModel
-	//var t textinput.Model
-	//for i := range m.inputs {
-	//	t = textinput.New()
-	//	t.CharLimit = 32
-	//	t.Width = 70
-	//	t.Cursor.Style = cursorStyle
-
-	//	switch i {
-	//	case 0:
-	//		t.Placeholder = product.Name
-	//		t.TextStyle = focusedStyle.Foreground(lipgloss.Color("#ffffff"))
-	//		t.PromptStyle = focusedStyle
-	//		t.Focus()
-	//	case 1:
-	//		t.Placeholder = product.Sku
-	//	case 2:
-	//		t.Placeholder = product.Description
-	//	case 3:
-	//		t.Placeholder = fmt.Sprintf("%.0f", product.Price)
-	//	case 4:
-	//		t.Placeholder = fmt.Sprintf("%d", product.CategoryId)
-	//	}
-
-	//	m.inputs[i] = t
-	//}
 
 	return m
 }
@@ -277,28 +252,48 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusIndex++
 			}
 
-			if m.focusIndex > 5 {
+			if m.focusIndex > 4 {
 				m.focusIndex = 0
 			} else if m.focusIndex < 0 {
 				m.focusIndex = 4
 			}
 
-			//cmds := make([]tea.Cmd, 5)
-			//for i := 0; i <= len(m.inputs)-1; i++ {
-			//	if i == m.focusIndex {
-			//		// Set focused state
-			//		cmds[i] = m.inputs[i].Focus()
-			//		m.inputs[i].PromptStyle = focusedStyle
-			//		m.inputs[i].TextStyle = focusedStyle
-			//		continue
-			//	}
-			//	// Remove focused state
-			//	m.inputs[i].Blur()
-			//	m.inputs[i].PromptStyle = noStyle
-			//	m.inputs[i].TextStyle = noStyle
-			//}
+			// Remove focused state
+			m.form.name.Blur()
+			m.form.name.PromptStyle = noStyle
+			m.form.name.TextStyle = noStyle
 
-			//return m, tea.Batch(cmds...)
+			m.form.sku.Blur()
+			m.form.sku.PromptStyle = noStyle
+			m.form.sku.TextStyle = noStyle
+
+			m.form.description.Blur()
+			//m.form.description.PromptStyle = noStyle
+			//m.form.description.TextStyle = noStyle
+
+			m.form.price.Blur()
+			m.form.price.PromptStyle = noStyle
+			m.form.price.TextStyle = noStyle
+
+			m.form.categoryId.Blur()
+			m.form.categoryId.PromptStyle = noStyle
+			m.form.categoryId.TextStyle = noStyle
+
+			cmds := make([]tea.Cmd, 5)
+			for i := 0; i <= 4; i++ {
+				if i == m.focusIndex {
+					m.form.focus = m.focusIndex
+					//focusedInput := m.form.focused()
+					fv := formView(&m.form)
+					// Set focused state
+					cmds[i] = fv.Focus()
+					fv.PromptStyle = focusedStyle
+					fv.TextStyle = focusedStyle
+					continue
+				}
+			}
+
+			return m, tea.Batch(cmds...)
 		}
 
 	}
@@ -320,6 +315,18 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
+func formView(form *ProductForm) any {
+	focusedEl := form.focused()
+	switch fv := focusedEl.(type) {
+	case *textinput.Model:
+		return focusedEl
+	case *textarea.Model:
+		return focusedEl
+	default:
+		return "blank"
+	}
+}
+
 func (m model) View() string {
 	doc := strings.Builder{}
 	//physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
@@ -328,8 +335,9 @@ func (m model) View() string {
 		w := lipgloss.Width
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
+		fv := formView(&m.form)
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d", m.product.Id))
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d %d %d %s", m.product.Id, m.focusIndex, m.form.focus, fv))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
