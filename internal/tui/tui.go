@@ -200,9 +200,9 @@ func initialModel(product *models.Product) model {
 
 	ta := textarea.New()
 	ta.SetHeight(3)
-	ta.SetWidth(50)
+	ta.SetWidth(60)
 	ta.SetValue(product.Description)
-	ta.SetValue(strings.ReplaceAll(product.Description, "\\n", "\n"))
+	ta.SetValue(product.Description)
 	formModel.description = ta
 
 	priceInput := textinput.New()
