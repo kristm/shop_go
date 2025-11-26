@@ -165,7 +165,6 @@ var (
 
 type model struct {
 	cursor     int
-	inputs     []string
 	form       ProductForm
 	focusIndex int
 	product    models.Product
@@ -230,6 +229,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -284,11 +284,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if i == m.focusIndex {
 					m.form.focus = m.focusIndex
 					//focusedInput := m.form.focused()
-					fv := formView(&m.form)
 					// Set focused state
-					cmds[i] = fv.Focus()
-					fv.PromptStyle = focusedStyle
-					fv.TextStyle = focusedStyle
+					//cmds[i] = focusedInput.Focus()
+					//focusedInput.PromptStyle = focusedStyle
+					//focusedInput.TextStyle = focusedStyle
 					continue
 				}
 			}
@@ -298,30 +297,41 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	}
 	// Handle character input and blinking
-	cmd := m.updateInputs(msg)
+	focusedInput := m.form.focused()
+
+	switch fi := focusedInput.(type) {
+	case *textinput.Model:
+		var updatedInput textinput.Model
+		updatedInput, cmd = fi.Update(msg)
+		// Now, update the correct field in the form
+		switch m.focusIndex {
+		case 0:
+			m.form.name = updatedInput
+		case 1:
+			m.form.sku = updatedInput
+		case 3:
+			m.form.price = updatedInput
+		case 4:
+			m.form.categoryId = updatedInput
+		}
+	case *textarea.Model:
+		var updatedInput textarea.Model
+		updatedInput, cmd = fi.Update(msg)
+		m.form.description = updatedInput
+	}
 
 	return m, cmd
 }
 
-func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.inputs))
 
-	//// Only text inputs with Focus() set will respond, so it's safe to simply
-	//// update all of them here without any further logic.
-	//for i := range m.inputs {
-	//	m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
-	//}
 
-	return tea.Batch(cmds...)
-}
-
-func formView(form *ProductForm) any {
+func formView(form *ProductForm) string {
 	focusedEl := form.focused()
 	switch fv := focusedEl.(type) {
 	case *textinput.Model:
-		return focusedEl
+		return fv.View()
 	case *textarea.Model:
-		return focusedEl
+		return fv.View()
 	default:
 		return "blank"
 	}
