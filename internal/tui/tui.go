@@ -180,16 +180,23 @@ func initialModel(product *models.Product) model {
 
 	var formModel ProductForm
 	formModel.focus = 0
-	tf := textinput.New()
-	tf.Width = 70
-	tf.CharLimit = 70
-	tf.CursorStyle = cursorStyle
 
-	tf.Placeholder = product.Name
-	formModel.name = tf
+	nameInput := textinput.New()
+	nameInput.Width = 70
+	nameInput.CharLimit = 70
+	nameInput.CursorStyle = cursorStyle
+	nameInput.Placeholder = product.Name
+	nameInput.Focus()
+	nameInput.PromptStyle = focusedStyle
+	nameInput.TextStyle = focusedStyle
+	formModel.name = nameInput
 
-	tf.Placeholder = product.Sku
-	formModel.sku = tf
+	skuInput := textinput.New()
+	skuInput.Width = 70
+	skuInput.CharLimit = 70
+	skuInput.CursorStyle = cursorStyle
+	skuInput.Placeholder = product.Sku
+	formModel.sku = skuInput
 
 	ta := textarea.New()
 	ta.SetHeight(3)
@@ -197,11 +204,19 @@ func initialModel(product *models.Product) model {
 	ta.Placeholder = product.Description
 	formModel.description = ta
 
-	tf.Placeholder = fmt.Sprintf("%.0f", product.Price)
-	formModel.price = tf
+	priceInput := textinput.New()
+	priceInput.Width = 70
+	priceInput.CharLimit = 70
+	priceInput.CursorStyle = cursorStyle
+	priceInput.Placeholder = fmt.Sprintf("%.0f", product.Price)
+	formModel.price = priceInput
 
-	tf.Placeholder = fmt.Sprintf("%d", product.CategoryId)
-	formModel.categoryId = tf
+	catInput := textinput.New()
+	catInput.Width = 70
+	catInput.CharLimit = 70
+	catInput.CursorStyle = cursorStyle
+	catInput.Placeholder = fmt.Sprintf("%d", product.CategoryId)
+	formModel.categoryId = catInput
 
 	m.form = formModel
 
@@ -323,8 +338,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-
-
 func formView(form *ProductForm) string {
 	focusedEl := form.focused()
 	switch fv := focusedEl.(type) {
@@ -345,9 +358,8 @@ func (m model) View() string {
 		w := lipgloss.Width
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
-		fv := formView(&m.form)
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d %d %d %s", m.product.Id, m.focusIndex, m.form.focus, fv))
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d %d %d", m.product.Id, m.focusIndex, m.form.focus))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
