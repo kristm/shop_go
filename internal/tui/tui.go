@@ -185,7 +185,7 @@ func initialModel(product *models.Product) model {
 	nameInput.Width = 70
 	nameInput.CharLimit = 70
 	nameInput.CursorStyle = cursorStyle
-	nameInput.Placeholder = product.Name
+	nameInput.SetValue(product.Name)
 	nameInput.Focus()
 	nameInput.PromptStyle = focusedStyle
 	nameInput.TextStyle = focusedStyle
@@ -195,27 +195,28 @@ func initialModel(product *models.Product) model {
 	skuInput.Width = 70
 	skuInput.CharLimit = 70
 	skuInput.CursorStyle = cursorStyle
-	skuInput.Placeholder = product.Sku
+	skuInput.SetValue(product.Sku)
 	formModel.sku = skuInput
 
 	ta := textarea.New()
 	ta.SetHeight(3)
 	ta.SetWidth(50)
-	ta.Placeholder = product.Description
+	ta.SetValue(product.Description)
+	ta.SetValue(strings.ReplaceAll(product.Description, "\\n", "\n"))
 	formModel.description = ta
 
 	priceInput := textinput.New()
 	priceInput.Width = 70
 	priceInput.CharLimit = 70
 	priceInput.CursorStyle = cursorStyle
-	priceInput.Placeholder = fmt.Sprintf("%.0f", product.Price)
+	priceInput.SetValue(fmt.Sprintf("%.0f", product.Price))
 	formModel.price = priceInput
 
 	catInput := textinput.New()
 	catInput.Width = 70
 	catInput.CharLimit = 70
 	catInput.CursorStyle = cursorStyle
-	catInput.Placeholder = fmt.Sprintf("%d", product.CategoryId)
+	catInput.SetValue(fmt.Sprintf("%d", product.CategoryId))
 	formModel.categoryId = catInput
 
 	m.form = formModel
