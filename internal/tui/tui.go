@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,39 +18,21 @@ import (
 )
 
 const (
-	width                   = 110
-	columnWidth             = 30
-	innerMargin             = 60
-	columnKeyID             = "id"
-	columnKeyReference      = "reference"
-	columnKeyCustomer       = "customer"
-	columnKeyAmount         = "amount"
-	columnKeyStatus         = "status"
-	columnKeyCreatedAt      = "created"
-	columnKeyFirstName      = "firstname"
-	columnKeyLastName       = "lastname"
-	columnKeyEmail          = "email"
-	columnKeyPhone          = "phone"
-	columnKeyAddress        = "address"
-	columnKeyCity           = "city"
-	columnKeyCountry        = "country"
-	columnKeyZip            = "zip"
-	columnKeyNotes          = "notes"
-	columnKeyCategory       = "category"
-	columnKeyName           = "name"
-	columnKeySku            = "sku"
-	columnKeyPrice          = "price"
-	columnKeyProductStatus  = "productstatus"
-	columnKeyVoucherType    = "vouchertype"
-	columnKeyVoucherCode    = "vouchercode"
-	columnKeyValid          = "valid"
-	columnKeyRequiredAmount = "requiredamount"
-	columnKeyDiscount       = "discount"
-	columnKeyExpires        = "expires"
+	width = 110
 )
 
 var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
 var productStatus = [4]string{"Instock", "Low Stock", "Out of Stock", "Preorder"}
+
+type ProductForm struct {
+	name        textinput.Model
+	sku         textinput.Model
+	price       textinput.Model
+	categoryId  textinput.Model
+	description textarea.Model
+
+	focus int
+}
 
 type fn func(int) string
 
@@ -182,7 +165,8 @@ var (
 
 type model struct {
 	cursor     int
-	inputs     []textinput.Model
+	inputs     []string
+	form       ProductForm
 	focusIndex int
 	product    models.Product
 	cursorMode cursor.Mode
@@ -190,39 +174,80 @@ type model struct {
 
 func initialModel(product *models.Product) model {
 	m := model{
-		inputs:     make([]textinput.Model, 5),
 		focusIndex: 0,
 		cursorMode: cursor.CursorBlink,
 		product:    *product,
 	}
 
-	var t textinput.Model
-	for i := range m.inputs {
-		t = textinput.New()
-		t.CharLimit = 32
-		t.Width = 70
-		t.Cursor.Style = cursorStyle
+	var formModel ProductForm
+	formModel.focus = 0
+	tf := textinput.New()
+	tf.Width = 70
+	tf.CharLimit = 70
+	tf.CursorStyle = cursorStyle
 
-		switch i {
-		case 0:
-			t.Placeholder = product.Name
-			t.TextStyle = focusedStyle.Foreground(lipgloss.Color("#ffffff"))
-			t.PromptStyle = focusedStyle
-			t.Focus()
-		case 1:
-			t.Placeholder = product.Sku
-		case 2:
-			t.Placeholder = product.Description
-		case 3:
-			t.Placeholder = fmt.Sprintf("%.0f", product.Price)
-		case 4:
-			t.Placeholder = fmt.Sprintf("%d", product.CategoryId)
-		}
+	tf.Placeholder = product.Name
+	formModel.name = tf
 
-		m.inputs[i] = t
-	}
+	tf.Placeholder = product.Sku
+	formModel.sku = tf
+
+	ta := textarea.New()
+	ta.SetHeight(3)
+	ta.SetWidth(50)
+	ta.Placeholder = product.Description
+	formModel.description = ta
+
+	tf.Placeholder = fmt.Sprintf("%.0f", product.Price)
+	formModel.price = tf
+
+	tf.Placeholder = fmt.Sprintf("%d", product.CategoryId)
+	formModel.categoryId = tf
+
+	m.form = formModel
+	//var t textinput.Model
+	//for i := range m.inputs {
+	//	t = textinput.New()
+	//	t.CharLimit = 32
+	//	t.Width = 70
+	//	t.Cursor.Style = cursorStyle
+
+	//	switch i {
+	//	case 0:
+	//		t.Placeholder = product.Name
+	//		t.TextStyle = focusedStyle.Foreground(lipgloss.Color("#ffffff"))
+	//		t.PromptStyle = focusedStyle
+	//		t.Focus()
+	//	case 1:
+	//		t.Placeholder = product.Sku
+	//	case 2:
+	//		t.Placeholder = product.Description
+	//	case 3:
+	//		t.Placeholder = fmt.Sprintf("%.0f", product.Price)
+	//	case 4:
+	//		t.Placeholder = fmt.Sprintf("%d", product.CategoryId)
+	//	}
+
+	//	m.inputs[i] = t
+	//}
 
 	return m
+}
+
+func (f *ProductForm) focused() any {
+	switch f.focus {
+	case 0:
+		return &f.name
+	case 1:
+		return &f.sku
+	case 2:
+		return &f.description
+	case 3:
+		return &f.price
+	case 4:
+		return &f.categoryId
+	}
+	return &f.name
 }
 
 func (m model) Init() tea.Cmd {
@@ -230,10 +255,6 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	//var (
-	//	cmds []tea.Cmd
-	//)
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -245,7 +266,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
-			if s == "enter" && m.focusIndex == len(m.inputs) {
+			if s == "enter" && m.focusIndex == m.form.focus {
 				return m, tea.Quit
 			}
 
@@ -256,28 +277,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusIndex++
 			}
 
-			if m.focusIndex > len(m.inputs) {
+			if m.focusIndex > 5 {
 				m.focusIndex = 0
 			} else if m.focusIndex < 0 {
-				m.focusIndex = len(m.inputs)
+				m.focusIndex = 4
 			}
 
-			cmds := make([]tea.Cmd, len(m.inputs))
-			for i := 0; i <= len(m.inputs)-1; i++ {
-				if i == m.focusIndex {
-					// Set focused state
-					cmds[i] = m.inputs[i].Focus()
-					m.inputs[i].PromptStyle = focusedStyle
-					m.inputs[i].TextStyle = focusedStyle
-					continue
-				}
-				// Remove focused state
-				m.inputs[i].Blur()
-				m.inputs[i].PromptStyle = noStyle
-				m.inputs[i].TextStyle = noStyle
-			}
+			//cmds := make([]tea.Cmd, 5)
+			//for i := 0; i <= len(m.inputs)-1; i++ {
+			//	if i == m.focusIndex {
+			//		// Set focused state
+			//		cmds[i] = m.inputs[i].Focus()
+			//		m.inputs[i].PromptStyle = focusedStyle
+			//		m.inputs[i].TextStyle = focusedStyle
+			//		continue
+			//	}
+			//	// Remove focused state
+			//	m.inputs[i].Blur()
+			//	m.inputs[i].PromptStyle = noStyle
+			//	m.inputs[i].TextStyle = noStyle
+			//}
 
-			return m, tea.Batch(cmds...)
+			//return m, tea.Batch(cmds...)
 		}
 
 	}
@@ -290,11 +311,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
-	// Only text inputs with Focus() set will respond, so it's safe to simply
-	// update all of them here without any further logic.
-	for i := range m.inputs {
-		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
-	}
+	//// Only text inputs with Focus() set will respond, so it's safe to simply
+	//// update all of them here without any further logic.
+	//for i := range m.inputs {
+	//	m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
+	//}
 
 	return tea.Batch(cmds...)
 }
@@ -318,11 +339,11 @@ func (m model) View() string {
 
 		div := divStyle.Render(
 			lipgloss.JoinVertical(lipgloss.Left,
-				divItem(fmt.Sprintf("%s%s", "Name:", m.inputs[0].View())),
-				divItem(fmt.Sprintf("%s%s", "SKU:", m.inputs[1].View())),
-				divItem(fmt.Sprintf("%s%s", "Description:", m.inputs[2].View())),
-				divItem(fmt.Sprintf("%s%s", "Price:", m.inputs[3].View())),
-				divItem(fmt.Sprintf("%s%s", "CategoryId:", m.inputs[4].View())),
+				divItem(fmt.Sprintf("%s%s", "Name:", m.form.name.View())),
+				divItem(fmt.Sprintf("%s%s", "SKU:", m.form.sku.View())),
+				divItem(fmt.Sprintf("%s%s", "Description:", m.form.description.View())),
+				divItem(fmt.Sprintf("%s%s", "Price:", m.form.price.View())),
+				divItem(fmt.Sprintf("%s%s", "CategoryId:", m.form.categoryId.View())),
 			),
 		)
 
