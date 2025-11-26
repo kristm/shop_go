@@ -18,7 +18,9 @@ import (
 )
 
 const (
-	width = 110
+	width      = 80
+	MAX_INDEX  = 5
+	FORM_WIDTH = 60
 )
 
 var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
@@ -56,6 +58,18 @@ var (
 	baseStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("#FFF7DB"))
+
+	buttonStyle = lipgloss.NewStyle().
+			Inherit(baseStyle).
+			BorderStyle(lipgloss.NormalBorder()).
+			Padding(0, 1).
+			BorderForeground(lipgloss.Color("#FF5F87"))
+
+	buttonBlurredStyle = lipgloss.NewStyle().
+				BorderStyle(lipgloss.NormalBorder()).
+				Bold(false).
+				Padding(0, 1).
+				BorderForeground(lipgloss.Color("#353533"))
 
 	divStyle = lipgloss.NewStyle().
 			Align(lipgloss.Left).
@@ -182,7 +196,7 @@ func initialModel(product *models.Product) model {
 	formModel.focus = 0
 
 	nameInput := textinput.New()
-	nameInput.Width = 70
+	nameInput.Width = FORM_WIDTH
 	nameInput.CharLimit = 70
 	nameInput.CursorStyle = cursorStyle
 	nameInput.SetValue(product.Name)
@@ -192,7 +206,7 @@ func initialModel(product *models.Product) model {
 	formModel.name = nameInput
 
 	skuInput := textinput.New()
-	skuInput.Width = 70
+	skuInput.Width = FORM_WIDTH
 	skuInput.CharLimit = 70
 	skuInput.CursorStyle = cursorStyle
 	skuInput.SetValue(product.Sku)
@@ -206,14 +220,14 @@ func initialModel(product *models.Product) model {
 	formModel.description = ta
 
 	priceInput := textinput.New()
-	priceInput.Width = 70
+	priceInput.Width = FORM_WIDTH
 	priceInput.CharLimit = 70
 	priceInput.CursorStyle = cursorStyle
 	priceInput.SetValue(fmt.Sprintf("%.0f", product.Price))
 	formModel.price = priceInput
 
 	catInput := textinput.New()
-	catInput.Width = 70
+	catInput.Width = FORM_WIDTH
 	catInput.CharLimit = 70
 	catInput.CursorStyle = cursorStyle
 	catInput.SetValue(fmt.Sprintf("%d", product.CategoryId))
@@ -237,7 +251,7 @@ func (f *ProductForm) focused() any {
 	case 4:
 		return &f.categoryId
 	}
-	return &f.name
+	return nil
 }
 
 func (m model) Init() tea.Cmd {
@@ -257,7 +271,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
-			if s == "enter" && m.focusIndex == m.form.focus {
+			if s == "enter" && m.focusIndex == MAX_INDEX {
+				//button event handler
 				return m, tea.Quit
 			}
 
@@ -268,10 +283,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusIndex++
 			}
 
-			if m.focusIndex > 4 {
+			if m.focusIndex > MAX_INDEX {
 				m.focusIndex = 0
 			} else if m.focusIndex < 0 {
-				m.focusIndex = 4
+				m.focusIndex = MAX_INDEX
 			}
 
 			// Remove focused state
@@ -360,7 +375,7 @@ func (m model) View() string {
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d %d %d", m.product.Id, m.focusIndex, m.form.focus))
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d", m.product.Id, m.focusIndex, m.form.focus))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
@@ -378,9 +393,15 @@ func (m model) View() string {
 			),
 		)
 
-		body := lipgloss.JoinVertical(lipgloss.Left, bar, div)
+		button := buttonBlurredStyle.Render("Save")
+		if m.focusIndex == MAX_INDEX {
+			button = buttonStyle.Render("Save")
+		}
+		//fmt.Fprintf(&b, "\n\n%s\n\n", button)
+		body := lipgloss.JoinVertical(lipgloss.Left, bar, div, button)
 
 		doc.WriteString(lipgloss.NewStyle().Width(width).Render(body) + "\n\n")
+
 	}
 
 	return docStyle.Render(doc.String())
