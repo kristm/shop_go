@@ -279,20 +279,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.form.categoryId.PromptStyle = noStyle
 			m.form.categoryId.TextStyle = noStyle
 
-			cmds := make([]tea.Cmd, 5)
-			for i := 0; i <= 4; i++ {
-				if i == m.focusIndex {
-					m.form.focus = m.focusIndex
-					//focusedInput := m.form.focused()
-					// Set focused state
-					//cmds[i] = focusedInput.Focus()
-					//focusedInput.PromptStyle = focusedStyle
-					//focusedInput.TextStyle = focusedStyle
-					continue
-				}
+			m.form.focus = m.focusIndex
+			focusedInput := m.form.focused()
+			var cmd tea.Cmd
+
+			switch fi := focusedInput.(type) {
+			case *textinput.Model:
+				cmd = fi.Focus()
+				fi.PromptStyle = focusedStyle
+				fi.TextStyle = focusedStyle
+			case *textarea.Model:
+				cmd = fi.Focus()
 			}
 
-			return m, tea.Batch(cmds...)
+			return m, cmd
 		}
 
 	}
