@@ -76,8 +76,10 @@ var (
 			BorderStyle(lipgloss.NormalBorder()).
 			Padding(0, 2).
 			BorderForeground(lipgloss.Color("69"))
+	divBlurredStyle = divStyle.BorderForeground(lipgloss.Color("8"))
 
-	divItem = baseStyle.Foreground(lipgloss.Color("#FFD046")).Render
+	divItem        = baseStyle.Foreground(lipgloss.Color("#FFD046")).Render
+	divBlurredItem = baseStyle.Foreground(lipgloss.Color("8")).Render
 
 	titleBarStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
@@ -375,7 +377,7 @@ func (m model) View() string {
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d", m.product.Id, m.focusIndex, m.form.focus))
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d %d", m.product.Id, m.focusIndex, m.form.focus, int(m.product.Status)))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
@@ -393,12 +395,29 @@ func (m model) View() string {
 			),
 		)
 
+		var ps strings.Builder
+		var status string
+		for i := range productStatus {
+			if i == int(m.product.Status) {
+				status = "x"
+				ps.WriteString(divItem(fmt.Sprintf("[%s] %s     ", status, productStatus[i])))
+			} else {
+				status = " "
+				ps.WriteString(divBlurredItem(fmt.Sprintf("[%s] %s     ", status, productStatus[i])))
+			}
+		}
+		statusDiv := divBlurredStyle.Render(
+			lipgloss.JoinHorizontal(lipgloss.Top,
+				ps.String(),
+			),
+		)
+
 		button := buttonBlurredStyle.Render("Save")
 		if m.focusIndex == MAX_INDEX {
 			button = buttonStyle.Render("Save")
 		}
 		//fmt.Fprintf(&b, "\n\n%s\n\n", button)
-		body := lipgloss.JoinVertical(lipgloss.Left, bar, div, button)
+		body := lipgloss.JoinVertical(lipgloss.Left, bar, div, statusDiv, button)
 
 		doc.WriteString(lipgloss.NewStyle().Width(width).Render(body) + "\n\n")
 
