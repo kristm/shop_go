@@ -235,8 +235,14 @@ func getOrderDetails(reference string) {
 		})
 		items = append(items, row)
 	}
+	var nameWidth int
+	if physicalWidth > 50 {
+		nameWidth = 40
+	} else {
+		nameWidth = columnWidth / 3
+	}
 	columns := []table.Column{
-		table.NewColumn("NAME", "NAME", columnWidth/3).WithStyle(baseStyle),
+		table.NewColumn("NAME", "NAME", nameWidth).WithStyle(baseStyle),
 		table.NewColumn("QTY", "QTY", 10).WithStyle(center),
 		table.NewColumn("PRICE", "PRICE", 10).WithStyle(center),
 	}
