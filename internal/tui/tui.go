@@ -225,7 +225,7 @@ func initialModel(product *models.Product) model {
 	priceInput.Width = FORM_WIDTH
 	priceInput.CharLimit = 70
 	priceInput.CursorStyle = cursorStyle
-	priceInput.SetValue(fmt.Sprintf("%.0f", product.Price))
+	priceInput.SetValue(fmt.Sprintf("%.2f", product.Price/100))
 	formModel.price = priceInput
 
 	catInput := textinput.New()
