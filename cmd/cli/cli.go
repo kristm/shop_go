@@ -16,6 +16,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
+	"golang.org/x/term"
 )
 
 func PrintJSON(obj interface{}) {
@@ -120,9 +121,14 @@ func getOrderDetails(reference string) {
 		log.Printf("error getting orders %v", err)
 	}
 
-	const (
+	physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
+	var columnWidth int
+	if physicalWidth > 50 {
 		columnWidth = 60
-	)
+	} else {
+		columnWidth = 50
+	}
+
 	var (
 		doc = strings.Builder{}
 
@@ -133,10 +139,10 @@ func getOrderDetails(reference string) {
 				Foreground(lipgloss.Color("#FFF7DB"))
 
 		titleStyle = baseStyle.
-				Padding(0, 2).
-				MarginBottom(1).
+				Padding(0, 1).
 				Bold(true).
 				Foreground(lipgloss.Color("#000000")).
+				MarginBottom(1).
 				Background(cyan)
 
 		//subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#383838"}
@@ -144,26 +150,26 @@ func getOrderDetails(reference string) {
 		center = lipgloss.NewStyle().
 			Align(lipgloss.Center)
 		div = lipgloss.NewStyle().
-			Padding(1, 1).
-			MarginRight(2).
-			Height(8).
-			Width(columnWidth + 1)
+			Padding(1, 0).
+			Width(columnWidth - 10)
 
 		divItem = baseStyle.Foreground(lipgloss.Color("#FFD046")).Render
+		header  = baseStyle.
+			Border(lipgloss.NormalBorder()).
+			BorderForeground(cyan).
+			Align(lipgloss.Center).
+			Width(columnWidth - 12)
 
 		list = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			BorderForeground(cyan).
-			Padding(1, 1).
-			MarginRight(2).
-			Height(8).
-			Width(columnWidth + 1)
+			PaddingLeft(1).
+			Width(columnWidth - 10)
 
 		listHeader = baseStyle.
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderBottom(true).
 				BorderForeground(cyan).
-				MarginRight(2).
 				Render
 
 		listItem = baseStyle.PaddingLeft(2).Render
@@ -179,6 +185,7 @@ func getOrderDetails(reference string) {
 	notes := fmt.Sprintf("NOTES: %s", shipping.Notes)
 	customerDetails := div.Render(
 		lipgloss.JoinVertical(lipgloss.Left,
+			header.Render(fmt.Sprintf("Order %s", reference)),
 			titleStyle.Render("Customer Details"),
 			divItem(name),
 			divItem(phone),
@@ -227,7 +234,7 @@ func getOrderDetails(reference string) {
 		items = append(items, row)
 	}
 	columns := []table.Column{
-		table.NewColumn("NAME", "NAME", 40).WithStyle(baseStyle),
+		table.NewColumn("NAME", "NAME", columnWidth/3).WithStyle(baseStyle),
 		table.NewColumn("QTY", "QTY", 10).WithStyle(center),
 		table.NewColumn("PRICE", "PRICE", 10).WithStyle(center),
 	}
@@ -241,7 +248,12 @@ func getOrderDetails(reference string) {
 		)
 
 	firstRow := lipgloss.JoinHorizontal(lipgloss.Top, customerDetails)
-	secondRow := lipgloss.JoinHorizontal(lipgloss.Top, lists, t.View())
+	var secondRow string
+	if columnWidth > 50 {
+		secondRow = lipgloss.JoinHorizontal(lipgloss.Top, lists, t.View())
+	} else {
+		secondRow = lipgloss.JoinVertical(lipgloss.Left, lists, t.View())
+	}
 
 	doc.WriteString(lipgloss.JoinVertical(lipgloss.Left, firstRow, secondRow))
 	fmt.Println(docStyle.Render(doc.String()))

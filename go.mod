@@ -4,13 +4,16 @@ go 1.23.9
 
 require (
 	github.com/Shopify/gomail v0.0.0-20220729171026-0784ece65e69
+	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/chenyahui/gin-cache v1.9.0
+	github.com/evertras/bubble-table v0.19.2
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/term v0.28.0
 )
 
 require (
@@ -22,7 +25,6 @@ require (
 	github.com/charmbracelet/bubbles v0.21.0 // indirect
 	github.com/charmbracelet/bubbletea v1.3.4 // indirect
 	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
-	github.com/charmbracelet/lipgloss v1.1.0 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
@@ -30,7 +32,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
-	github.com/evertras/bubble-table v0.19.2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gin-contrib/sse v1.0.0 // indirect
