@@ -106,6 +106,8 @@ func showProducts() {
 }
 
 func getOrderDetails(reference string) {
+	orderStatuses := []string{"Pending", "Cancelled", "Paid"}
+	shipStatuses := []string{"Packing", "In transit", "Shipped", "Delivered"}
 	order, err := models.GetOrderByReference(reference)
 	if err != nil {
 		log.Printf("error getting orders %v", err)
@@ -200,12 +202,12 @@ func getOrderDetails(reference string) {
 	amount := fmt.Sprintf("Total: %.2f", order.Amount/100.00)
 	orderId := fmt.Sprintf("ID: %d", order.Id)
 	referenceLine := fmt.Sprintf("Reference: %s", reference)
-	orderStatus := fmt.Sprintf("Status: %d", order.Status)
+	orderStatus := fmt.Sprintf("Status: %s", orderStatuses[order.Status])
 	paymentRef := fmt.Sprintf("Payment Reference: %s", order.PaymentReference)
 	voucher := fmt.Sprintf("Voucher: %s", order.VoucherCode)
 	customerId := fmt.Sprintf("Customer ID: %d", order.CustomerId)
 	shippingId := fmt.Sprintf("Shipping ID: %d", order.ShippingId)
-	shippingStatus := fmt.Sprintf("Shipping Status: %d", order.ShippingStatus)
+	shippingStatus := fmt.Sprintf("Shipping Status: %s", shipStatuses[order.ShippingStatus])
 	lists := lipgloss.JoinHorizontal(lipgloss.Top,
 		list.Render(
 			lipgloss.JoinVertical(lipgloss.Left,
