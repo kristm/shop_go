@@ -8,10 +8,12 @@ import (
 	"shop_go/internal/models"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/timer"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -22,6 +24,7 @@ const (
 	width      = 80
 	MAX_INDEX  = 5
 	FORM_WIDTH = 60
+	timeout    = time.Second * 2
 )
 
 var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
@@ -186,6 +189,7 @@ type model struct {
 	focusIndex int
 	product    models.Product
 	response   string
+	timer      timer.Model
 	cursorMode cursor.Mode
 }
 
@@ -195,6 +199,7 @@ func initialModel(product *models.Product) model {
 		cursorMode: cursor.CursorBlink,
 		product:    *product,
 		response:   "",
+		timer:      timer.NewWithInterval(timeout, time.Millisecond),
 	}
 
 	var formModel ProductForm
@@ -260,12 +265,27 @@ func (f *ProductForm) focused() any {
 }
 
 func (m model) Init() tea.Cmd {
-	return textinput.Blink
+	return tea.Batch(
+		textinput.Blink,
+		m.timer.Init(),
+	)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case timer.TickMsg:
+		var cmd tea.Cmd
+		m.timer, cmd = m.timer.Update(msg)
+		return m, cmd
+	case timer.StartStopMsg:
+		var cmd tea.Cmd
+		m.timer, cmd = m.timer.Update(msg)
+		return m, cmd
+	case timer.TimeoutMsg:
+		m.response = ""
+		return m, cmd
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q", "esc":
