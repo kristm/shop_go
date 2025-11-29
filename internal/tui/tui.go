@@ -417,7 +417,7 @@ func (m model) View() string {
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d %d %s", m.product.Id, m.focusIndex, m.form.focus, int(m.product.Status), m.timer.View()))
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d %d", m.product.Id, m.focusIndex, m.form.focus, int(m.product.Status)))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
