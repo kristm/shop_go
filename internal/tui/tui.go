@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
@@ -190,15 +191,20 @@ type model struct {
 	product    models.Product
 	response   string
 	timer      timer.Model
+	spinner    spinner.Model
 	cursorMode cursor.Mode
 }
 
 func initialModel(product *models.Product) model {
+	s := spinner.New()
+	s.Spinner = spinner.Dot
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	m := model{
 		focusIndex: 0,
 		cursorMode: cursor.CursorBlink,
 		product:    *product,
 		response:   "",
+		spinner:    s,
 		timer:      timer.New(0),
 	}
 
@@ -268,6 +274,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		textinput.Blink,
 		m.timer.Init(),
+		m.spinner.Tick,
 	)
 }
 
@@ -281,9 +288,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case timer.StartStopMsg:
-		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 		m.timer.Timeout = timeout
+		return m, cmd
+
+	case spinner.TickMsg:
+		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 
 	case tea.KeyMsg:
@@ -311,7 +321,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					m.response = fmt.Sprintf("Error encountered %s", err)
 				} else {
-					m.response = "Update Successful!"
+					m.response = fmt.Sprintf("Update Successful! %s", m.spinner.View())
 				}
 
 				return m, m.timer.Start()
