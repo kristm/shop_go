@@ -279,11 +279,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if s == "enter" && m.focusIndex == MAX_INDEX {
 				//Save handler
 				price_in_cents, _ := strconv.Atoi(m.form.price.Value())
+				categoryId, _ := strconv.Atoi(m.form.categoryId.Value())
 				_, err := models.UpdateProduct(m.product.Id,
 					m.form.name.Value(),
 					m.form.sku.Value(),
 					m.form.description.Value(),
-					price_in_cents*100)
+					price_in_cents*100,
+					categoryId)
 
 				if err != nil {
 					m.response = fmt.Sprintf("Error encountered %s", err)
