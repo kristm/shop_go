@@ -163,7 +163,7 @@ func GetProductBySku(sku string) (Product, error) {
 	return product, nil
 }
 
-func UpdateProduct(id int, name string, sku string, description, string, price_in_cents int) (bool, error) {
+func UpdateProduct(id int, name string, sku string, description string, price_in_cents int) (bool, error) {
 	tx, err := DB.Begin()
 	if err != nil {
 		return false, err
@@ -176,7 +176,7 @@ func UpdateProduct(id int, name string, sku string, description, string, price_i
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(name, sku, description, price_in_cents)
+	_, err = stmt.Exec(name, sku, description, price_in_cents, id)
 	if err != nil {
 		return false, err
 	}

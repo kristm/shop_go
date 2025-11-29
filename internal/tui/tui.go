@@ -6,6 +6,7 @@ import (
 	"os"
 	"shop_go/internal/config"
 	"shop_go/internal/models"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
@@ -184,6 +185,7 @@ type model struct {
 	form       ProductForm
 	focusIndex int
 	product    models.Product
+	response   string
 	cursorMode cursor.Mode
 }
 
@@ -192,6 +194,7 @@ func initialModel(product *models.Product) model {
 		focusIndex: 0,
 		cursorMode: cursor.CursorBlink,
 		product:    *product,
+		response:   "",
 	}
 
 	var formModel ProductForm
@@ -274,8 +277,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == MAX_INDEX {
-				//button event handler
-				return m, tea.Quit
+				//Save handler
+				price_in_cents, _ := strconv.Atoi(m.form.price.Value())
+				_, err := models.UpdateProduct(m.product.Id,
+					m.form.name.Value(),
+					m.form.sku.Value(),
+					m.form.description.Value(),
+					price_in_cents*100)
+
+				if err != nil {
+					m.response = fmt.Sprintf("Error encountered %s", err)
+				} else {
+					m.response = "Update Successful!"
+				}
+
+				//return m, tea.Quit
 			}
 
 			// Cycle indexes
@@ -385,6 +401,8 @@ func (m model) View() string {
 			rightStatus,
 		)
 
+		serverMessage := baseStyle.Align(lipgloss.Center).Render(m.response)
+
 		div := divStyle.Render(
 			lipgloss.JoinVertical(lipgloss.Left,
 				divItem(fmt.Sprintf("%s%s", "Name:", m.form.name.View())),
@@ -417,7 +435,7 @@ func (m model) View() string {
 			button = buttonStyle.Render("Save")
 		}
 		//fmt.Fprintf(&b, "\n\n%s\n\n", button)
-		body := lipgloss.JoinVertical(lipgloss.Left, bar, div, statusDiv, button)
+		body := lipgloss.JoinVertical(lipgloss.Left, bar, serverMessage, div, statusDiv, button)
 
 		doc.WriteString(lipgloss.NewStyle().Width(width).Render(body) + "\n\n")
 
