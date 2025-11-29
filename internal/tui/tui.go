@@ -274,7 +274,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == MAX_INDEX {
-				//button event handler
+				//Save handler
 				return m, tea.Quit
 			}
 
@@ -417,9 +417,29 @@ func (m model) View() string {
 			button = buttonStyle.Render("Save")
 		}
 		//fmt.Fprintf(&b, "\n\n%s\n\n", button)
-		body := lipgloss.JoinVertical(lipgloss.Left, bar, div, statusDiv, button)
 
-		doc.WriteString(lipgloss.NewStyle().Width(width).Render(body) + "\n\n")
+		div2 := lipgloss.NewStyle().
+			Width(30).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("14")).
+			Render(
+				lipgloss.JoinVertical(lipgloss.Left,
+					divItem(m.form.name.Value()),
+					divItem(m.form.sku.Value()),
+					divItem(m.form.description.Value()),
+					divItem(m.form.price.Value()),
+				),
+			)
+
+		mid := lipgloss.NewStyle().
+			Width(120).
+			Render(
+				lipgloss.JoinHorizontal(lipgloss.Top, div, div2),
+			)
+
+		body := lipgloss.JoinVertical(lipgloss.Left, bar, mid, statusDiv, button)
+
+		doc.WriteString(lipgloss.NewStyle().Width(120).Render(body) + "\n\n")
 
 	}
 
