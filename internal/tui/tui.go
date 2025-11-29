@@ -199,7 +199,7 @@ func initialModel(product *models.Product) model {
 		cursorMode: cursor.CursorBlink,
 		product:    *product,
 		response:   "",
-		timer:      timer.NewWithInterval(timeout, time.Millisecond),
+		timer:      timer.New(0),
 	}
 
 	var formModel ProductForm
@@ -273,17 +273,17 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	m.timer, cmd = m.timer.Update(msg)
+
 	switch msg := msg.(type) {
-	case timer.TickMsg:
-		var cmd tea.Cmd
-		m.timer, cmd = m.timer.Update(msg)
-		return m, cmd
+	case timer.TimeoutMsg:
+		m.response = ""
+		return m, nil
+
 	case timer.StartStopMsg:
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
-		return m, cmd
-	case timer.TimeoutMsg:
-		m.response = ""
+		m.timer.Timeout = timeout
 		return m, cmd
 
 	case tea.KeyMsg:
@@ -298,13 +298,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// If so, exit.
 			if s == "enter" && m.focusIndex == MAX_INDEX {
 				//Save handler
-				price_in_cents, _ := strconv.Atoi(m.form.price.Value())
+				price, _ := strconv.ParseFloat(m.form.price.Value(), 64)
+				price_in_cents := int(price * 100)
 				categoryId, _ := strconv.Atoi(m.form.categoryId.Value())
 				_, err := models.UpdateProduct(m.product.Id,
 					m.form.name.Value(),
 					m.form.sku.Value(),
 					m.form.description.Value(),
-					price_in_cents*100,
+					price_in_cents,
 					categoryId)
 
 				if err != nil {
@@ -313,7 +314,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.response = "Update Successful!"
 				}
 
-				//return m, tea.Quit
+				return m, m.timer.Start()
 			}
 
 			// Cycle indexes
@@ -352,28 +353,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.form.focus = m.focusIndex
 			focusedInput := m.form.focused()
-			var cmd tea.Cmd
+			var keypressCmd tea.Cmd
 
 			switch fi := focusedInput.(type) {
 			case *textinput.Model:
-				cmd = fi.Focus()
+				keypressCmd = fi.Focus()
 				fi.PromptStyle = focusedStyle
 				fi.TextStyle = focusedStyle
 			case *textarea.Model:
-				cmd = fi.Focus()
+				keypressCmd = fi.Focus()
 			}
 
-			return m, cmd
+			return m, keypressCmd
 		}
 
 	}
 	// Handle character input and blinking
 	focusedInput := m.form.focused()
+	var focusedCmd tea.Cmd
 
 	switch fi := focusedInput.(type) {
 	case *textinput.Model:
 		var updatedInput textinput.Model
-		updatedInput, cmd = fi.Update(msg)
+		updatedInput, focusedCmd = fi.Update(msg)
 		// Now, update the correct field in the form
 		switch m.focusIndex {
 		case 0:
@@ -387,11 +389,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case *textarea.Model:
 		var updatedInput textarea.Model
-		updatedInput, cmd = fi.Update(msg)
+		updatedInput, focusedCmd = fi.Update(msg)
 		m.form.description = updatedInput
 	}
 
-	return m, cmd
+	return m, tea.Batch(cmd, focusedCmd)
 }
 
 func formView(form *ProductForm) string {
@@ -415,7 +417,7 @@ func (m model) View() string {
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d %d", m.product.Id, m.focusIndex, m.form.focus, int(m.product.Status)))
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d %d %s", m.product.Id, m.focusIndex, m.form.focus, int(m.product.Status), m.timer.View()))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
