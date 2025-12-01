@@ -18,14 +18,21 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/evertras/bubble-table/table"
 )
 
 const (
-	width      = 80
-	MAX_INDEX  = 5
-	FORM_WIDTH = 60
-	timeout    = time.Second * 2
+	width          = 80
+	MAX_INDEX      = 5
+	FORM_WIDTH     = 60
+	timeout        = time.Second * 2
+	HOTPINK        = lipgloss.Color("205")
+	DEEPPINK       = lipgloss.Color("197")
+	DARKGRAY       = lipgloss.Color("240")
+	GRAY           = lipgloss.Color("8")
+	CORNFLOWERBLUE = lipgloss.Color("69")
+	GOLD           = lipgloss.Color("221")
+	WHITE          = lipgloss.Color("#FFFDF5")
+	GREEN          = lipgloss.Color("40")
 )
 
 var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
@@ -47,44 +54,35 @@ var (
 	//t  table.Model
 	vp viewport.Model
 
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-	noStyle             = lipgloss.NewStyle()
-
-	normal = lipgloss.Color("#EEEEEE")
-	base   = lipgloss.NewStyle().Foreground(normal)
-	subtle = lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#585858"}
-
-	background = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#CCCCCC"}
-	highlight  = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#61D4C6"}
+	focusedStyle = lipgloss.NewStyle().Foreground(HOTPINK)
+	blurredStyle = lipgloss.NewStyle().Foreground(DARKGRAY)
+	cursorStyle  = focusedStyle
+	noStyle      = lipgloss.NewStyle()
 
 	baseStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("#FFF7DB"))
+			Bold(true)
 
 	buttonStyle = lipgloss.NewStyle().
 			Inherit(baseStyle).
 			BorderStyle(lipgloss.NormalBorder()).
 			Padding(0, 1).
-			BorderForeground(lipgloss.Color("#FF5F87"))
+			BorderForeground(DEEPPINK)
 
 	buttonBlurredStyle = lipgloss.NewStyle().
 				BorderStyle(lipgloss.NormalBorder()).
 				Bold(false).
 				Padding(0, 1).
-				BorderForeground(lipgloss.Color("#353533"))
+				BorderForeground(DARKGRAY)
 
 	divStyle = lipgloss.NewStyle().
 			Align(lipgloss.Left).
 			BorderStyle(lipgloss.NormalBorder()).
 			Padding(0, 2).
-			BorderForeground(lipgloss.Color("69"))
-	divBlurredStyle = divStyle.BorderForeground(lipgloss.Color("8"))
+			BorderForeground(CORNFLOWERBLUE)
+	divBlurredStyle = divStyle.BorderForeground(GRAY)
 
-	divItem        = baseStyle.Foreground(lipgloss.Color("#FFD046")).Render
-	divBlurredItem = baseStyle.Foreground(lipgloss.Color("8")).Render
+	divItem        = baseStyle.Foreground(GOLD).Render
+	divBlurredItem = baseStyle.Foreground(GRAY).Render
 
 	titleBarStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
@@ -92,28 +90,9 @@ var (
 			Align(lipgloss.Center)
 	dialogTitleStyle = lipgloss.NewStyle().
 				Inherit(titleBarStyle).
-				Foreground(lipgloss.Color("#FFFDF5")).
-				Background(lipgloss.Color("#FF5F87")).
+				Foreground(WHITE).
+				Background(DEEPPINK).
 				Padding(0, 1)
-
-	modalBodyStyle = lipgloss.NewStyle().
-			Inherit(titleBarStyle).
-			Foreground(lipgloss.Color("#FF5F87")).
-			Background(lipgloss.Color("#000000")).
-			Padding(0, 1)
-
-	dialogBoxStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#874BFD")).
-			Padding(0, 0).
-			BorderTop(true).
-			BorderLeft(true).
-			BorderRight(true).
-			BorderBottom(true)
-
-	tableStyle = lipgloss.NewStyle().
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("240"))
 
 	statusBarStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
@@ -150,38 +129,6 @@ var (
 		BottomLeft:  "┴",
 		BottomRight: "┴",
 	}
-
-	customBorder = table.Border{
-		Top:    "─",
-		Left:   "│",
-		Right:  "│",
-		Bottom: "─",
-
-		TopRight:    "╮",
-		TopLeft:     "╭",
-		BottomRight: "╯",
-		BottomLeft:  "╰",
-
-		TopJunction:    "┬",
-		LeftJunction:   "├",
-		RightJunction:  "┤",
-		BottomJunction: "┴",
-		InnerJunction:  "┼",
-
-		InnerDivider: "│",
-	}
-
-	tab = lipgloss.NewStyle().
-		Border(tabBorder, true).
-		BorderForeground(highlight).
-		Padding(0, 1)
-
-	activeTab = tab.Border(activeTabBorder, true).BorderForeground(highlight)
-
-	tabGap = tab.
-		BorderTop(false).
-		BorderLeft(false).
-		BorderRight(false)
 )
 
 type model struct {
@@ -425,7 +372,7 @@ func (m model) View() string {
 		leftStatus := statusStyle.Render("<<<<")
 		rightStatus := statusStyle.Render(">>>>")
 		statusVal := statusText.
-			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d --- %d %d %d", m.product.Id, m.focusIndex, m.form.focus, int(m.product.Status)))
+			Width(width - w(leftStatus) - w(rightStatus) - 1).Render(fmt.Sprintf("Product ID: %d", m.product.Id))
 
 		bar := lipgloss.JoinHorizontal(lipgloss.Top,
 			leftStatus,
@@ -441,7 +388,7 @@ func (m model) View() string {
 		serverMessage := baseStyle.
 			Padding(1).
 			Align(lipgloss.Center).
-			Foreground(lipgloss.Color("40")).
+			Foreground(GREEN).
 			Render(m.response)
 
 		div := divStyle.Render(
