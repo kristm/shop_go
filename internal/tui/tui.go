@@ -27,6 +27,7 @@ const (
 	timeout        = time.Second * 2
 	HOTPINK        = lipgloss.Color("205")
 	DEEPPINK       = lipgloss.Color("197")
+	BLACK          = lipgloss.Color("236")
 	DARKGRAY       = lipgloss.Color("240")
 	GRAY           = lipgloss.Color("8")
 	CORNFLOWERBLUE = lipgloss.Color("69")
@@ -55,7 +56,7 @@ var (
 	//t  table.Model
 	vp viewport.Model
 
-	focusedStyle = lipgloss.NewStyle().Foreground(HOTPINK)
+	focusedStyle = lipgloss.NewStyle().Foreground(CYAN)
 	blurredStyle = lipgloss.NewStyle().Foreground(DARKGRAY)
 	cursorStyle  = focusedStyle
 	noStyle      = lipgloss.NewStyle()
@@ -64,6 +65,7 @@ var (
 			Bold(true)
 
 	buttonStyle = lipgloss.NewStyle().
+			Foreground(CYAN).
 			Inherit(baseStyle).
 			BorderStyle(lipgloss.NormalBorder()).
 			Padding(0, 1).
@@ -108,28 +110,6 @@ var (
 	statusText = lipgloss.NewStyle().Inherit(statusBarStyle).MarginLeft(1)
 
 	docStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
-
-	activeTabBorder = lipgloss.Border{
-		Top:         "─",
-		Bottom:      " ",
-		Left:        "│",
-		Right:       "│",
-		TopLeft:     "╭",
-		TopRight:    "╮",
-		BottomLeft:  "┘",
-		BottomRight: "└",
-	}
-
-	tabBorder = lipgloss.Border{
-		Top:         "─",
-		Bottom:      "─",
-		Left:        "│",
-		Right:       "│",
-		TopLeft:     "╭",
-		TopRight:    "╮",
-		BottomLeft:  "┴",
-		BottomRight: "┴",
-	}
 )
 
 type model struct {
@@ -182,7 +162,10 @@ func initialModel(product *models.Product) model {
 	ta.SetHeight(3)
 	ta.SetWidth(60)
 	ta.SetValue(product.Description)
-	ta.SetValue(product.Description)
+	ta.FocusedStyle.Base = lipgloss.NewStyle().Foreground(CYAN)
+	ta.FocusedStyle.CursorLine = lipgloss.NewStyle().UnsetBackground()
+	ta.BlurredStyle.Base = lipgloss.NewStyle().Foreground(BLACK)
+	ta.BlurredStyle.Text = lipgloss.NewStyle().UnsetBackground()
 	formModel.description = ta
 
 	priceInput := textinput.New()
@@ -399,7 +382,7 @@ func (m model) View() string {
 		serverMessage := baseStyle.
 			Padding(1).
 			Align(lipgloss.Center).
-			Foreground(GREEN).
+			Foreground(CYAN).
 			Render(m.response)
 
 		div := divStyle.Render(
