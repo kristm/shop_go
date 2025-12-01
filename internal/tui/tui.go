@@ -350,8 +350,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.form.sku.TextStyle = noStyle
 
 			m.form.description.Blur()
-			//m.form.description.PromptStyle = noStyle
-			//m.form.description.TextStyle = noStyle
 
 			m.form.price.Blur()
 			m.form.price.PromptStyle = noStyle
@@ -435,7 +433,11 @@ func (m model) View() string {
 			rightStatus,
 		)
 
-		serverMessage := baseStyle.Align(lipgloss.Center).Render(m.response)
+		serverMessage := baseStyle.
+			Padding(1).
+			Align(lipgloss.Center).
+			Foreground(lipgloss.Color("40")).
+			Render(m.response)
 
 		div := divStyle.Render(
 			lipgloss.JoinVertical(lipgloss.Left,
