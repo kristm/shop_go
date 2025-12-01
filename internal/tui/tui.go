@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/timer"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -183,23 +184,15 @@ var (
 		BorderRight(false)
 )
 
-type tickMsg struct{}
-
 type model struct {
 	cursor     int
 	form       ProductForm
 	focusIndex int
 	product    models.Product
 	response   string
-	timer      int
+	timer      timer.Model
 	spinner    spinner.Model
 	cursorMode cursor.Mode
-}
-
-func tickCmd() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
-		return tickMsg{}
-	})
 }
 
 func initialModel(product *models.Product) model {
@@ -212,7 +205,7 @@ func initialModel(product *models.Product) model {
 		product:    *product,
 		response:   "",
 		spinner:    s,
-		timer:      0,
+		timer:      timer.New(0),
 	}
 
 	var formModel ProductForm
@@ -280,27 +273,24 @@ func (f *ProductForm) focused() any {
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		textinput.Blink,
-		tickCmd(),
+		m.timer.Init(),
 		m.spinner.Tick,
 	)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	//m.timer, cmd = m.timer.Update(msg)
+	m.timer, cmd = m.timer.Update(msg)
 
 	switch msg := msg.(type) {
-	//case timer.TimeoutMsg:
-	//	m.response = ""
-	//	return m, nil
+	case timer.TimeoutMsg:
+		m.response = ""
+		return m, nil
 
-	//case timer.StartStopMsg:
-	//	m.timer, cmd = m.timer.Update(msg)
-	//	m.timer.Timeout = timeout
-	//	return m, cmd
-	case tickMsg:
-		m.timer++
-		return m, tickCmd()
+	case timer.StartStopMsg:
+		m.timer, cmd = m.timer.Update(msg)
+		m.timer.Timeout = timeout
+		return m, cmd
 
 	case spinner.TickMsg:
 		m.spinner, cmd = m.spinner.Update(msg)
@@ -334,7 +324,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.response = fmt.Sprintf("Update Successful! %s", m.spinner.View())
 				}
 
-				return m, tickCmd()
+				return m, m.timer.Start()
 			}
 
 			// Cycle indexes
@@ -447,7 +437,7 @@ func (m model) View() string {
 			Padding(1).
 			Align(lipgloss.Center).
 			Foreground(lipgloss.Color("40")).
-			Render(m.spinner.View())
+			Render(m.response)
 
 		div := divStyle.Render(
 			lipgloss.JoinVertical(lipgloss.Left,
