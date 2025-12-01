@@ -321,7 +321,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					m.response = fmt.Sprintf("Error encountered %s", err)
 				} else {
-					m.response = fmt.Sprintf("Update Successful! %s", m.spinner.View())
+					m.response = fmt.Sprintf("Update Successful!")
 				}
 
 				return m, m.timer.Start()
@@ -433,6 +433,11 @@ func (m model) View() string {
 			rightStatus,
 		)
 
+		spinView := m.spinner.View()
+		if m.response == "Update Successful!" {
+			resp := []string{m.response, spinView}
+			m.response = strings.Join(resp, " ")
+		}
 		serverMessage := baseStyle.
 			Padding(1).
 			Align(lipgloss.Center).
