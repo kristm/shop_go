@@ -33,6 +33,7 @@ const (
 	GOLD           = lipgloss.Color("221")
 	WHITE          = lipgloss.Color("#FFFDF5")
 	GREEN          = lipgloss.Color("40")
+	CYAN           = lipgloss.Color("45")
 )
 
 var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
@@ -140,6 +141,7 @@ type model struct {
 	timer      timer.Model
 	spinner    spinner.Model
 	cursorMode cursor.Mode
+	updating   bool
 }
 
 func initialModel(product *models.Product) model {
@@ -153,6 +155,7 @@ func initialModel(product *models.Product) model {
 		response:   "",
 		spinner:    s,
 		timer:      timer.New(0),
+		updating:   false,
 	}
 
 	var formModel ProductForm
@@ -231,12 +234,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case timer.TimeoutMsg:
-		m.response = ""
-		return m, nil
+		if m.updating {
+			m.response = "Update Successful!"
+			m.updating = false
+			m.timer.Timeout = timeout
+			return m, m.timer.Start()
+		} else {
+			m.response = ""
+			return m, nil
+		}
 
 	case timer.StartStopMsg:
 		m.timer, cmd = m.timer.Update(msg)
-		m.timer.Timeout = timeout
+		m.timer.Timeout = time.Second
 		return m, cmd
 
 	case spinner.TickMsg:
@@ -268,7 +278,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					m.response = fmt.Sprintf("Error encountered %s", err)
 				} else {
-					m.response = fmt.Sprintf("Update Successful!")
+					m.updating = true
+					m.response = fmt.Sprintf("Updating...")
 				}
 
 				return m, m.timer.Start()
@@ -381,7 +392,7 @@ func (m model) View() string {
 		)
 
 		spinView := m.spinner.View()
-		if m.response == "Update Successful!" {
+		if m.response == "Updating..." {
 			resp := []string{m.response, spinView}
 			m.response = strings.Join(resp, " ")
 		}
@@ -422,7 +433,7 @@ func (m model) View() string {
 		if m.focusIndex == MAX_INDEX {
 			button = buttonStyle.Render("Save")
 		}
-		//fmt.Fprintf(&b, "\n\n%s\n\n", button)
+
 		body := lipgloss.JoinVertical(lipgloss.Left, bar, serverMessage, div, statusDiv, button)
 
 		doc.WriteString(lipgloss.NewStyle().Width(width).Render(body) + "\n\n")
