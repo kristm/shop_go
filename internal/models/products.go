@@ -150,7 +150,7 @@ func GetProductBySku(sku string) (Product, error) {
 	sqlErr := stmt.QueryRow(sku).Scan(&product.Id, &product.Name, &product.Sku, &product.Description, &product.CategoryId, &product.Price, &product.Status)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
-			return Product{}, nil
+			return Product{}, sqlErr
 		}
 		return Product{}, sqlErr
 	}

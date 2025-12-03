@@ -433,10 +433,14 @@ func Run(ref string) {
 		log.Printf("ERROR LOADING CONFIG")
 	}
 
-	product, _ := models.GetProductBySku(ref)
+	product, err := models.GetProductBySku(ref)
+	if err != nil {
+		log.Printf("Product Not Found!")
+		os.Exit(0)
+	}
 
 	if _, err := tea.NewProgram(initialModel(&product)).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
-		os.Exit(1)
+		os.Exit(0)
 	}
 }

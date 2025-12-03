@@ -142,7 +142,7 @@ func GetOrderByReference(ref string) (*Order, error) {
 	sqlErr := stmt.QueryRow(ref).Scan(&order.Id, &order.ShippingId, &order.CustomerId, &order.ReferenceCode, &order.PaymentReference, &order.Amount, &order.Status, &order.VoucherCode)
 	if sqlErr != nil {
 		if sqlErr == sql.ErrNoRows {
-			return nil, nil
+			return nil, sqlErr
 		}
 		return nil, sqlErr
 	}

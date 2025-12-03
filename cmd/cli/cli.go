@@ -116,7 +116,8 @@ func getOrderDetails(reference string) {
 	shipStatuses := []string{"Packing", "In transit", "Shipped", "Delivered"}
 	order, err := models.GetOrderByReference(reference)
 	if err != nil {
-		log.Printf("error getting orders %v", err)
+		log.Printf("Error getting orders %v", err)
+		os.Exit(1)
 	}
 
 	customer, err := models.GetCustomerById(order.CustomerId)
