@@ -98,7 +98,7 @@ var (
 				Padding(0, 1)
 
 	statusBarStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#C1C6B2"}).
+			Foreground(lipgloss.AdaptiveColor{Light: "#343433", Dark: "#FFFDF5"}).
 			Background(lipgloss.AdaptiveColor{Light: "#D9DCCF", Dark: "#353533"})
 
 	statusStyle = lipgloss.NewStyle().
