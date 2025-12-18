@@ -356,7 +356,7 @@ func main() {
 	orderRefCode := flag.String("getorder", "", "order reference")
 	shippingRef := flag.String("updateship", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
-	tui := flag.String("tui", "", "order reference")
+	tui := flag.String("tui", "", "product sku")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
