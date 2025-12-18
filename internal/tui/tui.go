@@ -39,6 +39,7 @@ const (
 
 var orderStatus = [3]string{"Pending", "Cancelled", "Paid"}
 var productStatus = [4]string{"Instock", "Low Stock", "Out of Stock", "Preorder"}
+var categories map[int]string
 
 type ProductForm struct {
 	name        textinput.Model
@@ -385,13 +386,17 @@ func (m model) View() string {
 			Foreground(CYAN).
 			Render(m.response)
 
+		categoryId, _ := strconv.Atoi(m.form.categoryId.Value())
+		categoryRow := lipgloss.JoinVertical(lipgloss.Left,
+			divItem(fmt.Sprintf("%s%s", "CategoryId:", m.form.categoryId.View())),
+			divBlurredItem(fmt.Sprintf("(%s)", categories[categoryId])))
 		div := divStyle.Render(
 			lipgloss.JoinVertical(lipgloss.Left,
 				divItem(fmt.Sprintf("%s%s", "Name:", m.form.name.View())),
 				divItem(fmt.Sprintf("%s%s", "SKU:", m.form.sku.View())),
 				divItem(fmt.Sprintf("%s%s", "Description:", m.form.description.View())),
 				divItem(fmt.Sprintf("%s%s", "Price:", m.form.price.View())),
-				divItem(fmt.Sprintf("%s%s", "CategoryId:", m.form.categoryId.View())),
+				categoryRow,
 			),
 		)
 
@@ -437,6 +442,12 @@ func Run(ref string) {
 	if err != nil {
 		log.Printf("Product Not Found!")
 		os.Exit(0)
+	}
+
+	categories = make(map[int]string)
+	categoriesObj, _ := models.GetCategories()
+	for _, category := range categoriesObj {
+		categories[category.Id] = category.Name
 	}
 
 	if _, err := tea.NewProgram(initialModel(&product)).Run(); err != nil {
