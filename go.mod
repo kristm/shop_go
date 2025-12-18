@@ -1,6 +1,6 @@
 module shop_go
 
-go 1.23.9
+go 1.25.5
 
 require (
 	github.com/Shopify/gomail v0.0.0-20220729171026-0784ece65e69
