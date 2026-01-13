@@ -24,6 +24,7 @@ func AddVoucher(voucher *Voucher) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("INSERT INTO vouchers (voucher_type_id, code, valid, expires_at) VALUES (?,?,?, ?)")
 

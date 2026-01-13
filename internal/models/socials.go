@@ -52,6 +52,7 @@ func AddSocials(socials *Socials) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("INSERT INTO socials (customer_id, subscribed_to_newsletter, account_url) VALUES (?,?,?)")
 

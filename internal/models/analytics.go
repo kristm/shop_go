@@ -4,7 +4,7 @@ type Analytics struct {
 	CustomerId int    `json:"customer_id"`
 	IpAddress  string `json:"ip_address"`
 	Device     string `json:"device"`
-	Others     string `json:"others"`
+	Others     string `json:"others"` //CartAge is in minutes
 }
 
 func AddAnalytics(analytics *Analytics) (bool, error) {
@@ -13,6 +13,7 @@ func AddAnalytics(analytics *Analytics) (bool, error) {
 		return false, err
 	}
 
+	defer tx.Rollback()
 	stmt, err := tx.Prepare("INSERT INTO analytics (customer_id, ip_address, device, others) VALUES (?, ?, ?, ?)")
 
 	if err != nil {
@@ -38,6 +39,7 @@ func AddCartAnalytics(analytics *Analytics) (bool, error) {
 		return false, err
 	}
 
+	defer tx.Rollback()
 	stmt, err := tx.Prepare("INSERT INTO analytics (ip_address, device, others) VALUES (?, ?, ?)")
 
 	if err != nil {

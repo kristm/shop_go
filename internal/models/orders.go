@@ -279,6 +279,7 @@ func AddOrderRecord(newOrder Order) (int, string, error) {
 	if err != nil {
 		return -1, "", err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("INSERT INTO orders (customer_id, shipping_id, reference_code, amount_in_cents, status, payment_reference, voucher) VALUES (?, ?, ?, ?, ?, ?, ?)")
 
@@ -308,6 +309,7 @@ func AddOrderItem(newOrderItem OrderItem) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer tx.Rollback()
 
 	//TODO: fetch price from product table
 	stmt, err := tx.Prepare("INSERT INTO order_products (order_id, product_id, qty, price_in_cents) VALUES (?, ?, ?, ?)")
@@ -334,6 +336,7 @@ func UpdateOrderStatus(reference string, status OrderStatus) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("UPDATE orders SET STATUS = ? WHERE reference_code = ?")
 	if err != nil {

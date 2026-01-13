@@ -22,6 +22,7 @@ func AddPhoto(sku string, filenames []string) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("INSERT INTO product_gallery (product_id, images) VALUES (?, ?)")
 

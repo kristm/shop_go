@@ -17,6 +17,7 @@ func AddCategory(category *Category) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("INSERT into categories (name, enabled) VALUES (?, ?)")
 

@@ -26,6 +26,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 	if err != nil {
 		return -1, err
 	}
+	defer tx.Rollback()
 
 	//if !ValidateNotEmpty(newAddress) {
 	//	return -1, nil
@@ -72,6 +73,7 @@ func UpdateShippingStatus(id int, status ShippingStatus) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("UPDATE shipping SET STATUS = ? WHERE id = ?")
 	if err != nil {

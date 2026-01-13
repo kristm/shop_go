@@ -168,6 +168,7 @@ func UpdateProduct(id int, name string, sku string, description string, price_in
 	if err != nil {
 		return false, err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("UPDATE products SET name = ?, sku = ?, description = ?, price_in_cents = ?, category_id = ? WHERE id = ?")
 	if err != nil {
@@ -223,6 +224,7 @@ func SetPreorder(product *Product) (bool, error) {
 		if err != nil {
 			return false, err
 		}
+		defer tx.Rollback()
 
 		stmt, err := tx.Prepare("UPDATE products SET status = ? WHERE id = ?")
 		if err != nil {
@@ -278,6 +280,7 @@ func AddProduct(newProduct Product) (int, error) {
 	if err != nil {
 		return -1, err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("INSERT INTO products (name, sku, description, category_id, price_in_cents) VALUES (?, ?, ?, ?, ?)")
 
@@ -321,6 +324,7 @@ func UpdateProductInventory(productId int, qty int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("UPDATE product_inventory SET qty = ? WHERE product_id = ?")
 	if err != nil {
@@ -353,6 +357,7 @@ func AddProductInventory(productId int, qty int) (bool, error) {
 		if err != nil {
 			return false, err
 		}
+		defer tx.Rollback()
 
 		stmt, err := tx.Prepare("INSERT INTO product_inventory (product_id, qty) VALUES (?, ?)")
 
@@ -380,6 +385,7 @@ func AddProductLink(productId int, path string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer tx.Rollback()
 
 	stmt, err := tx.Prepare("INSERT INTO product_links (product_id, url) VALUES (?, ?)")
 	if err != nil {

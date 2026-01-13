@@ -221,7 +221,7 @@ func createOrder(m mailer, cfg *config.Config) gin.HandlerFunc {
 		}
 
 		// create analytics
-		cartAge := strings.Join([]string{"cart_age=", strconv.FormatFloat(requestBody.CartAge, 'f', 2, 64)}, "")
+		cartAge := strings.Join([]string{"cart_age=", strconv.FormatFloat(requestBody.CartAge, 'f', 2, 64)}, "") // cart age in minutes
 		_, err = models.AddAnalytics(&models.Analytics{
 			CustomerId: customerId,
 			IpAddress:  c.ClientIP(),

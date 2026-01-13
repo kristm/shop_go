@@ -78,6 +78,7 @@ func AddCustomer(newCustomer *Customer) (int, error) {
 	if err != nil {
 		return -1, err
 	}
+	defer tx.Rollback()
 
 	if !ValidateNotEmpty(newCustomer) {
 		err = errors.New("Invalid Customer Data")
