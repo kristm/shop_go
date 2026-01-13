@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var testTables = []string{"categories", "customers", "orders", "order_products", "shipping", "vouchers", "product_gallery", "product_inventory"}
+var testTables = []string{"categories", "customers", "orders", "order_products", "shipping", "vouchers", "product_gallery", "product_inventory", "subscribers"}
 
 func ClearTestTable(tableName string) (bool, error) {
 	tx, err := DB.Begin()
