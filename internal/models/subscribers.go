@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/mattn/go-sqlite3"
 )
@@ -43,4 +44,26 @@ func AddSubscriber(email string) error {
 	}
 
 	return nil
+}
+
+func Unsubscribe(email string) error {
+	var id int
+	err := DB.QueryRow("SELECT id FROM subscribers WHERE email LIKE ?", email).Scan(&id)
+
+	if err != nil {
+		return err
+	}
+
+	tx, err := DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	newEmail := fmt.Sprintf("%s-%d", email, id)
+	if _, err := tx.Exec("UPDATE subscribers SET email = ? WHERE id = ?", newEmail, id); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }

@@ -187,6 +187,17 @@ func subscribeToList(c *gin.Context) {
 	}
 }
 
+func unsubscribeToList(c *gin.Context) {
+	email := c.Param("email")
+	err := models.Unsubscribe(email)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"subscribed": false})
+	}
+}
+
 func createAnalytic(c *gin.Context) {
 	// create analytics
 	var requestBody AnalyticPayload
@@ -353,6 +364,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 		v1.POST("orders", createOrder(m, cfg))
 		v1.POST("analytics", createAnalytic)
 		v1.GET("subscribe/:email", subscribeToList)
+		v1.GET("unsubscribe/:email", unsubscribeToList)
 		v1.GET("news", getNews)
 	}
 
