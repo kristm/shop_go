@@ -39,11 +39,7 @@ func AddSubscriber(email string) error {
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }
 
 func Unsubscribe(email string) error {

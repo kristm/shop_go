@@ -41,9 +41,7 @@ func AddPhoto(sku string, filenames []string) error {
 		return err
 	}
 
-	tx.Commit()
-
-	return nil
+	return tx.Commit()
 }
 
 func GetPhotosBySku(sku string) (Photo, error) {

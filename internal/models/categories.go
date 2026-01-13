@@ -33,9 +33,7 @@ func AddCategory(category *Category) error {
 		return err
 	}
 
-	tx.Commit()
-
-	return nil
+	return tx.Commit()
 }
 
 func GetCategories() ([]Category, error) {

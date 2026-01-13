@@ -40,10 +40,7 @@ func AddVoucher(voucher *Voucher) error {
 		return err
 	}
 
-	tx.Commit()
-
-	return nil
-
+	return tx.Commit()
 }
 
 func GetVoucherByCode(code string) (*Voucher, error) {
