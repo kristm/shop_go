@@ -327,6 +327,7 @@ func loadConfig() (*config.Config, error) {
 }
 
 type mailer func(*models.Order, *models.Customer, *config.Config) (bool, error)
+type welcome_mailer func(email, *config.Config) error
 type configLoader func() (*config.Config, error)
 type connectDB func(*config.Config) error
 

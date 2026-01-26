@@ -24,6 +24,9 @@ func StatusLabel(status models.OrderStatus) string {
 	return [...]string{"Pending", "Cancelled", "Paid"}[status]
 }
 
+func WelcomeToList(string email, cfg *config.Config) error {
+}
+
 func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Config) (bool, error) {
 
 	var err error
