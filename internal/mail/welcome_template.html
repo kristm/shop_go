@@ -3,46 +3,9 @@
     <title>Welcome</title>
     <style>
       html *{ padding: 0; margin: 0 }
-      #border { position: relative; width: 100vw; height: 100vh; z-index: 1001}
-      .border-x { 
-        height: 25px;
-        width: 100vw;
-        background: url('https://shop.yakalstmoving.co/images/circle_pink.png') repeat;
-      }
-      .border-y { 
-        width: 25px;
-        height: 100vh;
-        background: url('https://shop.yakalstmoving.co/images/circle_pink.png') repeat;
-        position: fixed;
-        z-index: 1000;
-      }
-      .border-top {
-        background-position-y: -25px;
-        background-position-x: -5px;
-      }
-      .border-bottom {
-        position: absolute;
-        bottom: 0;
-        background-position-y: 50px;
-      }
-      .border-left {
-        top: 0;
-        left: 0;
-        background-position-x: -25px;
-      }
-      .border-right {
-        top: 0;
-        right: 0;
-      }
-      main {
-        position: absolute; 
-        width: 100%;
-        top: 100px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 100px;
-        font-family: Helvetica, sans-serif;
+      table {
+        background: url("https://shop.yakalstmoving.co/images/bg_border.png") no-repeat;
+        height: 768px;
       }
       a { color: #3EA4B9 }
       #logo { 
@@ -53,27 +16,33 @@
         top: 100px;
         left: calc(100vw/2 - 122px);
       }
-      p { padding: 0px 5rem }
-      small { padding: 0 }
+      p { padding: 0px 5rem 10px }
+      small { display: block; padding: 4rem 0 0 }
+      p, small { font-family: Helvetica, sans-serif }
     </style>
   </head>
   <body>
-    <section id="border">
-      <div class="border-x border-top"></div>
-      <div class="border-x border-bottom"></div>
-      <div class="border-y border-left"></div>
-      <div class="border-y border-right"></div>
-    </section>
-    <main>
-      <img src="https://shop.yakalstmoving.co/images/logo_ysmc_cyan.png" id="logo"/>
-      <img src="https://shop.yakalstmoving.co/images/txt_yourin.png" id="yourin"/>
-      <p>Thank you for subscribing. We'll keep you on the loop for any update!</p>
-      <p style="width: 70%; text-align: center">You received this email because you subscribed from our homepage. If this was not your intention, please <a href="https://shop.yakalstmoving.co/unsubscribe/{{.Email}}">click here.</a></p>
-      <small>
-        <span>Yakal St. Moving Co.</span> | 
-        <span><a href="https://shop.yakalstmoving.co" target="_blank">shop.yakalstmoving.co</a></span>
-      </small>
-    </main>
+    <table width="700" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center" height="300px">
+          <img src="https://shop.yakalstmoving.co/images/logo_ysmc_cyan.png" id="logo"/>
+        </td>
+      </tr>
+      <tr>
+        <td align="center">
+          <img src="https://shop.yakalstmoving.co/images/txt_yourin.png" id="yourin"/>
+        </td>
+      </tr>
+      <tr>
+        <td align="center">
+          <p>Thank you for subscribing. We'll keep you on the loop for any update!</p>
+          <p style="width: 70%; text-align: center">You received this email because you subscribed from our homepage. If this was not your intention, please <a href="https://shop.yakalstmoving.co/unsubscribe/{{.Email}}">click here.</a></p>
+          <small>
+            <span>Yakal St. Moving Co.</span> | 
+            <span><a href="https://shop.yakalstmoving.co" target="_blank">shop.yakalstmoving.co</a></span>
+          </small>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
-
