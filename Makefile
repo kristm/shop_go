@@ -34,3 +34,6 @@ run_shop:
 
 build:
 	GIN_MODE=release go build cmd/main.go
+
+vulcheck:
+	govulncheck ./...
