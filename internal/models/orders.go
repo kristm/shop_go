@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 )
 
 type OrderStatus int
@@ -338,14 +339,17 @@ func UpdateOrderStatus(reference string, status OrderStatus) (bool, error) {
 	}
 	defer tx.Rollback()
 
-	stmt, err := tx.Prepare("UPDATE orders SET STATUS = ? WHERE reference_code = ?")
+	t := time.Now()
+	time := t.Format(DATE_FORMAT)
+
+	stmt, err := tx.Prepare("UPDATE orders SET STATUS = ?, updated_at = ? WHERE reference_code = ?")
 	if err != nil {
 		return false, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(status, reference)
+	_, err = stmt.Exec(status, time, reference)
 	if err != nil {
 		return false, err
 	}

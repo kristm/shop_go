@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -170,14 +171,16 @@ func UpdateProduct(id int, name string, sku string, description string, price_in
 	}
 	defer tx.Rollback()
 
-	stmt, err := tx.Prepare("UPDATE products SET name = ?, sku = ?, description = ?, price_in_cents = ?, category_id = ? WHERE id = ?")
+	t := time.Now()
+	time := t.Format(DATE_FORMAT)
+	stmt, err := tx.Prepare("UPDATE products SET name = ?, sku = ?, description = ?, price_in_cents = ?, category_id = ?, updated_at = ? WHERE id = ?")
 	if err != nil {
 		return false, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(name, sku, description, price_in_cents, category_id, id)
+	_, err = stmt.Exec(name, sku, description, price_in_cents, category_id, time, id)
 	if err != nil {
 		return false, err
 	}

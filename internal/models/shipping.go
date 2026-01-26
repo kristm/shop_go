@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type ShippingStatus int
 
 const (
@@ -75,14 +77,16 @@ func UpdateShippingStatus(id int, status ShippingStatus) (bool, error) {
 	}
 	defer tx.Rollback()
 
-	stmt, err := tx.Prepare("UPDATE shipping SET STATUS = ? WHERE id = ?")
+	t := time.Now()
+	time := t.Format(DATE_FORMAT)
+	stmt, err := tx.Prepare("UPDATE shipping SET STATUS = ?, updated_at = ? WHERE id = ?")
 	if err != nil {
 		return false, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(status, id)
+	_, err = stmt.Exec(status, time, id)
 	if err != nil {
 		return false, err
 	}
