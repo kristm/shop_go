@@ -26,7 +26,7 @@ func StatusLabel(status models.OrderStatus) string {
 
 func WelcomeToList(email string, cfg *config.Config) error {
 	var err error
-	t, err := template.New("template.html").Funcs(template.FuncMap{
+	t, err := template.New("welcome_template.html").Funcs(template.FuncMap{
 		"StatusLabel": StatusLabel,
 	}).ParseFiles("internal/mail/welcome_template.html")
 	if err != nil {
