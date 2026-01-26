@@ -91,7 +91,10 @@ func TestPing(t *testing.T) {
 	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
 		return true, nil
 	}
-	router, _ := setupRouter(mailerMock, loadConfigMock, models.ConnectTestDatabase)
+	welcomeMailerMock := func(string, *config.Config) error {
+		return nil
+	}
+	router, _ := setupRouter(mailerMock, welcomeMailerMock, loadConfigMock, models.ConnectTestDatabase)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)
@@ -114,7 +117,10 @@ func TestPostOrders(t *testing.T) {
 	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
 		return true, nil
 	}
-	router, _ := setupRouter(mailerMock, loadConfigMock, models.ConnectTestDatabase)
+	welcomeMailerMock := func(string, *config.Config) error {
+		return nil
+	}
+	router, _ := setupRouter(mailerMock, welcomeMailerMock, loadConfigMock, models.ConnectTestDatabase)
 
 	w := httptest.NewRecorder()
 	orders := make([]models.OrderItem, 0)
@@ -150,7 +156,10 @@ func TestPostIncompleteOrders(t *testing.T) {
 	mailerMock := func(*models.Order, *models.Customer, *config.Config) (bool, error) {
 		return true, nil
 	}
-	router, _ := setupRouter(mailerMock, loadConfigMock, models.ConnectTestDatabase)
+	welcomeMailerMock := func(string, *config.Config) error {
+		return nil
+	}
+	router, _ := setupRouter(mailerMock, welcomeMailerMock, loadConfigMock, models.ConnectTestDatabase)
 
 	w := httptest.NewRecorder()
 	orders := make([]models.OrderItem, 0)

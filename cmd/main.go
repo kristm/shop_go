@@ -176,15 +176,20 @@ func getVoucherComputation(c *gin.Context) {
 	}
 }
 
-func subscribeToList(c *gin.Context) {
-	email := c.Param("email")
-	err := models.AddSubscriber(email)
+func subscribeToList(m welcome_mailer, cfg *config.Config) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		email := c.Param("email")
+		err := models.AddSubscriber(email)
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"subscribed": true})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		} else {
+			go m(email, cfg)
+			c.JSON(http.StatusOK, gin.H{"subscribed": true})
+		}
 	}
+
+	return gin.HandlerFunc(fn)
 }
 
 func unsubscribeToList(c *gin.Context) {
@@ -327,11 +332,11 @@ func loadConfig() (*config.Config, error) {
 }
 
 type mailer func(*models.Order, *models.Customer, *config.Config) (bool, error)
-type welcome_mailer func(email, *config.Config) error
+type welcome_mailer func(string, *config.Config) error
 type configLoader func() (*config.Config, error)
 type connectDB func(*config.Config) error
 
-func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config.Config) {
+func setupRouter(m mailer, wm welcome_mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config.Config) {
 	cfg, _ := cl()
 	err := cdb(cfg)
 	checkErr(err)
@@ -364,7 +369,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 		v1.GET("vouchers/:code/apply/:amount", getVoucherComputation)
 		v1.POST("orders", createOrder(m, cfg))
 		v1.POST("analytics", createAnalytic)
-		v1.GET("subscribe/:email", subscribeToList)
+		v1.GET("subscribe/:email", subscribeToList(wm, cfg))
 		v1.GET("unsubscribe/:email", unsubscribeToList)
 		v1.GET("news", getNews)
 	}
@@ -378,7 +383,7 @@ func setupRouter(m mailer, cl configLoader, cdb connectDB) (*gin.Engine, *config
 
 func main() {
 
-	r, cfg := setupRouter(mail.NotifyOrder, loadConfig, models.ConnectDatabase)
+	r, cfg := setupRouter(mail.NotifyOrder, mail.WelcomeToList, loadConfig, models.ConnectDatabase)
 
 	if cfg != nil {
 		r.RunTLS(":8080", cfg.SSL_CERT, cfg.SSL_KEY)

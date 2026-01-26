@@ -24,7 +24,38 @@ func StatusLabel(status models.OrderStatus) string {
 	return [...]string{"Pending", "Cancelled", "Paid"}[status]
 }
 
-func WelcomeToList(string email, cfg *config.Config) error {
+func WelcomeToList(email string, cfg *config.Config) error {
+	var err error
+	t, err := template.New("template.html").Funcs(template.FuncMap{
+		"StatusLabel": StatusLabel,
+	}).ParseFiles("internal/mail/welcome_template.html")
+	if err != nil {
+		log.Println(err)
+	}
+
+	var tpl bytes.Buffer
+	if err = t.Execute(&tpl, M{"Email": email}); err != nil {
+		log.Println(err)
+	}
+
+	emailBody := tpl.String()
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", cfg.EMAIL_FROM)
+	m.SetHeader("To", email)
+	m.SetAddressHeader("Bcc", cfg.EMAIL_REPORTS, "Newsletter welcome")
+	m.SetHeader("Subject", "You're In!")
+	m.SetBody("text/html", emailBody)
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, cfg.EMAIL_FROM, cfg.EMAIL_PASSWORD)
+	d.StartTLSPolicy = gomail.MandatoryStartTLS
+
+	if err = d.DialAndSend(m); err != nil {
+		log.Printf("MAIL ERROR %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func NotifyOrder(order *models.Order, customer *models.Customer, cfg *config.Config) (bool, error) {
