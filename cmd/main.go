@@ -197,7 +197,7 @@ func unsubscribeToList(c *gin.Context) {
 	err := models.Unsubscribe(email)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": true})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"subscribed": false})
 	}

@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/mattn/go-sqlite3"
 )
@@ -56,8 +57,10 @@ func Unsubscribe(email string) error {
 	}
 	defer tx.Rollback()
 
+	t := time.Now()
+	time := t.Format(DATE_FORMAT)
 	newEmail := fmt.Sprintf("%s-%d", email, id)
-	if _, err := tx.Exec("UPDATE subscribers SET email = ? WHERE id = ?", newEmail, id); err != nil {
+	if _, err := tx.Exec("UPDATE subscribers SET email = ?, updated_at = ? WHERE id = ?", newEmail, time, id); err != nil {
 		return err
 	}
 
