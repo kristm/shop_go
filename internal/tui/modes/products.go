@@ -1,4 +1,4 @@
-package tuimodels
+package modes
 
 import (
 	"fmt"

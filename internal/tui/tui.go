@@ -6,7 +6,7 @@ import (
 	"os"
 	"shop_go/internal/config"
 	"shop_go/internal/models"
-	tuimodels "shop_go/internal/tui/models"
+	"shop_go/internal/tui/modes"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -45,7 +45,8 @@ func Run(mode Mode, param any) {
 		}
 	}
 
-	if _, err := tea.NewProgram(tuimodels.ProductModel(&product)).Run(); err != nil {
+	model := initialModel.(models.Product)
+	if _, err := tea.NewProgram(modes.ProductModel(&model)).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(0)
 	}
