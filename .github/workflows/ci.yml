@@ -23,4 +23,8 @@ jobs:
         run: go mod download
 
       - name: Run all tests
+        env:
+          TEST_DB: ./internal/database/test.db
+          GO111MODULE: on
+          CGO_ENABLED: 1
         run: go test -v ./...
