@@ -15,6 +15,7 @@ type Mode int
 
 const (
 	ProductUpdate Mode = iota
+	OrderDetails
 )
 
 func Run(mode Mode, param any) {
@@ -24,11 +25,11 @@ func Run(mode Mode, param any) {
 		log.Printf("ERROR LOADING CONFIG")
 	}
 
-	var initialModel any
+	var model any
 
 	switch mode {
 	case ProductUpdate:
-		initialModel, err = models.GetProductBySku(param.(string))
+		model, err = models.GetProductBySku(param.(string))
 		if err != nil {
 			log.Printf("Product Not Found!")
 			os.Exit(0)
@@ -43,11 +44,23 @@ func Run(mode Mode, param any) {
 		for _, category := range categoriesObj {
 			categories[category.Id] = category.Name
 		}
+		initialModel := model.(models.Product)
+		if _, err := tea.NewProgram(modes.ProductModel(&initialModel)).Run(); err != nil {
+			fmt.Printf("could not start program: %s\n", err)
+			os.Exit(0)
+		}
+	case OrderDetails:
+		model, err = models.GetOrderByReference(param.(string))
+		if err != nil {
+			log.Printf("Order Not Found!")
+			os.Exit(0)
+		}
+		if initialModel, ok := model.(*models.Order); ok {
+			log.Printf("%+v", initialModel)
+		} else {
+			os.Exit(0)
+		}
+
 	}
 
-	model := initialModel.(models.Product)
-	if _, err := tea.NewProgram(modes.ProductModel(&model)).Run(); err != nil {
-		fmt.Printf("could not start program: %s\n", err)
-		os.Exit(0)
-	}
 }
