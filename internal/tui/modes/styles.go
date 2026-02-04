@@ -7,7 +7,9 @@ import (
 
 var (
 	//t  table.Model
-	vp viewport.Model
+	vp            viewport.Model
+	ColumnWidth   int
+	PhysicalWidth int
 
 	focusedStyle = lipgloss.NewStyle().Foreground(CYAN)
 	blurredStyle = lipgloss.NewStyle().Foreground(DARKGRAY)

@@ -362,7 +362,6 @@ func (m model) View() string {
 	}
 
 	doc := strings.Builder{}
-	//physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
 
 	{
 		w := lipgloss.Width

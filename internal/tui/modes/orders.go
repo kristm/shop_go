@@ -9,7 +9,6 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
-	"golang.org/x/term"
 )
 
 var (
@@ -34,20 +33,20 @@ var (
 		Align(lipgloss.Center)
 	div = lipgloss.NewStyle().
 		Padding(1, 0).
-		Width(columnWidth - 10)
+		Width(ColumnWidth - 10)
 
 	//divItem = baseStyle.Foreground(lipgloss.Color("#FFD046")).Render
 	header = baseStyle.
 		Border(lipgloss.NormalBorder()).
 		BorderForeground(cyan).
 		Align(lipgloss.Center).
-		Width(columnWidth - 12)
+		Width(ColumnWidth - 12)
 
 	list = lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).
 		BorderForeground(cyan).
 		PaddingLeft(1).
-		Width(columnWidth - 10)
+		Width(ColumnWidth - 10)
 
 	listHeader = baseStyle.
 			BorderStyle(lipgloss.NormalBorder()).
@@ -59,16 +58,7 @@ var (
 	//docStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
 )
 
-var columnWidth int
-
 func ShowOrder(reference string) string {
-	physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
-	if physicalWidth > 50 {
-		columnWidth = 60
-	} else {
-		columnWidth = 50
-	}
-
 	order, err := models.GetOrderByReference(reference)
 	if err != nil {
 		log.Printf("Error getting orders %v", err)
@@ -143,10 +133,10 @@ func ShowOrder(reference string) string {
 		items = append(items, row)
 	}
 	var nameWidth int
-	if physicalWidth > 50 {
+	if PhysicalWidth > 50 {
 		nameWidth = 40
 	} else {
-		nameWidth = columnWidth / 3
+		nameWidth = ColumnWidth / 3
 	}
 	columns := []table.Column{
 		table.NewColumn("NAME", "NAME", nameWidth).WithStyle(baseStyle),
@@ -164,7 +154,7 @@ func ShowOrder(reference string) string {
 
 	firstRow := lipgloss.JoinHorizontal(lipgloss.Top, customerDetails)
 	var secondRow string
-	if columnWidth > 50 {
+	if ColumnWidth > 50 {
 		secondRow = lipgloss.JoinHorizontal(lipgloss.Top, lists, t.View())
 	} else {
 		secondRow = lipgloss.JoinVertical(lipgloss.Left, lists, t.View())

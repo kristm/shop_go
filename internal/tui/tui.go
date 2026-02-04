@@ -9,6 +9,7 @@ import (
 	"shop_go/internal/tui/modes"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/term"
 )
 
 type Mode int
@@ -27,6 +28,12 @@ func Run(mode Mode, param any) {
 	}
 
 	var model any
+	modes.PhysicalWidth, _, _ = term.GetSize(int(os.Stdout.Fd()))
+	if modes.PhysicalWidth > 50 {
+		modes.ColumnWidth = 60
+	} else {
+		modes.ColumnWidth = 50
+	}
 
 	switch mode {
 	case ProductUpdate:
