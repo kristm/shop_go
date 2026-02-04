@@ -6,25 +6,34 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  test:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+          
+        - name: Set up environment
+          uses: actions/setup-go@v5
+          with:
+            go-version-file: 'go.mod'
+            cache: true
         
-      - name: Set up environment
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-      
-      - name: Install dependencies
-        run: go mod download
+        - name: Install dependencies
+          run: go mod download
 
-      - name: Run all tests
-        env:
-          TEST_DB: ./internal/database/test.db
-          GO111MODULE: on
-          CGO_ENABLED: 1
-        run: go test -v ./...
+        - name: Run all tests
+          env:
+            TEST_DB: ./internal/database/test.db
+            GO111MODULE: on
+            CGO_ENABLED: 1
+          run: go test -v ./...
+  vulnerability-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: '1.25'
+          go-package: './...'
