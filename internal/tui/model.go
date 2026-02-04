@@ -19,3 +19,5 @@ func GetOrderDetail(ref string) *OrderDetail {
 
 	return &orderDetail
 }
+
+type SubscriberList [][]string

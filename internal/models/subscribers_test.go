@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAddSubscriber(t *testing.T) {
@@ -42,4 +43,13 @@ func TestUnsubscribe(t *testing.T) {
 func TestUnsubscribeNonExistingEmail(t *testing.T) {
 	err := Unsubscribe("test2@example.com")
 	assert.Error(t, err)
+}
+
+func TestGetSubscribers(t *testing.T) {
+	_ = AddSubscriber("admin@ysmc.co")
+	_ = AddSubscriber("dummy@ysmc.co")
+
+	subscribers, err := GetSubscribers()
+	require.NoError(t, err)
+	assert.Equal(t, 2, len(subscribers))
 }
