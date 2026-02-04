@@ -355,6 +355,12 @@ func formView(form *ProductForm) string {
 }
 
 func (m model) View() string {
+	categories = make(map[int]string)
+	categoriesObj, _ := models.GetCategories()
+	for _, category := range categoriesObj {
+		categories[category.Id] = category.Name
+	}
+
 	doc := strings.Builder{}
 	//physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
 
