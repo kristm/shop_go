@@ -50,17 +50,8 @@ func Run(mode Mode, param any) {
 			os.Exit(0)
 		}
 	case OrderDetails:
-		model, err = models.GetOrderByReference(param.(string))
-		if err != nil {
-			log.Printf("Order Not Found!")
-			os.Exit(0)
-		}
-		if initialModel, ok := model.(*models.Order); ok {
-			log.Printf("%+v", initialModel)
-		} else {
-			os.Exit(0)
-		}
-
+		fmt.Println(modes.ShowOrder(param.(string)))
+		os.Exit(0)
 	}
 
 }
