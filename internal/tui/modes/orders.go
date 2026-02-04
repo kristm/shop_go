@@ -18,10 +18,6 @@ var (
 
 	cyan = lipgloss.Color("#00DBC6")
 
-	//baseStyle = lipgloss.NewStyle().
-	//		Bold(true).
-	//		Foreground(lipgloss.Color("#FFF7DB"))
-
 	titleStyle = baseStyle.
 			Padding(0, 1).
 			Bold(true).
@@ -35,7 +31,6 @@ var (
 		Padding(1, 0).
 		Width(ColumnWidth - 10)
 
-	//divItem = baseStyle.Foreground(lipgloss.Color("#FFD046")).Render
 	header = baseStyle.
 		Border(lipgloss.NormalBorder()).
 		BorderForeground(cyan).
@@ -55,7 +50,6 @@ var (
 			Render
 
 	listItem = baseStyle.PaddingLeft(2).Render
-	//docStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
 )
 
 func ShowOrder(reference string) string {

@@ -59,7 +59,7 @@ func Run(mode Mode, param any) {
 	case OrderDetails:
 		fmt.Println(modes.ShowOrder(param.(string)))
 	case Subscribers:
-		fmt.Println("Hello")
+		fmt.Println(modes.ShowSubscribers())
 	}
 	os.Exit(0)
 
