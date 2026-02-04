@@ -16,6 +16,7 @@ type Mode int
 const (
 	ProductUpdate Mode = iota
 	OrderDetails
+	Subscribers
 )
 
 func Run(mode Mode, param any) {
@@ -47,11 +48,12 @@ func Run(mode Mode, param any) {
 		initialModel := model.(models.Product)
 		if _, err := tea.NewProgram(modes.ProductModel(&initialModel)).Run(); err != nil {
 			fmt.Printf("could not start program: %s\n", err)
-			os.Exit(0)
 		}
 	case OrderDetails:
 		fmt.Println(modes.ShowOrder(param.(string)))
-		os.Exit(0)
+	case Subscribers:
+		fmt.Println("Hello")
 	}
+	os.Exit(0)
 
 }

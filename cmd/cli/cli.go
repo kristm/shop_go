@@ -186,6 +186,7 @@ func main() {
 	shippingRef := flag.String("updateship", "", "order reference")
 	preorder := flag.String("setpreorder", "", "product sku")
 	sku := flag.String("sku", "", "product sku")
+	subs := flag.Bool("getsubs", true, "show subscribers")
 	flag.Parse()
 	cfg, err := config.LoadConfig(".env")
 	if err != nil {
@@ -230,6 +231,11 @@ func main() {
 
 	if len(*sku) > 0 {
 		runTUI(tui.ProductUpdate, *sku)
+		os.Exit(1)
+	}
+
+	if *subs {
+		runTUI(tui.Subscribers, "")
 		os.Exit(1)
 	}
 
