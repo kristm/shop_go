@@ -3,14 +3,50 @@ package models
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/mattn/go-sqlite3"
 )
 
 type Subscriber struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
+	Id        int    `json:"id"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
+}
+
+func GetSubscribers() ([]Subscriber, error) {
+	rows, err := DB.Query("SELECT id, email, created_at FROM subscribers")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	subscribers := make([]Subscriber, 0)
+
+	for rows.Next() {
+		subscriber := Subscriber{}
+		err = rows.Scan(&subscriber.Id, &subscriber.Email, &subscriber.CreatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+
+		//filter unsubscribed
+		unsubscribePattern := `\-\d+$`
+		matched, _ := regexp.MatchString(unsubscribePattern, subscriber.Email)
+		if !matched {
+			subscribers = append(subscribers, subscriber)
+		}
+	}
+
+	err = rows.Err()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return subscribers, err
 }
 
 func AddSubscriber(email string) error {
