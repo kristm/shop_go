@@ -4,6 +4,7 @@
 *.swo
 *.swn
 *.db
+!internal/database/test.db
 *.db*
 *.DB
 *.csv
