@@ -28,6 +28,7 @@ type Order struct {
 	VoucherCode      string         `json:"voucher"`
 	Items            []OrderItem    `json:"orders"`
 	ShippingStatus   ShippingStatus `json:"shipping_status"`
+	ShippingFee      float64        `json:"shipping_fee_in_cents"`
 }
 
 type OrderItem struct {
@@ -44,6 +45,7 @@ type OrderItem struct {
 func (order Order) MarshalJSON() ([]byte, error) {
 	type Alias Order
 	var computedAmount float64
+	shippingFee := order.ShippingFee
 	for _, item := range order.Items {
 		total := float64(item.Qty) * item.Price
 		computedAmount += total
@@ -60,10 +62,12 @@ func (order Order) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&struct {
 		*Alias
-		Amount float64 `json:"amount"`
+		ShippingFee float64 `json:"shipping_fee"`
+		Amount      float64 `json:"amount"`
 	}{
-		Alias:  (*Alias)(&order),
-		Amount: computedAmount / 100.00,
+		Alias:       (*Alias)(&order),
+		ShippingFee: shippingFee / 100.00,
+		Amount:      computedAmount / 100.00,
 	})
 }
 
@@ -148,17 +152,21 @@ func GetOrderByReference(ref string) (*Order, error) {
 		return nil, sqlErr
 	}
 
-	stmt, err = DB.Prepare("SELECT status FROM shipping WHERE id = ?")
+	stmt, err = DB.Prepare("SELECT status, fee_in_cents FROM shipping WHERE id = ?")
 	if err != nil {
 		return nil, err
 	}
 
 	var shippingStatus ShippingStatus
-	sqlErr = stmt.QueryRow(order.ShippingId).Scan(&shippingStatus)
-	if sqlErr != nil {
-		shippingStatus = 0
-	}
+	var shippingFee float64
+	sqlErr = stmt.QueryRow(order.ShippingId).Scan(&shippingStatus, &shippingFee)
+	//if sqlErr != nil {
+	//	shippingStatus = 0
+	//
+	//}
+	log.Printf("shipping %d %.2f", shippingStatus, shippingFee)
 	order.ShippingStatus = shippingStatus
+	order.ShippingFee = shippingFee
 
 	stmt, err = DB.Prepare("SELECT op.id, op.order_id, p.name, op.qty, op.price_in_cents, COALESCE(pl.url, '') FROM order_products as op LEFT JOIN products as p ON p.id = op.product_id LEFT JOIN product_links as pl ON p.id = pl.product_id WHERE op.order_id = ?")
 	if err != nil {

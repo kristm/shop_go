@@ -285,9 +285,11 @@ func updateShipping(reference string) {
 
 	status := order.ShippingStatus
 	shippingId := order.ShippingId
+	log.Printf("<< %d", status)
 
 	if status < models.Delivered {
 		status++
+		log.Printf(">> %d", status)
 		_, err := models.UpdateShippingStatus(shippingId, status)
 		if err != nil {
 			log.Printf("error updating shipping status %v", err)

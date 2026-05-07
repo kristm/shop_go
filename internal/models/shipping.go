@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"log"
+	"time"
+)
 
 type ShippingStatus int
 
@@ -22,6 +26,20 @@ type Shipping struct {
 	Phone      string         `json:"phone"`
 	Notes      string         `json:"notes"`
 	Fee        float64        `json:"fee_in_cents"`
+}
+
+// NOT USED?
+func (shipping Shipping) MarshalJSON() ([]byte, error) {
+	type Alias Shipping
+	var computedFee float64
+
+	return json.Marshal(&struct {
+		*Alias
+		Fee float64 `json:"fee"`
+	}{
+		Alias: (*Alias)(&shipping),
+		Fee:   computedFee / 100.00,
+	})
 }
 
 func AddShipping(newAddress *Shipping) (int, error) {
@@ -87,6 +105,7 @@ func UpdateShippingStatus(id int, status ShippingStatus) (bool, error) {
 
 	defer stmt.Close()
 
+	log.Printf("update shipping status to %d", status)
 	_, err = stmt.Exec(status, time, id)
 	if err != nil {
 		return false, err
