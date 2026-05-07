@@ -1,8 +1,14 @@
 migrate_up: 
 	migrate -path=internal/database/migrations -database "sqlite3://internal/database/shop.db" -verbose up $(N)
 
+migrate_up_test: 
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/test.db" -verbose up $(N)
+
 migrate_down: 
 	migrate -path=internal/database/migrations -database "sqlite3://internal/database/shop.db" -verbose down $(N)
+
+migrate_down_test: 
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/test.db" -verbose down $(N)
 
 migrate_reset: 
 	migrate -path=internal/database/migrations -database "sqlite3://internal/database/shop.db" -verbose force $(V)

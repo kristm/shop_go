@@ -35,7 +35,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 	//	return -1, nil
 	//}
 
-	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone,notes,free) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone,notes,fee_in_cents) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 	if err != nil {
 		return -1, err
@@ -43,7 +43,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 
 	defer stmt.Close()
 
-	res, err := stmt.Exec(newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone, newAddress.Notes)
+	res, err := stmt.Exec(newAddress.CustomerId, newAddress.Status, newAddress.Address, newAddress.City, newAddress.Country, newAddress.Zip, newAddress.Phone, newAddress.Notes, newAddress.Fee)
 
 	if err != nil {
 		return -1, err
@@ -56,14 +56,14 @@ func AddShipping(newAddress *Shipping) (int, error) {
 }
 
 func GetShippingById(id int) (*Shipping, error) {
-	stmt, err := DB.Prepare("SELECT status, address, city, country, zip, phone, notes, fee FROM shipping WHERE id = ?")
+	stmt, err := DB.Prepare("SELECT status, address, city, country, zip, phone, notes, fee_in_cents FROM shipping WHERE id = ?")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
 	shipping := &Shipping{}
-	sqlErr := stmt.QueryRow(id).Scan(&shipping.Status, &shipping.Address, &shipping.City, &shipping.Country, &shipping.Zip, &shipping.Phone, &shipping.Notes)
+	sqlErr := stmt.QueryRow(id).Scan(&shipping.Status, &shipping.Address, &shipping.City, &shipping.Country, &shipping.Zip, &shipping.Phone, &shipping.Notes, &shipping.Fee)
 	if sqlErr != nil {
 		return nil, sqlErr
 	}
