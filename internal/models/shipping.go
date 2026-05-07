@@ -21,6 +21,7 @@ type Shipping struct {
 	Zip        string         `json:"zip"`
 	Phone      string         `json:"phone"`
 	Notes      string         `json:"notes"`
+	Fee        float64        `json:"fee_in_cents"`
 }
 
 func AddShipping(newAddress *Shipping) (int, error) {
@@ -34,7 +35,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 	//	return -1, nil
 	//}
 
-	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone,notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO shipping (customer_id, status, address, city, country, zip, phone,notes,free) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 	if err != nil {
 		return -1, err
@@ -55,7 +56,7 @@ func AddShipping(newAddress *Shipping) (int, error) {
 }
 
 func GetShippingById(id int) (*Shipping, error) {
-	stmt, err := DB.Prepare("SELECT status, address, city, country, zip, phone, notes FROM shipping WHERE id = ?")
+	stmt, err := DB.Prepare("SELECT status, address, city, country, zip, phone, notes, fee FROM shipping WHERE id = ?")
 	if err != nil {
 		return nil, err
 	}

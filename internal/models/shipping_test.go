@@ -16,6 +16,7 @@ func TestAddShipping(t *testing.T) {
 		Country:    "PH",
 		Zip:        "1203",
 		Phone:      "8888",
+		Fee:        0,
 	})
 
 	require.NoError(t, err)
@@ -32,6 +33,7 @@ func TestGetShippingById(t *testing.T) {
 		Zip:        "1203",
 		Phone:      "8888",
 		Notes:      "X marks the spot",
+		Fee:        0,
 	})
 
 	shipping, err := GetShippingById(shippingId)
