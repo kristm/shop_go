@@ -1,1 +1,1 @@
-ALTER TABLE shipping ADD fee_in_cents INTEGER;
+ALTER TABLE shipping ADD fee_in_cents INTEGER NOT NULL DEFAULT 0;

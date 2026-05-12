@@ -16,7 +16,6 @@ func TestAddShipping(t *testing.T) {
 		Country:    "PH",
 		Zip:        "1203",
 		Phone:      "8888",
-		Fee:        0,
 	})
 
 	require.NoError(t, err)
