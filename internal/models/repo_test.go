@@ -58,7 +58,14 @@ func TestMain(m *testing.M) {
 	log.Println("Test Models Main")
 	cfg, err := config.LoadConfig("../../.env")
 	if err != nil {
-		log.Printf("CFG TEST MAIN %v", &cfg)
+		log.Printf("Missing .env file %v", &cfg)
+		testDb := os.Getenv("TEST_DB")
+		log.Printf("Accessing ENV vars %s", testDb)
+		cfg = config.Config{TEST_DB: testDb}
+
+		if testDb == "" {
+			panic("Error getting config")
+		}
 		//panic(err)
 	}
 	log.Printf("OK CFG TEST MAIN %v", &cfg)

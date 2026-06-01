@@ -45,7 +45,14 @@ func setupTest(tb testing.TB) func(tb testing.TB) {
 func ConnectTestDatabase() {
 	cfg, err := config.LoadConfig("../.env")
 	if err != nil {
-		log.Fatal("cannot load config ", err)
+		log.Printf("Missing .env file %v", &cfg)
+		testDb := os.Getenv("TEST_DB")
+		log.Printf("Accessing ENV vars %s", testDb)
+		cfg = config.Config{TEST_DB: testDb}
+
+		if testDb == "" {
+			panic("Error getting config")
+		}
 	}
 	db, err := sql.Open("sqlite3", cfg.TEST_DB)
 	if err != nil {
@@ -107,7 +114,16 @@ func TestPing(t *testing.T) {
 func loadConfigMock() (*config.Config, error) {
 	cfg, err := config.LoadConfig("../.env")
 	if err != nil {
-		log.Fatal("cannot load config ", err)
+		//log.Fatal("cannot load config ", err)
+		//DRY UP
+		log.Printf("Missing .env file %v", &cfg)
+		testDb := os.Getenv("TEST_DB")
+		log.Printf("Accessing ENV vars %s", testDb)
+		cfg = config.Config{TEST_DB: testDb}
+
+		if testDb == "" {
+			panic("Error getting config")
+		}
 		return nil, err
 	}
 	return &cfg, err
