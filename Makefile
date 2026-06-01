@@ -1,30 +1,37 @@
+DB := shop.db
+TEST_DB := test.db
 migrate_up: 
-	migrate -path=internal/database/migrations -database "sqlite3://internal/database/shop.db" -verbose up $(N)
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/$(DB)" -verbose up $(N)
 
 migrate_up_test: 
-	migrate -path=internal/database/migrations -database "sqlite3://internal/database/test.db" -verbose up $(N)
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/$(TEST_DB)" -verbose up $(N)
 
 migrate_down: 
-	migrate -path=internal/database/migrations -database "sqlite3://internal/database/shop.db" -verbose down $(N)
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/$(DB)" -verbose down $(N)
 
 migrate_down_test: 
-	migrate -path=internal/database/migrations -database "sqlite3://internal/database/test.db" -verbose down $(N)
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/$(TEST_DB)" -verbose down $(N)
 
+V ?= 1
 migrate_reset: 
-	migrate -path=internal/database/migrations -database "sqlite3://internal/database/shop.db" -verbose force $(V)
+ifndef V
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/$(DB)" -verbose force $(V)
+else
+	migrate -path=internal/database/migrations -database "sqlite3://internal/database/$(DB)" -verbose force $(V)
+endif
 
 migrate_version: 
-	migrate -version -path=internal/database/migrations -database=sqlite3://internal/database/shop.db
+	migrate -version -path=internal/database/migrations -database=sqlite3://internal/database/$(DB)
 
 migrate_drop:
-	migrate drop -f -ext=sql -database "sqlite3://internal/database/shop.db"
+	migrate drop -f -ext=sql -database "sqlite3://internal/database/$(DB)"
 
 migrate_create:
 	migrate create -ext=sql -seq -dir=internal/database/migrations $(name) 
 
 # does not work
 migrate_goto:
-	migrate goto $(version) -path=internal/database/migrations -database "sqlite3://internal/database/shop.db"
+	migrate goto $(version) -path=internal/database/migrations -database "sqlite3://internal/database/$(DB)"
 
 clean_test:
 	go clean -testcache
